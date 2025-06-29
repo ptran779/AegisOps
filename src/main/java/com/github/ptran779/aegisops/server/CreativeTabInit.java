@@ -18,7 +18,13 @@ public class CreativeTabInit {
       .displayItems((params, output) -> {
         output.accept(ItemInit.SOLDIER_SPAWN_EGG.get());
         output.accept(ItemInit.SNIPER_SPAWN_EGG.get());
+        output.accept(ItemInit.HEAVY_SPAWN_EGG.get());
+        output.accept(ItemInit.DEMOLITION_SPAWN_EGG.get());
+        output.accept(ItemInit.MEDIC_SPAWN_EGG.get());
+        output.accept(ItemInit.ENGINEER_SPAWN_EGG.get());
+        output.accept(ItemInit.SWORDMAN_SPAWN_EGG.get());
         output.accept(ItemInit.DROP_POD_ITEM.get());
+        output.accept(ItemInit.BEACON_ITEM.get());
         // Add more if needed
       }).build()
     );

@@ -4,5 +4,6 @@ public enum AgentCommandType {
   AUTO_ARMOR,
   FOLLOW,
   AUTO_HOSTILE,
-  DEBUG
+  ATTACK_PLAYER,
+  REMOVE
 }

@@ -22,7 +22,7 @@ public class AgentInventoryMenu extends AbstractContainerMenu {
 
     //server construct
     public AgentInventoryMenu(int containerId, Inventory playerInventory, AbstractAgentEntity agent) {
-        super(MenuInit.AGENT_MENU.get(), containerId);
+        super(MenuInit.AEGISOPS_MENU.get(), containerId);
         this.agent = agent;
         this.agentInv = agent.inventory;
         this.playerInv = playerInventory;
@@ -36,27 +36,27 @@ public class AgentInventoryMenu extends AbstractContainerMenu {
 
     private void loadInventoryMenu() {
         for (int i = 0; i < 9; i++) {
-            this.addSlot(new Slot(this.agentInv, i, 66 + i * 18, 54));
+            this.addSlot(new Slot(this.agentInv, i, 61 + i * 18, 57));
         }
         // agent load out
         int agentInvSize = agentInv.getContainerSize();
-        this.addSlot(new GunSlot(this.agentInv, agent.gunSlot, 66+18*4, 18));    // gun
-        this.addSlot(new Slot(this.agentInv, agent.meleeSlot, 66+18*5, 18));    // sword
-        this.addSlot(new Slot(this.agentInv, agent.specialSlot, 66+18*6, 18));    // special
-        this.addSlot(new ArmorSlot(this.agentInv, agentInvSize-4, 66, 18, EquipmentSlot.HEAD));
-        this.addSlot(new ArmorSlot(this.agentInv, agentInvSize-3, 66+18*1, 18, EquipmentSlot.CHEST));
-        this.addSlot(new ArmorSlot(this.agentInv, agentInvSize-2, 66+18*2, 18, EquipmentSlot.LEGS));
-        this.addSlot(new ArmorSlot(this.agentInv, agentInvSize-1, 66+18*3, 18, EquipmentSlot.FEET));
+        this.addSlot(new GunSlot(this.agentInv, agent.gunSlot, 14, 120));    // gun
+        this.addSlot(new MeleeSlot(this.agentInv, agent.meleeSlot, 34, 120));    // sword
+        this.addSlot(new Slot(this.agentInv, agent.specialSlot, 24, 139));    // special
+        this.addSlot(new ArmorSlot(this.agentInv, agentInvSize-4, 14, 82, EquipmentSlot.HEAD));
+        this.addSlot(new ArmorSlot(this.agentInv, agentInvSize-3, 34, 82, EquipmentSlot.CHEST));
+        this.addSlot(new ArmorSlot(this.agentInv, agentInvSize-2, 14, 101, EquipmentSlot.LEGS));
+        this.addSlot(new ArmorSlot(this.agentInv, agentInvSize-1, 34, 101, EquipmentSlot.FEET));
 
         //player hotbar
         for (int c = 0; c < 9; c++) {
-            this.addSlot(new Slot(this.playerInv, c, 66 + c * 18, 161 -18));
+            this.addSlot(new Slot(this.playerInv, c, 61 + c * 18, 141));
         }
 
         // player slot
         for (int r = 0; r < 3; r++) {
             for (int c = 0; c < 9; c++) {
-                this.addSlot(new Slot(this.playerInv, c + r * 9+9, 66 + c * 18, 85 + r * 18));
+                this.addSlot(new Slot(this.playerInv, c + r * 9+9, 61 + c * 18, 85 + r * 17));
             }
         }
     }

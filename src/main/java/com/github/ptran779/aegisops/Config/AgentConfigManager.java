@@ -1,8 +1,6 @@
 package com.github.ptran779.aegisops.Config;
 
-import com.github.ptran779.aegisops.entity.Heavy;
-import com.github.ptran779.aegisops.entity.Sniper;
-import com.github.ptran779.aegisops.entity.Soldier;
+import com.github.ptran779.aegisops.entity.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tacz.guns.api.TimelessAPI;
@@ -53,19 +51,22 @@ public class AgentConfigManager {
   private static void generateDefaultIfMissing(String classId, List<GunTabType> defaultGunTypes) {
     Path path = CONFIG_DIR.resolve(classId + ".json");
     if (!Files.exists(path)) {
+      //gun
       AgentConfig config = new AgentConfig();
       config.allowGuns = getDefaultGuns(defaultGunTypes); // properly assign the default guns
+      config.allowMelees = getDefaultMelees(); // for melee if missing
 
       try {
         Files.createDirectories(CONFIG_DIR); // ensure folder exists
         try (Writer writer = Files.newBufferedWriter(path)) {
           GSON.toJson(config, writer);
-          System.out.println("[AegisOps] Generated default config for class: " + classId);
+//          System.out.println("[AegisOps] Generated default config for class: " + classId);
         }
       } catch (IOException e) {
         System.err.println("[AegisOps] Failed to write default config for: " + classId);
         e.printStackTrace();
       }
+      //skin // empty for now
     }
   }
 
@@ -83,33 +84,31 @@ public class AgentConfigManager {
     return defaultGuns;
   }
 
+  private static Set<String> getDefaultMelees() {
+    Set<String> defaultMelees = new HashSet<>();
+    // Swords
+    defaultMelees.add("minecraft:wooden_sword");
+    defaultMelees.add("minecraft:stone_sword");
+    defaultMelees.add("minecraft:iron_sword");
+    defaultMelees.add("minecraft:golden_sword");
+    defaultMelees.add("minecraft:diamond_sword");
+    defaultMelees.add("minecraft:netherite_sword");
+
+    // Axes (vanilla tools but used as weapons)
+    defaultMelees.add("minecraft:wooden_axe");
+    defaultMelees.add("minecraft:stone_axe");
+    defaultMelees.add("minecraft:iron_axe");
+    defaultMelees.add("minecraft:golden_axe");
+    defaultMelees.add("minecraft:diamond_axe");
+    defaultMelees.add("minecraft:netherite_axe");
+
+    return defaultMelees;
+  }
+
   private static AgentConfig getConfig(String classId) {
     AgentConfig out = CLASS_CONFIGS.get(classId);
     if (out == null) {return new AgentConfig();}
     return out;
-  }
-
-  public static void printEverything() {
-    System.out.println("[AegisOps] ===== Agent Config Dump =====");
-
-    if (CLASS_CONFIGS.isEmpty()) {
-      System.out.println("[AegisOps] No configs loaded.");
-      return;
-    }
-
-    for (Map.Entry<String, AgentConfig> entry : CLASS_CONFIGS.entrySet()) {
-      String classId = entry.getKey();
-      AgentConfig config = entry.getValue();
-
-      System.out.println("Class: " + classId);
-      System.out.println("  Allowed Guns:");
-
-      config.allowGuns.stream()
-          .sorted()
-          .forEach(gunId -> System.out.println("    - " + gunId));
-    }
-
-    System.out.println("[AegisOps] ===== End Config Dump =====");
   }
 
   // IMPORTANT: make sure all class is register here
@@ -118,6 +117,10 @@ public class AgentConfigManager {
     generateDefaultIfMissing("soldier", List.of(GunTabType.PISTOL, GunTabType.RIFLE, GunTabType.SMG));
     generateDefaultIfMissing("sniper", List.of(GunTabType.PISTOL, GunTabType.RIFLE, GunTabType.SNIPER));
     generateDefaultIfMissing("heavy", List.of(GunTabType.PISTOL, GunTabType.SHOTGUN, GunTabType.MG));
+    generateDefaultIfMissing("demolition", List.of(GunTabType.PISTOL, GunTabType.SMG));
+    generateDefaultIfMissing("medic", List.of(GunTabType.PISTOL, GunTabType.SMG));
+    generateDefaultIfMissing("engineer", List.of(GunTabType.PISTOL, GunTabType.RIFLE));
+    generateDefaultIfMissing("swordman", List.of(GunTabType.PISTOL, GunTabType.SHOTGUN));
 
     // load into memory cache
     reloadCache(); // load everything into memory afterward
@@ -127,5 +130,9 @@ public class AgentConfigManager {
     Soldier.updateClassConfig(getConfig("soldier"));
     Sniper.updateClassConfig(getConfig("sniper"));
     Heavy.updateClassConfig(getConfig("heavy"));
+    Demolition.updateClassConfig(getConfig("demolition"));
+    Medic.updateClassConfig(getConfig("medic"));
+    Engineer.updateClassConfig(getConfig("engineer"));
+    Swordman.updateClassConfig(getConfig("swordman"));
   }
 }

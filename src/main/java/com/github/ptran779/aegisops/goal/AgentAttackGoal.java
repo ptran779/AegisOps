@@ -4,6 +4,8 @@ import com.github.ptran779.aegisops.attribute.AgentAttribute;
 import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.entity.IGunOperator;
+import com.tacz.guns.api.item.IAmmo;
+import com.tacz.guns.api.item.IAmmoBox;
 import com.tacz.guns.api.item.gun.AbstractGunItem;
 import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.util.AttachmentDataUtils;
@@ -17,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.EnumSet;
 
 public class AgentAttackGoal extends Goal {
+//  private static final int maxActionTime = 300;  // abandon target if stuck? need test with epic fight
   private final AbstractAgentEntity agent;
   private int attackCoolDown = 0;
   private int seeTime=0;
@@ -43,14 +46,12 @@ public class AgentAttackGoal extends Goal {
     if (op.getSynIsBolting()) {op.aim(false);}
     if (op.getSynIsAiming() != precision) {
       op.aim(precision);
-//      System.out.println("aim mode "+ op.getSynIsAiming());
     }
 
     switch (op.shoot(() -> agent.getViewXRot(1f), () -> agent.getViewYRot(1f))) {
       case SUCCESS -> {attackCoolDown = computeAttackCooldown();}
       case NOT_DRAW -> {
         op.draw(agent::getMainHandItem);
-//        System.out.println("better draw");
       }
       case NEED_BOLT -> {
         op.bolt();
@@ -72,31 +73,41 @@ public class AgentAttackGoal extends Goal {
     AbstractGunItem gunItem = (AbstractGunItem)gunStack.getItem();
     ResourceLocation gunResource = gunItem.getGunId(gunStack);
     CommonGunIndex gunIndex = TimelessAPI.getCommonGunIndex(gunResource).orElse(null);
+
     int maxAmmoCount = AttachmentDataUtils.getAmmoCountWithAttachment(gunStack, gunIndex.getGunData());
     int curAmmoCount = agent.inventory.checkGunAmmo(gunStack, gunItem);
-    int reloadAmount = Math.min(maxAmmoCount - curAmmoCount, ammoStack.getCount());
-    //reload gun
+
+    int reloadAmount = curAmmoCount;
+    if (ammoStack.getItem() instanceof IAmmoBox iAmmoBoxItem) {
+      reloadAmount = Math.min(maxAmmoCount - curAmmoCount, iAmmoBoxItem.getAmmoCount(ammoStack));
+      iAmmoBoxItem.setAmmoCount(ammoStack,iAmmoBoxItem.getAmmoCount(ammoStack)-reloadAmount);
+    } else if(ammoStack.getItem() instanceof IAmmo){
+      reloadAmount = Math.min(maxAmmoCount - curAmmoCount, ammoStack.getCount());
+      ammoStack.setCount(ammoStack.getCount() - reloadAmount);
+    }
     gunItem.setCurrentAmmoCount(gunStack,curAmmoCount+reloadAmount);
-    ammoStack.setCount(ammoStack.getCount() - reloadAmount);
   }
 
   protected double getAttackReachSqr(LivingEntity target) {return Math.pow((agent.getBbWidth() + target.getBbWidth())/2+2, 2);}
 
   public boolean canUse() {
-    return !agent.isUsingItem() && this.agent.getTarget() != null && this.agent.getTarget().isAlive();
+    return this.agent.getTarget() != null && !agent.isUsingItem() && this.agent.getTarget().isAlive();
   }
 
   public boolean canContinueToUse() {
     return (agent.getTarget() != null && agent.getTarget().isAlive() && seeTime > -100 && agent.distanceToSqr(agent.getTarget()) < maxRangeSq);
   }
 
-  public void start() {this.agent.setAggressive(true);}
+  public void start() {
+    this.agent.setAggressive(true);
+    this.seeTime = 0;
+    this.attackCoolDown = 0;
+
+  }
 
   public void stop() {
     this.agent.setAggressive(false);
-    this.seeTime = 0;
-    this.attackCoolDown = 0;
-    agent.clearTarget(); // should already clear but just incase
+    agent.clearTarget(); // should already clear but just in case
     agent.getNavigation().stop();
 //    IGunOperator op = IGunOperator.fromLivingEntity(agent);
     op.aim(false);  // turn off aiming
@@ -110,17 +121,18 @@ public class AgentAttackGoal extends Goal {
     //if I clear target, it shit itself...
     if (target == null) {return;}
     this.agent.getLookControl().setLookAt(target);
-    // Must see target for at least 1s, else dont bother. Also, if has not seen for 5s, disengage
-    if (agent.getSensing().hasLineOfSight(target)) {
-      this.seeTime = Math.min(20, this.seeTime+1);
-    } else {
-      this.seeTime--;
+    if (agent.tickCount % 5 == 0) {
+      if (agent.getSensing().hasLineOfSight(target)) {
+        seeTime = Math.min(20, seeTime + 5); // accelerate buildup
+      } else {
+        seeTime = seeTime - 5; // don't go wild negative
+      }
     }
 
     // compute attack cooldown
     if (this.attackCoolDown > 0) this.attackCoolDown--;
 
-    if(agent.getLookControl().isLookingAtTarget() && this.seeTime == 20 && this.attackCoolDown<=0) {
+    if(this.attackCoolDown<=0 && this.seeTime == 20) {
       double targetDistSq = agent.distanceToSqr(target);
       boolean meleeYes = agent.inventory.meleeExist();
       boolean gunYes = agent.inventory.gunExistWithAmmo();

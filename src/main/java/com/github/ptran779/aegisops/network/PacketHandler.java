@@ -11,6 +11,9 @@ public class PacketHandler {
 
   public static void register() {
     int id = 0;
-    CHANNELS.registerMessage(id++,AgentActionPacket.class, AgentActionPacket::encode, AgentActionPacket::decode, AgentActionPacket::handle);
+    CHANNELS.registerMessage(id++, AgentBoolPacket.class, AgentBoolPacket::encode, AgentBoolPacket::decode, AgentBoolPacket::handle);
+    CHANNELS.registerMessage(id++, AgentFollowPacket.class, AgentFollowPacket::encode, AgentFollowPacket::decode, AgentFollowPacket::handle);
+    CHANNELS.registerMessage(id++, AgentHostilePacket.class, AgentHostilePacket::encode, AgentHostilePacket::decode, AgentHostilePacket::handle);
+    CHANNELS.registerMessage(id++, CameraModePacket.class, CameraModePacket::encode, CameraModePacket::decode, CameraModePacket::handle);
   }
 }

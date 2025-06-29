@@ -19,21 +19,21 @@ public class FollowGoal extends Goal {
 
   @Override
   public boolean canUse() {
-    if(!agent.getFollow() || agent.followPlayer.isEmpty()) return false;
-    this.followTarget = ((ServerLevel) agent.level()).getServer().getPlayerList().getPlayerByName(agent.followPlayer);
+    if(!(agent.getMovement() == 2) || agent.followPlayer == null) return false;
+    this.followTarget = ((ServerLevel) agent.level()).getServer().getPlayerList().getPlayer(agent.followPlayer);
     if (followTarget == null) return false;
     double dist = agent.distanceToSqr(followTarget);
-    return 24*24 > dist && dist > 5*5;
+    return 32*32 > dist && dist > 6*6;
   }
 
   public boolean canContinueToUse() {
     double dist = agent.distanceToSqr(followTarget);
-    return agent.getFollow() && 24*24 > dist && dist > 3*3;
+    return agent.getMovement() == 2 && 32*32 > dist && dist > 3*3;
   }
 
   @Override
   public void tick() {
-    if (agent.getOwner() != null) {
+    if (agent.getOwnerUUID() != null) {
       agent.getNavigation().moveTo(followTarget, agent.getAttribute(Attributes.MOVEMENT_SPEED).getValue());
     }
   }

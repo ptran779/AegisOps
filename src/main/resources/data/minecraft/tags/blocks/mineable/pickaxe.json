@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "aegisops:drop_pod_block",
+    "aegisops:drop_pod_block_used",
+    "aegisops:beacon_block",
+    "aegisops:beacon_block_unused"
+  ]
+}

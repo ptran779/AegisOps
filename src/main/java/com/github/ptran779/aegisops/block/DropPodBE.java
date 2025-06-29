@@ -1,6 +1,7 @@
 package com.github.ptran779.aegisops.block;
 
 import com.github.ptran779.aegisops.server.BlockEntityInit;
+import com.github.ptran779.aegisops.server.BlockInit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -8,17 +9,27 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import static com.github.ptran779.aegisops.Config.ServerConfig.DROP_POD_DELAY_OPEN;
+
 //Logic go here
 public class DropPodBE extends BlockEntity{
+  public boolean openDoor = false;
+  public int openStep = 0;
+  public int delayOpenTick = 0;
+  public static final int doorOpenTime = 40;
+
+  public DropPodBE(BlockPos pPos, BlockState pBlockState, boolean forceOpen) {
+    super(BlockEntityInit.DROP_POD_BE.get(), pPos, pBlockState);
+    if (forceOpen) {
+      openDoor = true;
+      openStep = doorOpenTime;
+    }
+  }
+
   public DropPodBE(BlockPos pPos, BlockState pBlockState) {
     super(BlockEntityInit.DROP_POD_BE.get(), pPos, pBlockState);
   }
 
-  public boolean openDoor = false;
-  public int openStep = 0;
-  public static final int doorOpenTime = 40;
-
-  /// FIXME implement me
   @Override
   protected void saveAdditional(CompoundTag pTag) {
     super.saveAdditional(pTag);
@@ -57,11 +68,17 @@ public class DropPodBE extends BlockEntity{
   }
 
   public void tick() {
-    if (openDoor && openStep < doorOpenTime) {
-      openStep++;
-//      setChanged();
-      if (level != null && !level.isClientSide) {
-        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+    if (level != null && !level.isClientSide){
+      if (DROP_POD_DELAY_OPEN.get() > -1 && ++delayOpenTick >= DROP_POD_DELAY_OPEN.get()) openDoor = true;
+
+      if (openDoor) {
+        if (openStep < doorOpenTime){
+          openStep++;
+          level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        } else {
+          BlockState newState = BlockInit.DROP_POD_USED.get().defaultBlockState();
+          level.setBlockAndUpdate(worldPosition, newState);
+        }
       }
     }
   }

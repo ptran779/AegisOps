@@ -8,36 +8,29 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class AgentActionPacket {
+public class AgentBoolPacket {
   private final int entityId;
   private final AgentCommandType cType;
   private final boolean payload;          //action payload -- expanse me if need more complex data communication
-  private final String optinalData;
 
-  public AgentActionPacket(int entityId, AgentCommandType cType, boolean flag, String optinalData){
+  public AgentBoolPacket(int entityId, AgentCommandType cType, boolean flag){
     this.entityId = entityId;
     this.cType = cType;
     this.payload = flag;
-    this.optinalData = optinalData;
-  }
-
-  public AgentActionPacket(int entityId, AgentCommandType cType, boolean flag){
-    this(entityId, cType, flag, "");
   }
 
   public void encode(FriendlyByteBuf buf) {
     buf.writeInt(entityId);
     buf.writeEnum(cType);
     buf.writeBoolean(payload);
-    buf.writeUtf(optinalData);
   }
 
-  public static AgentActionPacket decode(FriendlyByteBuf buf){
+  public static AgentBoolPacket decode(FriendlyByteBuf buf){
     int entityId = buf.readInt();
     AgentCommandType cType = buf.readEnum(AgentCommandType.class);
     boolean payload = buf.readBoolean();
-    String optinalData = buf.readUtf();
-    return new AgentActionPacket(entityId, cType, payload, optinalData);
+//    UUID optinalData = buf.readUUID();
+    return new AgentBoolPacket(entityId, cType, payload);
   }
 
   public void handle(Supplier<NetworkEvent.Context> ctx) {
@@ -49,9 +42,11 @@ public class AgentActionPacket {
       if (!(e instanceof AbstractAgentEntity agent)) return;
       switch (cType) {
         case AUTO_ARMOR   -> agent.setAutoArmor(payload);
-        case FOLLOW       -> agent.setFollow(payload, optinalData);
-        case AUTO_HOSTILE -> agent.setAutoHostile(payload);
-        case DEBUG        -> agent.showTeam();
+        case ATTACK_PLAYER -> agent.setAttackPlayer(payload);
+        case REMOVE -> {
+          agent.setOwnerUUID(null);
+          agent.updateBossInfo();
+        }
         default -> {}
       }
     });

@@ -1,3 +1,16 @@
 {
+  "itemGroup.aegisops.tab": "Aegis Ops",
 
+  "item.aegisops.soldier_spawn_egg": "Soldier Spawn Egg",
+  "item.aegisops.sniper_spawn_egg": "Sniper Spawn Egg",
+  "item.aegisops.heavy_spawn_egg": "Heavy Spawn Egg",
+  "item.aegisops.demolition_spawn_egg": "Demolition Spawn Egg",
+  "item.aegisops.medic_spawn_egg": "Medic Spawn Egg",
+  "item.aegisops.engineer_spawn_egg": "Engineer Spawn Egg",
+  "item.aegisops.swordman_spawn_egg": "Swordman Spawn Egg",
+
+  "block.aegisops.drop_pod_block": "Drop Pod",
+  "block.aegisops.drop_pod_block_used": "Drop Pod",
+  "block.aegisops.beacon_block_unused": "Beacon",
+  "block.aegisops.beacon_block": "Beacon Core"
 }

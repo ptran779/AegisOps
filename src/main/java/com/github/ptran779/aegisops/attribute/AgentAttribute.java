@@ -1,8 +1,7 @@
 package com.github.ptran779.aegisops.attribute;
 import com.github.ptran779.aegisops.AegisOps;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.RangedAttribute;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.*;
 
 
 import java.util.UUID;

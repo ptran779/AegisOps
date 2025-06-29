@@ -23,7 +23,12 @@ public class CustomRangeTargetGoal<T extends LivingEntity> extends NearestAttack
 
   protected void findTarget() {
     if (this.targetType != Player.class && this.targetType != ServerPlayer.class) {
-      this.target = this.mob.level().getNearestEntity(this.mob.level().getEntitiesOfClass(this.targetType, this.getTargetSearchArea(this.scanRange), (p_148152_) -> true), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+      this.target = this.mob.level().getNearestEntity(
+          this.mob.level().getEntitiesOfClass(
+              this.targetType,
+              this.getTargetSearchArea(this.scanRange),
+              (p_148152_) -> true),
+          this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
     } else {
       this.target = this.mob.level().getNearestPlayer(this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
     }
@@ -32,7 +37,7 @@ public class CustomRangeTargetGoal<T extends LivingEntity> extends NearestAttack
   public boolean canUse() {
     if (!agent.inventory.haveWeapon()) {return false;}
     if (agent.getTarget() != null) {return false;}  // don't arquire target if already have one. combat will decided if target too far away
-    if (!agent.getAutoHostile() || this.randomInterval > 0 && this.mob.getRandom().nextInt(this.randomInterval) != 0) {return false;}
+    if (agent.getAutoHostile() ==0 || this.randomInterval > 0 && this.mob.getRandom().nextInt(this.randomInterval) != 0) {return false;}
     else {
       this.findTarget();
       return this.target != null;
@@ -42,7 +47,6 @@ public class CustomRangeTargetGoal<T extends LivingEntity> extends NearestAttack
   public boolean canContinueToUse() {return false;}
 
   public void start() {
-//    System.out.println("target acquired at " + this.mob.position() + " which is " + agent.distanceTo(this.target));
     this.mob.setTarget(this.target);
     super.start();
   }

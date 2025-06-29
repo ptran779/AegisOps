@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "aegisops:block/beacon_block_unused" }
+  }
+}

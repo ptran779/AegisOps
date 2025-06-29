@@ -15,7 +15,7 @@ import net.minecraft.util.Mth;
 
 public class DropPodBERender implements BlockEntityRenderer<DropPodBE> {
   private final DropPodModel model;
-  private static final ResourceLocation TEXTURE = new ResourceLocation(AegisOps.MOD_ID, "textures/blocks/drop_pod.png");
+  private static final ResourceLocation TEXTURE = new ResourceLocation(AegisOps.MOD_ID, "textures/block/drop_pod.png");
 
   public DropPodBERender(BlockEntityRendererProvider.Context context) {
     this.model = new DropPodModel(context.bakeLayer(DropPodModel.LAYER_LOCATION));

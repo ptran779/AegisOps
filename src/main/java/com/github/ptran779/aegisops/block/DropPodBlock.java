@@ -25,10 +25,10 @@ import org.jetbrains.annotations.Nullable;
 public class DropPodBlock extends BaseEntityBlock {
   public static final VoxelShape SHAPE_OPEN = Shapes.or(Block.box(-16, 0, -16, 32, 8, 32),
       Block.box(-8, 8, -8, 24, 16, 24),
-      Block.box(-4, 16, -4, -3, 48, 20),
-      Block.box(19, 16, -4, 20, 48, 20),
-      Block.box(-4, 16, 19, 20, 48, 20),
-      Block.box(-4, 47, -4, 20, 48, 20));
+      Block.box(-4, 16, -4, -2, 48, 20),
+      Block.box(18, 16, -4, 20, 48, 20),
+      Block.box(-4, 16, 18, 20, 48, 20),
+      Block.box(-4, 46, -4, 20, 48, 20));
   public static final VoxelShape SHAPE_CLOSE = Shapes.or(SHAPE_OPEN,
       Block.box(-4, 16, -4, 20, 48, -3));
 

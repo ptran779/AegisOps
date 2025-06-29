@@ -2,12 +2,13 @@ package com.github.ptran779.aegisops.entity;
 
 import com.github.ptran779.aegisops.Config.AgentConfig;
 import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
+import com.github.ptran779.aegisops.goal.AgentAttackGoal;
+import com.github.ptran779.aegisops.goal.CustomRangeTargetGoal;
+import com.github.ptran779.aegisops.goal.CustomRetaliationTargetGoal;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -29,6 +30,13 @@ public class Sniper extends AbstractAgentEntity {
         this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
     }
 
+    protected void registerGoals() {
+        super.registerGoals();
+        this.goalSelector.addGoal(2, new CustomRetaliationTargetGoal(this));
+        this.goalSelector.addGoal(3, new CustomRangeTargetGoal<>(this, LivingEntity.class, 60, 48, true, entity -> this.shouldTargetEntity((LivingEntity) entity)));
+        this.goalSelector.addGoal(3, new AgentAttackGoal(this, 4, 16, 48, 48));
+    }
+
     public void tick() {
         super.tick();
     }
@@ -46,5 +54,8 @@ public class Sniper extends AbstractAgentEntity {
         String gunId = nbt.getString(GUN_ID_TAG);
         if (gunId.isEmpty()) return false;
         return config.allowGuns.contains(gunId);
+    }
+    public boolean isEquipableMelee(ItemStack stack) {
+        return config.allowMelees.contains(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
     }
 }

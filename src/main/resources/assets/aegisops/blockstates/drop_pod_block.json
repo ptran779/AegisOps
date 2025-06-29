@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "aegisops:block/drop_pod_block"
+    }
+  }
+}

@@ -12,5 +12,5 @@ import net.minecraftforge.registries.RegistryObject;
 public final class MenuInit {
   public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES, AegisOps.MOD_ID);
 
-  public static final RegistryObject<MenuType<AgentInventoryMenu>> AGENT_MENU = MENU_TYPES.register("agent_menu", () -> IForgeMenuType.create(AgentInventoryMenu::new));
+  public static final RegistryObject<MenuType<AgentInventoryMenu>> AEGISOPS_MENU = MENU_TYPES.register("aegisops_menu", () -> IForgeMenuType.create(AgentInventoryMenu::new));
 }

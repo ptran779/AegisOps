@@ -1,18 +1,17 @@
 package com.github.ptran779.aegisops.entity.util;
 
-import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.item.IAmmo;
+import com.tacz.guns.api.item.IAmmoBox;
 import com.tacz.guns.api.item.gun.AbstractGunItem;
 import com.tacz.guns.item.ModernKineticGunItem;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
 
 public class AgentInventory extends SimpleContainer {
   private final AbstractAgentEntity agent;
+  private int lastAmmoSlot = -1;  // use in quick lookup for reload logic when needed
   public AgentInventory(int size, AbstractAgentEntity owner) {
     super(size);
     this.agent = owner;
@@ -107,14 +106,10 @@ public class AgentInventory extends SimpleContainer {
   /// MELEE STUFF
   //assume no autoequip for now
   public boolean meleeExist(){
-    ItemStack stack = getItem(agent.meleeSlot);
-    return stack.getItem() instanceof SwordItem || stack.getItem() instanceof AxeItem;
+    return !getItem(agent.meleeSlot).isEmpty();
   }
 
   /// Fire ARM :) // soft check type only. Strict check on menu.
-  public boolean gunExist(){  // lighter check variation
-    return getItem(agent.gunSlot).getItem() instanceof ModernKineticGunItem;
-  }
   public boolean gunExistWithAmmo(){
     ItemStack stack = getItem(agent.gunSlot);
     if (stack.getItem() instanceof ModernKineticGunItem gunItem) {
@@ -127,14 +122,33 @@ public class AgentInventory extends SimpleContainer {
 
   public int checkGunAmmo(ItemStack gunStack, AbstractGunItem gunItem){return gunItem.getCurrentAmmoCount(gunStack);}
 
-  public int findGunAmmo(ItemStack gunStack){
-    for (int i=0; i<getContainerSize(); i++){
-      ItemStack checkAmmoStack = getItem(i);
-      if (checkAmmoStack.getItem() instanceof IAmmo iAmmo) {
-        if (iAmmo.isAmmoOfGun(gunStack, checkAmmoStack)){
-          return i;
-        }
+  private int isAmmoGunSlot(int slotId, ItemStack gunStack){
+    ItemStack checkAmmoStack = getItem(slotId);
+    if (checkAmmoStack.getItem() instanceof IAmmo iAmmo) {
+      if (iAmmo.isAmmoOfGun(gunStack, checkAmmoStack)) {
+        lastAmmoSlot = slotId;
+        return slotId;
       }
+    } else if (checkAmmoStack.getItem() instanceof IAmmoBox iAmmoBox) {
+      if (iAmmoBox.isAmmoBoxOfGun(gunStack, checkAmmoStack)){
+        lastAmmoSlot = slotId;
+        return slotId;
+      }
+    }
+    return -1;
+  }
+
+  public int findGunAmmo(ItemStack gunStack){
+    int out;
+    // check cache
+    if (this.lastAmmoSlot != -1){
+      out = isAmmoGunSlot(this.lastAmmoSlot, gunStack);
+      if (out != -1){return out;}
+    }
+    //scan all inv
+    for (int i=0; i<getContainerSize(); i++){
+      out = isAmmoGunSlot(i, gunStack);
+      if (out != -1){return out;}
     }
     return -1;
   };

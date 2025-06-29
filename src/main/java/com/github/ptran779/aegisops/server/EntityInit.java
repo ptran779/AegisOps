@@ -1,10 +1,7 @@
 package com.github.ptran779.aegisops.server;
 
 import com.github.ptran779.aegisops.AegisOps;
-import com.github.ptran779.aegisops.entity.FallingDropPod;
-import com.github.ptran779.aegisops.entity.Heavy;
-import com.github.ptran779.aegisops.entity.Soldier;
-import com.github.ptran779.aegisops.entity.Sniper;
+import com.github.ptran779.aegisops.entity.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -19,5 +16,26 @@ public final class EntityInit {
   public static final RegistryObject<EntityType<Sniper>> SNIPER = ENTITIES.register("sniper", () -> EntityType.Builder.of(Sniper::new, MobCategory.MISC).build(new ResourceLocation(AegisOps.MOD_ID, "sniper").toString()));
   public static final RegistryObject<EntityType<Heavy>> HEAVY = ENTITIES.register("heavy", () -> EntityType.Builder.of(Heavy::new, MobCategory.MISC).build(new ResourceLocation(AegisOps.MOD_ID, "heavy").toString()));
 
-  public static final RegistryObject<EntityType<FallingDropPod>> FALLING_DROP_POD = ENTITIES.register("falling_drop_pod", () -> EntityType.Builder.of(FallingDropPod::new, MobCategory.MISC).build(new ResourceLocation(AegisOps.MOD_ID, "falling_drop_pod").toString()));
+  public static final RegistryObject<EntityType<Demolition>> DEMOLITION = ENTITIES.register("demolition", () -> EntityType.Builder.of(Demolition::new, MobCategory.MISC).build(new ResourceLocation(AegisOps.MOD_ID, "demolition").toString()));
+
+  public static final RegistryObject<EntityType<Medic>> MEDIC = ENTITIES.register("medic", () -> EntityType.Builder.of(Medic::new, MobCategory.MISC).build(new ResourceLocation(AegisOps.MOD_ID, "medic").toString()));
+
+  public static final RegistryObject<EntityType<Engineer>> ENGINEER = ENTITIES.register("engineer", () -> EntityType.Builder.of(Engineer::new, MobCategory.MISC).build(new ResourceLocation(AegisOps.MOD_ID, "engineer").toString()));
+
+  public static final RegistryObject<EntityType<Swordman>> SWORDMAN = ENTITIES.register("swordman", () -> EntityType.Builder.of(Swordman::new, MobCategory.MISC).build(new ResourceLocation(AegisOps.MOD_ID, "swordman").toString()));
+
+  public static final RegistryObject<EntityType<FallingDropPod>> FALLING_DROP_POD =
+      ENTITIES.register("falling_drop_pod", () ->
+          EntityType.Builder.of(FallingDropPod::new, MobCategory.MISC)
+          .sized(1.0f, 1.5f)  // ← 1×1.5 block hit‐box so it’s clickable
+          .build(new ResourceLocation(AegisOps.MOD_ID, "falling_drop_pod").toString()));
+
+//  public static final RegistryObject<EntityType<FallingDropPod>> FALLING_DROP_POD =
+//    ENTITIES.register("falling_drop_pod", () ->
+//      EntityType.Builder
+//        .<FallingDropPod>of(FallingDropPod::new, MobCategory.MISC)
+//        .sized(1.0f, 1.5f)  // ← 1×1.5 block hit‐box so it’s clickable
+//        .setCustomClientFactory((spawnEntity, world) -> new FallingDropPod(FALLING_DROP_POD.get(), world))
+//        .build(new ResourceLocation(AegisOps.MOD_ID, "falling_drop_pod").toString())
+//    );
 }
