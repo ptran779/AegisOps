@@ -1,11 +1,11 @@
 package com.github.ptran779.aegisops.network;
 
+import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 
-import java.util.UUID;
 import java.util.function.Supplier;
 
 public class AgentHostilePacket {
@@ -33,7 +33,7 @@ public class AgentHostilePacket {
       ServerPlayer player = ctx.get().getSender();
       if (player == null) return;
       if (player.level().getEntity(entityId) instanceof AbstractAgentEntity agent) {
-        agent.setAutoHostile(payload);
+        agent.setTargetMode(Utils.TargetMode.values()[payload]);
       }
     });
     ctx.get().setPacketHandled(true);

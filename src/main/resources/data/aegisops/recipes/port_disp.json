@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "cqc",
+    "rir",
+    "qIq"
+  ],
+  "key": {
+    "c": {"item":  "minecraft:cyan_dye"},
+    "r": {"item":  "minecraft:redstone"},
+    "q": {"item":  "minecraft:quartz"},
+    "i": { "item": "minecraft:iron_trapdoor" },
+    "I": { "item": "minecraft:iron_block" }
+  },
+  "result": {
+    "item": "aegisops:port_disp",
+    "count": 1
+  },
+  "show_notification": true
+}

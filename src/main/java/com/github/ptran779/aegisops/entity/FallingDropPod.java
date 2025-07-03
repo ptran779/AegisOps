@@ -27,7 +27,6 @@ import static com.github.ptran779.aegisops.Utils.*;
 import static com.github.ptran779.aegisops.server.BlockInit.DROP_POD;
 
 public class FallingDropPod extends LivingEntity {
-  private boolean exploded = false;
   private float xrand = 0f;
   private float zrand = 0f;
 
@@ -65,7 +64,7 @@ public class FallingDropPod extends LivingEntity {
       Vec3 motion = this.getDeltaMovement();
       double downwardSpeed = Math.max(motion.y, -1);  // cap falling speed (-0.08 is default)
       this.setDeltaMovement(motion.x+xrand, downwardSpeed, motion.z+zrand);
-      if (this.onGround() && !this.exploded) {triggerCrash();}
+      if (this.onGround()) {triggerCrash();}
     }
   }
 

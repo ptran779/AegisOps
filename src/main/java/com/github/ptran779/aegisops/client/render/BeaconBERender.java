@@ -2,7 +2,7 @@ package com.github.ptran779.aegisops.client.render;
 
 import com.github.ptran779.aegisops.AegisOps;
 import com.github.ptran779.aegisops.block.BeaconBE;
-import com.github.ptran779.aegisops.client.RecursiveAnimationHelper;
+import com.github.ptran779.aegisops.client.AnimationHelper;
 import com.github.ptran779.aegisops.client.animation.BeaconAnimation;
 import com.github.ptran779.aegisops.client.model.BeaconModel;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -19,7 +19,6 @@ import org.joml.Vector3f;
 public class BeaconBERender implements BlockEntityRenderer<BeaconBE> {
   private static final float[] rgb = new float[]{0.5F, 0.8F, 1.0F};
   private final BeaconModel model;
-  private final Vector3f animationScratch = new Vector3f();
 
   private static final ResourceLocation TEXTURE = new ResourceLocation(AegisOps.MOD_ID, "textures/block/beacon.png");
 //  private final AnimationState animationState = new AnimationState();
@@ -37,7 +36,7 @@ public class BeaconBERender implements BlockEntityRenderer<BeaconBE> {
     VertexConsumer consumer = buffer.getBuffer(RenderType.entityTranslucent(TEXTURE));
 
     float time = (entity.step + partialTick) / 20f;    // seconds = ticks/20
-    RecursiveAnimationHelper.animate(model, BeaconAnimation.beaconDeploy, time, 1, animationScratch);
+    AnimationHelper.animate(model, BeaconAnimation.beaconDeploy, time, 1);
     // 3. Render model
     float alpha = 1f;
     if (entity.step> 1060 && entity.step < 1260){ // alpha fade out

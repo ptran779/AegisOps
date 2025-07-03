@@ -44,8 +44,7 @@ public class AgentBoolPacket {
         case AUTO_ARMOR   -> agent.setAutoArmor(payload);
         case ATTACK_PLAYER -> agent.setAttackPlayer(payload);
         case REMOVE -> {
-          agent.setOwnerUUID(null);
-          agent.updateBossInfo();
+          agent.setBossUUID(null);
         }
         default -> {}
       }

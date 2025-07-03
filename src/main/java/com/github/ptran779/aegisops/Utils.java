@@ -5,12 +5,16 @@ import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 
 import static com.github.ptran779.aegisops.server.EntityInit.*;
 
@@ -63,5 +67,44 @@ public class Utils {
     level.addFreshEntity(agent);
     //agent ride pod
     agent.startRiding(pod, true); // force = true in case agent is riding something else
+  }
+
+  public enum TargetMode {
+    OFF,                        // Do not scan or target
+    HOSTILE_ONLY,               // Hostile mobs only
+    ENEMY_AGENTS,  // Hostile mobs + agents not on owner's team
+    ALL;         // Anything not on owner's team
+
+    public static final TargetMode[] VALUES = values();
+    public static TargetMode fromId(int id) {
+      return VALUES[id];
+    }
+    public static TargetMode nextTargetMode(int id) {
+      int next = (id + 1) % VALUES.length;
+      return VALUES[next];
+    }
+  }
+
+  public enum AniMove {
+    NORM,
+    ATTACK,
+    RELOAD,
+    SPECIAL,
+    DISP_RELOAD;
+
+    public static final AniMove[] VALUES = values();
+    public static AniMove fromId(int id) {
+      return VALUES[id];
+    }
+  }
+
+
+  public static <U extends Entity, T extends Entity> T findNearestEntity(U user, Class<T> type, double radius, Predicate<T> func) {
+    AABB box = user.getBoundingBox().inflate(radius);
+    List<T> entities = user.level().getEntitiesOfClass(type, box, func);
+
+    return entities.stream()
+        .min(Comparator.comparingDouble(user::distanceToSqr))
+        .orElse(null);
   }
 }

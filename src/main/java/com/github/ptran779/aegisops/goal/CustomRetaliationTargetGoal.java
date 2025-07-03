@@ -23,7 +23,7 @@ public class CustomRetaliationTargetGoal extends Goal {
   public boolean canUse() {
     if (++t_count < t_count_max || agent.getTarget() != null) {return false;}
     // Check boss if available
-    UUID bossUUID = agent.getOwnerUUID();
+    UUID bossUUID = agent.getBossUUID();
     if (bossUUID == null) {return false;}
     ServerPlayer boss = agent.level().getServer().getPlayerList().getPlayer(bossUUID);
     if (boss != null) {

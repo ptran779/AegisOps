@@ -32,8 +32,8 @@ public class Soldier extends AbstractAgentEntity {
 
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(2, new CustomRetaliationTargetGoal(this));
-        this.goalSelector.addGoal(3, new CustomRangeTargetGoal<>(this, LivingEntity.class, 40, 32, true, entity -> this.shouldTargetEntity((LivingEntity) entity)));
+        this.goalSelector.addGoal(3, new CustomRetaliationTargetGoal(this));
+        this.goalSelector.addGoal(4, new CustomRangeTargetGoal<>(this, LivingEntity.class, 40, 32, true, entity -> this.shouldTargetEntity((LivingEntity) entity)));
         this.goalSelector.addGoal(3, new AgentAttackGoal(this, 4, 10, 32, 48));
     }
 

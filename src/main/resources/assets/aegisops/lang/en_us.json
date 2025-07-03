@@ -8,9 +8,15 @@
   "item.aegisops.medic_spawn_egg": "Medic Spawn Egg",
   "item.aegisops.engineer_spawn_egg": "Engineer Spawn Egg",
   "item.aegisops.swordman_spawn_egg": "Swordman Spawn Egg",
+  "item.aegisops.port_disp": "Portable Dispenser",
+  "item.aegisops.db_turret": "Double Barrel Turret",
+  "item.aegisops.engi_hammer": "Engineering Hammer",
 
   "block.aegisops.drop_pod_block": "Drop Pod",
   "block.aegisops.drop_pod_block_used": "Drop Pod",
   "block.aegisops.beacon_block_unused": "Beacon",
-  "block.aegisops.beacon_block": "Beacon Core"
+  "block.aegisops.beacon_block": "Beacon Core",
+
+  "entity.aegisops.port_disp": "Portable Dispenser",
+  "entity.aegisops.db_turret": "Double Barrel Turret"
 }

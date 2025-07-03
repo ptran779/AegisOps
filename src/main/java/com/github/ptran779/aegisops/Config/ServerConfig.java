@@ -13,6 +13,13 @@ public class ServerConfig {
     public static ForgeConfigSpec.DoubleValue CHANCE_TO_SPAWN;
     public static ForgeConfigSpec.IntValue DROP_POD_DELAY_OPEN;
 
+    public static ForgeConfigSpec.DoubleValue BD_TURRET_DPS;
+    public static ForgeConfigSpec.IntValue BD_TURRET_CHARGE_MAX;
+    public static ForgeConfigSpec.IntValue PORT_DIS_CHARGE_MAX;
+
+    public static ForgeConfigSpec.IntValue ENGI_WORK_RECHARGE;
+    public static ForgeConfigSpec.IntValue VIRT_AMMO_REFILL;
+
     public static void register() {
         registerCommonConfig();
     }
@@ -49,6 +56,30 @@ public class ServerConfig {
         MAX_SPAWN_DISTANCE = builder
             .comment("Max distance from player where drop pods can spawn")
             .defineInRange("maxSpawnDistance", 128, 16, Integer.MAX_VALUE);
+
+        builder.comment("Structure Settings").push("structure");
+
+        BD_TURRET_DPS = builder
+            .comment("Double Barrel Bullet Damage per shot")
+                .defineInRange("BDTurretDps", 6f, 0f, Float.MAX_VALUE);
+
+        BD_TURRET_CHARGE_MAX = builder
+            .comment("Double Barrel Bullet Max Charge")
+            .defineInRange("BDTurretChargeMax", 100, 0, Integer.MAX_VALUE);
+
+        PORT_DIS_CHARGE_MAX = builder
+            .comment("Portable Dispenser Max Charge")
+            .defineInRange("PortDisMaxCharge", 100, 0, Integer.MAX_VALUE);
+
+        builder.comment("Agents settings").push("agent");
+
+        ENGI_WORK_RECHARGE = builder
+            .comment("How much charge per work should engineer refill")
+                .defineInRange("EngiWorkVal", 20, 0, Integer.MAX_VALUE);
+
+        VIRT_AMMO_REFILL = builder
+            .comment("How much virtual ammo can be refill per action")
+            .defineInRange("VirtAmmoRefill", 20, 0, Integer.MAX_VALUE);
 
         builder.pop();
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, builder.build());

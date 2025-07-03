@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "cic",
+    "isi",
+    " s "
+  ],
+  "key": {
+    "c": {"item":  "minecraft:cyan_dye"},
+    "i": { "item": "minecraft:iron_ingot"},
+    "s": { "item": "minecraft:stick"}
+  },
+  "result": {
+    "item": "aegisops:engi_hammer",
+    "count": 1
+  },
+  "show_notification": true
+}

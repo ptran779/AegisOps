@@ -1,24 +1,25 @@
 package com.github.ptran779.aegisops.goal;
 
-import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
+import com.github.ptran779.aegisops.Utils;
+import com.github.ptran779.aegisops.entity.util.IEntityTarget;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
 
 public class CustomRangeTargetGoal<T extends LivingEntity> extends NearestAttackableTargetGoal<T> {
   private double scanRange;
-  AbstractAgentEntity agent;
+  IEntityTarget modEntity;
 
-  public CustomRangeTargetGoal(AbstractAgentEntity agent, Class<T> pTargetType, int pRandomInterval, double scanRange, boolean pMustSee, @Nullable Predicate pTargetPredicate) {
-    super(agent, pTargetType, pRandomInterval, pMustSee, false, pTargetPredicate);
+  public CustomRangeTargetGoal(IEntityTarget modEntity, Class<T> pTargetType, int pRandomInterval, double scanRange, boolean pMustSee, Predicate pTargetPredicate) {
+    super((Mob) modEntity, pTargetType, pRandomInterval, pMustSee, false, pTargetPredicate);
     this.scanRange = scanRange;
 
     this.targetConditions.range(scanRange);
-    this.agent = agent;
+    this.modEntity = modEntity;
   }
 
   protected void findTarget() {
@@ -35,9 +36,9 @@ public class CustomRangeTargetGoal<T extends LivingEntity> extends NearestAttack
   }
 
   public boolean canUse() {
-    if (!agent.inventory.haveWeapon()) {return false;}
-    if (agent.getTarget() != null) {return false;}  // don't arquire target if already have one. combat will decided if target too far away
-    if (agent.getAutoHostile() ==0 || this.randomInterval > 0 && this.mob.getRandom().nextInt(this.randomInterval) != 0) {return false;}
+    if (!modEntity.haveWeapon()) {return false;}
+    if (modEntity.getTarget() != null) {return false;}  // don't acquire target if already have one. combat will decide if target too far away
+    if (modEntity.getTargetMode() == Utils.TargetMode.OFF || this.randomInterval > 0 && this.mob.getRandom().nextInt(this.randomInterval) != 0) {return false;}
     else {
       this.findTarget();
       return this.target != null;

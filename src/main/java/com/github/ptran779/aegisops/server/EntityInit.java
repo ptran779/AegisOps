@@ -30,12 +30,20 @@ public final class EntityInit {
           .sized(1.0f, 1.5f)  // ← 1×1.5 block hit‐box so it’s clickable
           .build(new ResourceLocation(AegisOps.MOD_ID, "falling_drop_pod").toString()));
 
-//  public static final RegistryObject<EntityType<FallingDropPod>> FALLING_DROP_POD =
-//    ENTITIES.register("falling_drop_pod", () ->
-//      EntityType.Builder
-//        .<FallingDropPod>of(FallingDropPod::new, MobCategory.MISC)
-//        .sized(1.0f, 1.5f)  // ← 1×1.5 block hit‐box so it’s clickable
-//        .setCustomClientFactory((spawnEntity, world) -> new FallingDropPod(FALLING_DROP_POD.get(), world))
-//        .build(new ResourceLocation(AegisOps.MOD_ID, "falling_drop_pod").toString())
-//    );
+  public static final RegistryObject<EntityType<DBTurret>> BD_TURRET =
+      ENTITIES.register("db_turret", () ->
+          EntityType.Builder.of(DBTurret::new, MobCategory.MISC)
+              .sized(1.0f, 1.8f)  // ← 1×1.5 block hit‐box so it’s clickable
+              .build(new ResourceLocation(AegisOps.MOD_ID, "db_turret").toString()));
+  public static final RegistryObject<EntityType<TurretBullet>> TURRET_BULLET = ENTITIES.register("turret_bullet",
+      () -> EntityType.Builder.of(TurretBullet::new, MobCategory.MISC)
+          .sized(0.125f, 0.125f)
+          .clientTrackingRange(64)
+          .updateInterval(1)
+          .build("turret_bullet"));
+  public static final RegistryObject<EntityType<PortDisp>> PORT_DISP =
+      ENTITIES.register("port_disp", () ->
+          EntityType.Builder.of(PortDisp::new, MobCategory.MISC)
+              .sized(1.0f, 1f)  // ← 1×1.5 block hit‐box so it’s clickable
+              .build(new ResourceLocation(AegisOps.MOD_ID, "port_disp").toString()));
 }

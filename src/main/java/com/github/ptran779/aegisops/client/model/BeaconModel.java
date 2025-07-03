@@ -4,14 +4,16 @@ package com.github.ptran779.aegisops.client.model;// Made with Blockbench 4.12.4
 
 
 import com.github.ptran779.aegisops.AegisOps;
-import com.github.ptran779.aegisops.client.BoneHierachy;
+import com.github.ptran779.aegisops.client.IBoneHierachy;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
@@ -19,9 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BeaconModel<T extends Entity> extends EntityModel<T> implements BoneHierachy {
+public class BeaconModel extends Model implements IBoneHierachy {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(AegisOps.MOD_ID, "beacon.json"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(AegisOps.MOD_ID, "beacon_layer"), "main");
 	private ModelPart rootBody;
 	public final Map<String, ModelPart> BONE_PARTS = new HashMap<>();
 
@@ -45,6 +47,7 @@ public class BeaconModel<T extends Entity> extends EntityModel<T> implements Bon
 	);
 
 	public BeaconModel(ModelPart root) {
+		super(RenderType::entityCutoutNoCull);
 		rootBody = root.getChild("Body");
 
 		put("Body", root.getChild("Body"));
@@ -93,15 +96,6 @@ public class BeaconModel<T extends Entity> extends EntityModel<T> implements Bon
 
 	private void put(String name, ModelPart part) {BONE_PARTS.put(name, part);}
 	public ModelPart get(String name) {return BONE_PARTS.get(name);}
-
-	@Override
-	public String getRootBoneName() {
-		return "Body";
-	}
-
-	public ModelPart getRoot() {
-		return rootBody;
-	}
 
 	public static LayerDefinition createBodyLayer() {
 		MeshDefinition meshdefinition = new MeshDefinition();
@@ -177,14 +171,16 @@ public class BeaconModel<T extends Entity> extends EntityModel<T> implements Bon
 
 		return LayerDefinition.create(meshdefinition, 64, 64);
 	}
-	@Override
-	public void setupAnim(Entity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-	}
 
 	@Override
 	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
 		rootBody.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
 	}
+
+	@Override
+	public String getRootBoneName() {return "Body";}
+
+	public ModelPart getRoot() {return rootBody;}
 
 	@Override
 	public Map<String, List<String>> getFullBoneHierachy() {return BONE_HIERARCHY;}

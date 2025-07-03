@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "qtq",
+    "cRc",
+    "iIi"
+  ],
+  "key": {
+    "c": {"item":  "minecraft:cyan_dye"},
+    "R": {"item":  "minecraft:redstone_block"},
+    "q": {"item":  "minecraft:quartz"},
+    "t": { "item": "minecraft:iron_trapdoor"},
+    "I": { "item": "minecraft:iron_block" },
+    "i": { "item": "minecraft:iron_ingot" }
+  },
+  "result": {
+    "item": "aegisops:db_turret",
+    "count": 1
+  },
+  "show_notification": true
+}

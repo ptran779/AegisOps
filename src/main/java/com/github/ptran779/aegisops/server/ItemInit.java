@@ -1,8 +1,7 @@
 package com.github.ptran779.aegisops.server;
 
 import com.github.ptran779.aegisops.AegisOps;
-import com.github.ptran779.aegisops.item.BeaconItem;
-import com.github.ptran779.aegisops.item.DropPodItem;
+import com.github.ptran779.aegisops.item.*;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.registries.DeferredRegister;
@@ -46,4 +45,13 @@ public final class ItemInit {
 
     public static final RegistryObject<Item> BEACON_ITEM = ITEMS.register("beacon",
         () -> new BeaconItem(new Item.Properties()));
+
+    public static final RegistryObject<Item> DB_TURRET_ITEM = ITEMS.register("db_turret",
+        () -> new DBTurretItem(new Item.Properties()));
+
+    public static final RegistryObject<Item> PORT_DISP_ITEM = ITEMS.register("port_disp",
+        () -> new PortDispItem(new Item.Properties()));
+
+    public static final RegistryObject<Item> ENGI_HAMMER_ITEM = ITEMS.register("engi_hammer",
+        () -> new EngiHammerItem(new Item.Properties().stacksTo(1)));
 }

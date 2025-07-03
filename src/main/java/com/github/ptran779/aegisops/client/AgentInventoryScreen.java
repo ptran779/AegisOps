@@ -1,6 +1,7 @@
 package com.github.ptran779.aegisops.client;
 
 import com.github.ptran779.aegisops.AegisOps;
+import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
 import com.github.ptran779.aegisops.entity.util.AgentInventoryMenu;
 import com.github.ptran779.aegisops.network.*;
@@ -20,12 +21,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Quaternionf;
 
-import java.awt.*;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
-import static com.github.ptran779.aegisops.entity.util.AbstractAgentEntity.FEMALE;
-import static com.github.ptran779.aegisops.entity.util.AbstractAgentEntity.SKIN;
 
 
 @OnlyIn(Dist.CLIENT)
@@ -53,9 +51,8 @@ public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventory
         PlainTextButton targetingBtn = new PlainTextButton(this.leftPos + 227, this.topPos + 36,
             65, 25,Component.empty(),
             btn -> {
-                PacketHandler.CHANNELS.sendToServer(new AgentHostilePacket(
-                    agent.getId(),
-                    agent.getAutoHostile() == 3 ? 0 : agent.getAutoHostile() + 1));
+                int next = (agent.getTargetMode().ordinal() + 1) % Utils.TargetMode.values().length;
+                PacketHandler.CHANNELS.sendToServer(new AgentHostilePacket(agent.getId(),next));
             }, font
         );
         targetingBtn.setTooltip(Tooltip.create(Component.literal("Toggle Targeting Mode")));
@@ -73,19 +70,6 @@ public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventory
         );
         dismissBtn.setTooltip(Tooltip.create(Component.literal("Dismiss Agent")));
         addRenderableWidget(dismissBtn);
-//        addRenderableWidget(new ToggleButton(this.leftPos + 227,this.topPos+35,8,8,0,0,8,BUTTON_STATE, 8,16, () -> true, btn -> {
-//            PacketHandler.CHANNELS.sendToServer(new AgentFollowPacket(agent.getId(), agent.getMovement() == 2 ? 0 :agent.getMovement()+1, this.player.getUUID()));
-//        }));
-//        addRenderableWidget(new ToggleButton(this.leftPos + 227,this.topPos+50,8,8,0,0,8,BUTTON_STATE, 8,16, () -> true,btn -> {
-//            PacketHandler.CHANNELS.sendToServer(new AgentHostilePacket(agent.getId(), agent.getAutoHostile() == 3 ? 0 :agent.getAutoHostile()+1));
-//        }));
-//        addRenderableWidget(new ToggleButton(this.leftPos + 227,this.topPos+65,8,8,0,0,8,BUTTON_STATE, 8,16, agent::getAttackPlayer,btn -> {
-//            PacketHandler.CHANNELS.sendToServer(new AgentBoolPacket(agent.getId(), AgentCommandType.ATTACK_PLAYER, !agent.getAttackPlayer()));
-//        }));
-//        addRenderableWidget(new ToggleButton(this.leftPos + 240,this.topPos+150,40,12,0,0,0,BUTTON_STATE, 40,12, ()->true,btn -> {
-//            PacketHandler.CHANNELS.sendToServer(new AgentBoolPacket(agent.getId(), AgentCommandType.REMOVE, true));
-//            Minecraft.getInstance().setScreen(null); // Close the screen
-//        }));
     }
 
     public AgentInventoryScreen(AgentInventoryMenu container, Inventory pPlayerInventory, Component pTitle) {
@@ -126,27 +110,27 @@ public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventory
     @Override
     protected void renderLabels(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
         // control flag
-        pGuiGraphics.drawString(this.font, agent.getName().getString() +" the " + agent.agentType, 65, 15, 0x00CFFF, false);
-        pGuiGraphics.drawString(this.font, "Commander: " + agent.getOwner(), 65, 40, 0x00CFFF, false);
+        pGuiGraphics.drawString(font, agent.getName().getString() +" the " + agent.agentType, 65, 15, 0x00CFFF, false);
+        pGuiGraphics.drawString(font, "Commander: " + agent.getOwner(), 65, 40, 0x00CFFF, false);
         String followDisp = switch (agent.getMovement()){
             case 0 -> "Wander";
             case 1 -> "Guard";
             case 2 -> "Follow";
             default -> "not sure";
         };
-        pGuiGraphics.drawString(this.font, followDisp, 245, 15, 0x00CFFF, false);
-        String hostileDisp = switch (agent.getAutoHostile()){
-            case 0 -> "None";
-            case 1 -> "Hostile";
-            case 2 -> "Humanoid";
-            case 3 -> "All";
-            default -> "not sure";
+        pGuiGraphics.drawString(font, followDisp, 245, 15, 0x00CFFF, false);
+        String hostileDisp = switch (agent.getTargetMode()){
+            case OFF -> "None";
+            case HOSTILE_ONLY -> "Hostile";
+            case ENEMY_AGENTS -> "Humanoid";
+            case ALL -> "All";
         };
-        pGuiGraphics.drawString(this.font, hostileDisp, 245, 45, 0x00CFFF, false);
+        pGuiGraphics.drawString(font, hostileDisp, 245, 45, 0x00CFFF, false);
 
         // debug val
 //        pGuiGraphics.drawString(this.font, "Food", 240, 80, 0x00CFFF, false);
-        pGuiGraphics.drawString(this.font, agent.getFood() + " / " +agent.maxfood, 245, 126, 0x00CFFF, false);
+        pGuiGraphics.drawString(font, agent.getVirtualAmmo() + " / " +agent.getMaxVirtualAmmo(), 245, 95, 0x00CFFF, false);
+        pGuiGraphics.drawString(font, agent.getFood() + " / " +agent.maxfood, 245, 125, 0x00CFFF, false);
 //        pGuiGraphics.drawString(this.font, agent.getEntityData().get(SKIN) + " - " +agent.getEntityData().get(FEMALE), 237, 105, 4210752, false);
     }
 

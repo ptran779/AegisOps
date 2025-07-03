@@ -2,7 +2,6 @@ package com.github.ptran779.aegisops.entity.util;
 
 import com.github.ptran779.aegisops.Config.SkinManager;
 import com.github.ptran779.aegisops.Utils;
-import com.github.ptran779.aegisops.attribute.AgentAttribute;
 import com.github.ptran779.aegisops.goal.*;
 import com.tacz.guns.api.entity.IGunOperator;
 import net.minecraft.nbt.CompoundTag;
@@ -32,7 +31,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.scores.Team;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,9 +41,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.github.ptran779.aegisops.attribute.AgentAttribute.*;
 
-public abstract class AbstractAgentEntity extends PathfinderMob implements MenuProvider, IAgentEntity {
+public abstract class AbstractAgentEntity extends PathfinderMob implements MenuProvider, IEntityTeam, IEntityTarget {
   public String agentType = "Template";
   private boolean persistedFromNBT = false;
+
   //inventory slot
   public AgentInventory inventory = new AgentInventory(16, this);  // so I can handle inventory related stuff cleaner
   public final int[] gearSlots = {inventory.getContainerSize()-4,inventory.getContainerSize()-3,inventory.getContainerSize()-2,inventory.getContainerSize()-1};
@@ -57,6 +56,7 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
   private UUID bossUUID = null;
   public UUID followPlayer = null;
   public int maxfood = 40;
+  private int pathCooldown = 0;
 
   // auto sync variable. Useful for setting flag
   private static final EntityDataAccessor<Boolean> AUTO_ARMOR_F = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.BOOLEAN);
@@ -66,12 +66,16 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
   public static final EntityDataAccessor<Boolean> KEEP_EAT_F = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.BOOLEAN);
   public static final EntityDataAccessor<Integer> FOOD_VALUE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);
   private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.STRING);
-  private static final EntityDataAccessor<String> TEAM = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.STRING);
+  private static final EntityDataAccessor<Integer> VIRTUAL_AMMO = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);  // for render purpose
 
+  private static final EntityDataAccessor<Integer> ANI_MOVE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);  // for render purpose
   public static final EntityDataAccessor<Boolean> FEMALE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.BOOLEAN);
   public static final EntityDataAccessor<String> SKIN = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.STRING);
-  private transient ResourceLocation cachedSkin;
   //skin quick lookup
+  private transient ResourceLocation cachedSkin;
+
+  // animation -- client render only -- send packet to server to update when to play
+  public float timeTrigger = -1000;
 
   public AbstractAgentEntity(EntityType<? extends AbstractAgentEntity> entityType, Level level) {
     super(entityType, level);
@@ -94,7 +98,7 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
         .add(Attributes.JUMP_STRENGTH, 1)
         .add(Attributes.FOLLOW_RANGE, 16)
         .add(Attributes.ATTACK_DAMAGE, 1)
-        .add(AgentAttribute.AGENT_ATTACK_SPEED, 1);
+        .add(AGENT_ATTACK_SPEED, 1);
   }
 
   // extra sync data for client and server
@@ -102,41 +106,27 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     super.defineSynchedData();
     entityData.define(AUTO_ARMOR_F, false);
     entityData.define(MOVEMENT_F, 0);
-    entityData.define(AUTO_HOSTILE_F, 0);
+    entityData.define(AUTO_HOSTILE_F, Utils.TargetMode.OFF.ordinal());
     entityData.define(KEEP_EAT_F, false);
     entityData.define(FOOD_VALUE, 0);
     entityData.define(PLAYER_HOSTILE_F, false);
+    entityData.define(ANI_MOVE, Utils.AniMove.NORM.ordinal());
+
     entityData.define(FEMALE, false);
     entityData.define(SKIN, "");
     entityData.define(OWNER, "");
-    entityData.define(TEAM, "");
+    entityData.define(VIRTUAL_AMMO, 0);
   }
 
   public String getOwner() {return this.entityData.get(OWNER);}
   public void setOwner(String boss) {this.entityData.set(OWNER, boss);}
 
-  public UUID getOwnerUUID() {return this.bossUUID;}
-  public void setOwnerUUID(UUID uuid) {
+  public UUID getBossUUID() {return this.bossUUID;}
+  public void setBossUUID(UUID uuid) {
     this.bossUUID = uuid;
     Player boss = this.level().getServer().getPlayerList().getPlayer(uuid);
     if (boss != null) {setOwner(boss.getGameProfile().getName());
     } else {setOwner("");}
-  }
-
-  public String getBossTeam() {return this.entityData.get(TEAM);}
-  public void setBossTeam(String bossTeam) {this.entityData.set(TEAM, bossTeam);}
-  public void updateBossInfo() {  // due to sync issue, call this to refresh a few thing
-    // no boss no team
-    if (getOwnerUUID() == null) {
-      setBossTeam("");
-      return;
-    }
-    Player boss = this.level().getServer().getPlayerList().getPlayer(getOwnerUUID());
-    if (boss != null) {
-      setOwner(boss.getGameProfile().getName());
-      Team team = boss.getTeam();
-      setBossTeam(team != null ? team.getName() : "");
-    }
   }
 
   public boolean getAutoArmor() {return this.entityData.get(AUTO_ARMOR_F);}
@@ -149,19 +139,23 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     this.entityData.set(MOVEMENT_F, flag);
     this.followPlayer = getMovement() == 2 ? player : null;
   }
-  // 0: none, 1: Hostile, 2: Player+Agent, 3: 1+2
-  public int getAutoHostile() {return this.entityData.get(AUTO_HOSTILE_F);}
-  public void setAutoHostile(int flag) {this.entityData.set(AUTO_HOSTILE_F, flag);}
+  public Utils.TargetMode getTargetMode() {return Utils.TargetMode.fromId(this.entityData.get(AUTO_HOSTILE_F));}
+  public void setTargetMode(Utils.TargetMode mode) {this.entityData.set(AUTO_HOSTILE_F, mode.ordinal());}
+  public Utils.TargetMode nextTargetMode() {
+    return Utils.TargetMode.nextTargetMode(this.entityData.get(AUTO_HOSTILE_F));
+  }
+  public boolean haveWeapon(){return this.inventory.haveWeapon();}
 
+  public int getVirtualAmmo(){return this.entityData.get(VIRTUAL_AMMO);}
+  public void setVirtualAmmo(int ammo){this.entityData.set(VIRTUAL_AMMO, ammo);};
   public boolean getAttackPlayer() {return this.entityData.get(PLAYER_HOSTILE_F);}
   public void setAttackPlayer(boolean flag) {this.entityData.set(PLAYER_HOSTILE_F, flag);}
-
   public Integer getFood() {return this.entityData.get(FOOD_VALUE);}
   public void setFood(Integer val) {this.entityData.set(FOOD_VALUE, val);}
-
   public boolean getFemale() {return this.entityData.get(FEMALE);}
   public void setFemale(boolean flag) {this.entityData.set(FEMALE, flag);}
-
+  public Utils.AniMove getAniMove() {return Utils.AniMove.fromId(this.entityData.get(ANI_MOVE));}
+  public void setAniMove(Utils.AniMove move) {this.entityData.set(ANI_MOVE, move.ordinal());}
 
   @Override
   protected void registerGoals() {
@@ -171,29 +165,29 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     this.goalSelector.addGoal(8, new OpenDoorGoal(this, true));
     this.goalSelector.addGoal(9, new CustomRandomStrollGoal(this, 0.4, 80));
 
+    this.goalSelector.addGoal(3, new RechargeVirtualAmmo(this, 60));
     this.goalSelector.addGoal(4, new EatFoodGoal(this));
     this.goalSelector.addGoal(5, new FollowGoal(this));
   }
 
   public InteractionResult mobInteract(Player player, InteractionHand hand) {
     if(!this.level().isClientSide()) {
-      updateBossInfo();  // should be good
-      if (getOwnerUUID() == null) {setOwnerUUID(player.getUUID());}
+      if (getBossUUID() == null) {
+        setBossUUID(player.getUUID());}
       if (sameTeam(player)) {
         if (player.getMainHandItem().getItem() instanceof SwordItem) {
-          int i = this.getAutoHostile() == 3 ? 0 : this.getAutoHostile() + 1;
-          this.setAutoHostile(i);
-          String disp = switch (i) {
-            case 0 -> this.getName().getString() + " shall not seek battle";
-            case 1 -> this.getName().getString() + " shall hunt down hostile";
-            case 2 -> this.getName().getString() + " shall hunt down other players";
-            case 3 -> this.getName().getString() + " shall hunt down hostile and other players";
-            default -> "";
+          Utils.TargetMode mode = nextTargetMode();
+          setTargetMode(mode);
+          String disp = switch (mode) {
+            case OFF -> this.getName().getString() + " shall not seek battle";
+            case HOSTILE_ONLY -> this.getName().getString() + " shall hunt down hostile";
+            case ENEMY_AGENTS -> this.getName().getString() + " shall hunt down other players";
+            case ALL -> this.getName().getString() + " shall hunt down hostile and other players";
           };
           player.displayClientMessage(Component.literal(disp), true);
         } else if (player.isCrouching()) {
           int i = this.getMovement() == 2 ? 0 : this.getMovement() + 1;
-          this.setMovement(i, getOwnerUUID());
+          this.setMovement(i, getBossUUID());
           String disp = switch (i) {
             case 0 -> this.getName().getString() + " will wander around here";
             case 1 -> this.getName().getString() + " will stand guard";
@@ -216,38 +210,45 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
   // check to make sure same owner, or owner in same team,
   private boolean sameTeam(LivingEntity entity) {
     if (entity instanceof Player player) {
-      return friendlyPlayer(player);
-    } else if (entity instanceof AbstractAgentEntity otherAgent){
-      return friendlyAgent(otherAgent);
+      return isFriendlyPlayer(player);
+    } else if (entity instanceof IEntityTeam teamer){
+      return isFriendlyMod(teamer);
     }
     return false;
   }
 
-  private boolean friendlyPlayer(Player player) {
-    if (getOwnerUUID() == null) return false;  // no boss
-    if (getOwnerUUID().equals(player.getUUID())) {return true;}  // is boss
-    if (getBossTeam().isEmpty()) return false;
-    return getBossTeam().equals(player.getTeam().getName());  // same team as boss
+  public boolean isFriendlyPlayer(Player player) {
+    // Boss
+    if (getBossUUID() == null) {return false;}
+    if (getBossUUID().equals(player.getUUID())) return true;
+    // Team
+    return player.getTeam().getName().equals(this.level().getPlayerByUUID(getBossUUID()).getTeam().getName());  // same team
   }
-
-  private boolean friendlyAgent(AbstractAgentEntity otherAgent) {
-    UUID myUUID = this.getOwnerUUID();
-    UUID theirUUID = otherAgent.getOwnerUUID();
-    if (myUUID == null || theirUUID == null) {return false;}
-    if (myUUID.equals(theirUUID)) {return true;}
-    if (this.getBossTeam().isEmpty() || otherAgent.getBossTeam().isEmpty()) {return false;}
-    return this.getBossTeam().equals(otherAgent.getBossTeam());
+  public boolean isFriendlyMod(IEntityTeam teamer) {
+    // boss
+    if (getBossUUID() == null || teamer.getBossUUID() == null) {return false;}
+    if (getBossUUID().equals(teamer.getBossUUID())) {return true;}
+    //team with boss
+    return this.level().getPlayerByUUID(teamer.getBossUUID()).getTeam().getName().equals(this.level().getPlayerByUUID(getBossUUID()).getTeam().getName());
   }
-
   public boolean shouldTargetEntity(LivingEntity entity) {
-    int mode = getAutoHostile();
-    if (mode == 0) return false;
-    if ((mode & 1) != 0 && entity instanceof Enemy) return true;
-    if ((mode & 2) != 0) {
-      if (entity instanceof Player player) {return !friendlyPlayer(player);}
-      else if (entity instanceof AbstractAgentEntity otherAgent) {return !friendlyAgent(otherAgent);}
-    }
-    return false;
+    Utils.TargetMode mode = getTargetMode();
+    boolean out = switch (mode) {
+      case OFF -> false;
+      case HOSTILE_ONLY -> entity instanceof Enemy;
+      case ENEMY_AGENTS -> {
+        if (entity instanceof Player player) yield !isFriendlyPlayer(player);
+        if (entity instanceof IEntityTeam teamer) yield !isFriendlyMod(teamer);
+        yield false;
+      }
+      case ALL -> {
+        if (entity instanceof Enemy) yield true;
+        if (entity instanceof Player player) yield !isFriendlyPlayer(player);
+        if (entity instanceof IEntityTeam teamer) yield !isFriendlyMod(teamer);
+        yield false;
+      }
+    };
+    return out;
   }
 
   public boolean hurt(DamageSource source, float amount) {
@@ -298,17 +299,14 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
 
     // save other data
     nbt.putInt("Food", this.getFood());
-    if (getOwnerUUID() != null) {
-      nbt.putUUID("owner_uuid", getOwnerUUID());
-    }
-
-    nbt.putString("boss_team", getBossTeam());
-
+    if (getBossUUID() != null) {nbt.putUUID("owner_uuid", getBossUUID());}
     nbt.putBoolean("auto_armor", this.getAutoArmor());
-    nbt.putInt("auto_hostile", this.getAutoHostile());
+    nbt.putInt("auto_hostile", this.entityData.get(AUTO_HOSTILE_F));
     nbt.putBoolean("is_female", getFemale());
     nbt.putString("skin", this.entityData.get(SKIN));
     nbt.putBoolean("attack_player", this.getAttackPlayer());
+    nbt.putInt("movement", this.getMovement());
+    nbt.putInt("virtual_ammo", this.getVirtualAmmo());
   }
   @Override
   public void readAdditionalSaveData(CompoundTag nbt) {
@@ -324,16 +322,16 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
 
     // load other data
     setFood(nbt.getInt("Food"));
-    if (nbt.contains("owner_uuid")){setOwnerUUID(nbt.getUUID("owner_uuid"));}
-    else {setOwnerUUID(null);}
+    if (nbt.contains("owner_uuid")){setBossUUID(nbt.getUUID("owner_uuid"));}
+    else {setBossUUID(null);}
 
-    setBossTeam(nbt.getString("boss_team"));
-    updateBossInfo();  // perform update in event boss online
     this.setAutoArmor(nbt.getBoolean("auto_armor"));
-    this.setAutoHostile(nbt.getInt("auto_hostile"));
+    this.setTargetMode(Utils.TargetMode.values()[nbt.getInt("auto_hostile")]);
     setFemale(nbt.getBoolean("is_female"));
     this.entityData.set(SKIN, nbt.getString("skin"));
     this.setAttackPlayer(nbt.getBoolean("attack_player"));
+    this.setMovement(nbt.getInt("movement"), this.getBossUUID());
+    this.setVirtualAmmo(nbt.getInt("virtual_ammo"));
   }
 
   public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag) {
@@ -376,7 +374,7 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
       } else {
         // Remove if no longer well-fed
         if (attr != null && attr.hasModifier(WELL_FEED_SPEED_BOOST)) {
-          attr.removeModifier(AgentAttribute.WELL_FEED_SPEED_BOOST);
+          attr.removeModifier(WELL_FEED_SPEED_BOOST);
         }
       }
       if (getHealth()<getMaxHealth() && getFood() >= maxfood * 0.25) {
@@ -390,13 +388,25 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     this.heal(1);
   }
 
+  public void moveto(Entity pEntity, double pSpeed){
+    if (--pathCooldown <= 0) {
+      this.getNavigation().moveTo(pEntity, pSpeed);
+      this.pathCooldown = 10;  // only compute every 20 tick
+    }
+  }
+
+  public void stopNav(){
+    this.getNavigation().stop();
+    this.pathCooldown = 0;
+  }
+
   //menu
   @Override
   public AbstractContainerMenu createMenu(int containerID, Inventory inventory, Player player) {
     return new AgentInventoryMenu(containerID, inventory, this);
   }
 
-  public void updateSwingTime(){super.updateSwingTime();}
+//  public void updateSwingTime(){super.updateSwingTime();}
 
   public void clearTarget() {setTarget(null);}
 
@@ -408,7 +418,16 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
       op.draw(this::getMainHandItem);
     }
   }
-
-  //just stack to mainhand
+  // just stack to mainhand
   public void equipMelee() {setItemSlot(EquipmentSlot.MAINHAND, inventory.getItem(meleeSlot));}
+  // special
+  public void equipSpecial() {setItemSlot(EquipmentSlot.MAINHAND, inventory.getItem(specialSlot));}
+  public ItemStack getSpecialSlot() {return inventory.getItem(specialSlot);}
+  public ItemStack getGunSlot(){return inventory.getItem(gunSlot);}
+
+  // for overwrite later in final class
+  public boolean isEquipableGun(ItemStack stack) {return false;}
+  public boolean isEquipableMelee(ItemStack stack) {return false;}
+  public int getMaxVirtualAmmo(){return 0;}
+  public int getAmmoPerCharge(){return 1;}
 }

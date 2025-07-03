@@ -28,8 +28,7 @@ public class DropPodFallingRender extends EntityRenderer<FallingDropPod> {
     pPoseStack.scale(-1.0F, -1.0F, 1.0F); // Flip model upright (Forge quirk)
 
     VertexConsumer vertexConsumer = pBuffer.getBuffer(model.renderType(TEXTURE));
-    model.renderToBuffer(pPoseStack, vertexConsumer, pPackedLight,
-        OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+    model.renderToBuffer(pPoseStack, vertexConsumer, pPackedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 
     pPoseStack.popPose();
   }

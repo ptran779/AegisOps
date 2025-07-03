@@ -32,8 +32,8 @@ public class Heavy extends AbstractAgentEntity {
 
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(2, new CustomRetaliationTargetGoal(this));
-        this.goalSelector.addGoal(3, new CustomRangeTargetGoal<>(this, LivingEntity.class, 30, 24, true, entity -> this.shouldTargetEntity((LivingEntity) entity)));
+        this.goalSelector.addGoal(3, new CustomRetaliationTargetGoal(this));
+        this.goalSelector.addGoal(4, new CustomRangeTargetGoal<>(this, LivingEntity.class, 30, 24, true, entity -> this.shouldTargetEntity((LivingEntity) entity)));
         this.goalSelector.addGoal(3, new AgentAttackGoal(this, 4, 6, 24, 32));
     }
 
@@ -58,4 +58,6 @@ public class Heavy extends AbstractAgentEntity {
     public boolean isEquipableMelee(ItemStack stack) {
         return config.allowMelees.contains(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
     }
+    public int getMaxVirtualAmmo(){return config.maxVirtualAmmo;}
+    public int getAmmoPerCharge(){return config.chargePerAmmo;}
 }

@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 
 //ChestRenderer
 

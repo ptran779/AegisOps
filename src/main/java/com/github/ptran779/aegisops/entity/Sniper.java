@@ -32,8 +32,8 @@ public class Sniper extends AbstractAgentEntity {
 
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(2, new CustomRetaliationTargetGoal(this));
-        this.goalSelector.addGoal(3, new CustomRangeTargetGoal<>(this, LivingEntity.class, 60, 48, true, entity -> this.shouldTargetEntity((LivingEntity) entity)));
+        this.goalSelector.addGoal(3, new CustomRetaliationTargetGoal(this));
+        this.goalSelector.addGoal(4, new CustomRangeTargetGoal<>(this, LivingEntity.class, 60, 48, true, entity -> this.shouldTargetEntity((LivingEntity) entity)));
         this.goalSelector.addGoal(3, new AgentAttackGoal(this, 4, 16, 48, 48));
     }
 

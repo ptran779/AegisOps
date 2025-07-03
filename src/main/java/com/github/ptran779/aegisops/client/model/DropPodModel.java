@@ -92,11 +92,6 @@ public class DropPodModel extends Model {
 
 		return LayerDefinition.create(meshdefinition, 256, 256);
 	}
-//
-//	@Override
-//	public void setupAnim(Entity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-//
-//	}
 
 	@Override
 	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {

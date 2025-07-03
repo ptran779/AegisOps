@@ -22,6 +22,7 @@ public class AgentInventory extends SimpleContainer {
   protected void equipBestArmor(){
     // get current load
     //FIXME this thing not sync, it pull from entity instead of inventory. Careful if it overwrite and cause item lost
+    //Actually, it maybe fine, Im not responsible for someone else bad design, but FYI
     ItemStack helmet = agent.getItemBySlot(EquipmentSlot.HEAD);
     ItemStack chest = agent.getItemBySlot(EquipmentSlot.CHEST);
     ItemStack legs = agent.getItemBySlot(EquipmentSlot.LEGS);
@@ -109,13 +110,11 @@ public class AgentInventory extends SimpleContainer {
     return !getItem(agent.meleeSlot).isEmpty();
   }
 
-  /// Fire ARM :) // soft check type only. Strict check on menu.
+  /// Fire ARM :) // soft check gun type only. Strict check on menu.
   public boolean gunExistWithAmmo(){
     ItemStack stack = getItem(agent.gunSlot);
     if (stack.getItem() instanceof ModernKineticGunItem gunItem) {
-      if (checkGunAmmo(stack, gunItem) > 0 || findGunAmmo(stack) != -1){
-        return true;
-      }
+      return checkGunAmmo(stack, gunItem) > 0 || agent.getVirtualAmmo() > 0 || findGunAmmo(stack) != -1;
     }
     return false;
   }
@@ -154,9 +153,7 @@ public class AgentInventory extends SimpleContainer {
   };
 
   // quick check to see if there's weapon in our slot
-  public boolean haveWeapon(){
-    return gunExistWithAmmo() || meleeExist();
-  }
+  public boolean haveWeapon(){return gunExistWithAmmo() || meleeExist();}
 
   /// UTIL
   protected void swapItem(int id1, int id2){

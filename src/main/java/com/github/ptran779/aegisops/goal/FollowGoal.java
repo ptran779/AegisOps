@@ -33,12 +33,12 @@ public class FollowGoal extends Goal {
 
   @Override
   public void tick() {
-    if (agent.getOwnerUUID() != null) {
-      agent.getNavigation().moveTo(followTarget, agent.getAttribute(Attributes.MOVEMENT_SPEED).getValue());
+    if (agent.getBossUUID() != null) {
+      agent.moveto(followTarget, agent.getAttribute(Attributes.MOVEMENT_SPEED).getValue());
     }
   }
 
   public void stop(){
-    agent.getNavigation().stop();
+    agent.stopNav();
   }
 }

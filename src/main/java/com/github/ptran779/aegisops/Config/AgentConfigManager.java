@@ -48,13 +48,15 @@ public class AgentConfigManager {
   }
 
   // Make a default file if one doesn’t exist. Use defaultGunTypes to fill in the file
-  private static void generateDefaultIfMissing(String classId, List<GunTabType> defaultGunTypes) {
+  private static void generateDefaultIfMissing(String classId, List<GunTabType> defaultGunTypes, int maxVirtAmmo, int chargePerAmmp) {
     Path path = CONFIG_DIR.resolve(classId + ".json");
     if (!Files.exists(path)) {
       //gun
       AgentConfig config = new AgentConfig();
       config.allowGuns = getDefaultGuns(defaultGunTypes); // properly assign the default guns
       config.allowMelees = getDefaultMelees(); // for melee if missing
+      config.maxVirtualAmmo = maxVirtAmmo;
+      config.chargePerAmmo = chargePerAmmp;
 
       try {
         Files.createDirectories(CONFIG_DIR); // ensure folder exists
@@ -114,13 +116,13 @@ public class AgentConfigManager {
   // IMPORTANT: make sure all class is register here
   public static void serverGenerateDefault() {
     // take care of generate missing default
-    generateDefaultIfMissing("soldier", List.of(GunTabType.PISTOL, GunTabType.RIFLE, GunTabType.SMG));
-    generateDefaultIfMissing("sniper", List.of(GunTabType.PISTOL, GunTabType.RIFLE, GunTabType.SNIPER));
-    generateDefaultIfMissing("heavy", List.of(GunTabType.PISTOL, GunTabType.SHOTGUN, GunTabType.MG));
-    generateDefaultIfMissing("demolition", List.of(GunTabType.PISTOL, GunTabType.SMG));
-    generateDefaultIfMissing("medic", List.of(GunTabType.PISTOL, GunTabType.SMG));
-    generateDefaultIfMissing("engineer", List.of(GunTabType.PISTOL, GunTabType.RIFLE));
-    generateDefaultIfMissing("swordman", List.of(GunTabType.PISTOL, GunTabType.SHOTGUN));
+    generateDefaultIfMissing("soldier", List.of(GunTabType.PISTOL, GunTabType.RIFLE, GunTabType.SMG), 100, 1);
+    generateDefaultIfMissing("sniper", List.of(GunTabType.PISTOL, GunTabType.RIFLE, GunTabType.SNIPER), 50, 3);
+    generateDefaultIfMissing("heavy", List.of(GunTabType.PISTOL, GunTabType.SHOTGUN, GunTabType.MG), 200, 2);
+    generateDefaultIfMissing("demolition", List.of(GunTabType.PISTOL, GunTabType.SMG), 100, 1);
+    generateDefaultIfMissing("medic", List.of(GunTabType.PISTOL, GunTabType.SMG), 100, 1);
+    generateDefaultIfMissing("engineer", List.of(GunTabType.PISTOL, GunTabType.RIFLE), 100, 1);
+    generateDefaultIfMissing("swordman", List.of(GunTabType.PISTOL, GunTabType.SHOTGUN), 50, 2);
 
     // load into memory cache
     reloadCache(); // load everything into memory afterward

@@ -25,6 +25,9 @@ public class CreativeTabInit {
         output.accept(ItemInit.SWORDMAN_SPAWN_EGG.get());
         output.accept(ItemInit.DROP_POD_ITEM.get());
         output.accept(ItemInit.BEACON_ITEM.get());
+        output.accept(ItemInit.DB_TURRET_ITEM.get());
+        output.accept(ItemInit.PORT_DISP_ITEM.get());
+        output.accept(ItemInit.ENGI_HAMMER_ITEM.get());
         // Add more if needed
       }).build()
     );
