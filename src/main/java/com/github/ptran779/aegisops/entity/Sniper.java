@@ -5,6 +5,7 @@ import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
 import com.github.ptran779.aegisops.goal.AgentAttackGoal;
 import com.github.ptran779.aegisops.goal.CustomRangeTargetGoal;
 import com.github.ptran779.aegisops.goal.CustomRetaliationTargetGoal;
+import com.github.ptran779.aegisops.goal.PrecisionShot;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.DifficultyInstance;
@@ -32,6 +33,7 @@ public class Sniper extends AbstractAgentEntity {
 
     protected void registerGoals() {
         super.registerGoals();
+        this.goalSelector.addGoal(2, new PrecisionShot(this, 64, 600));
         this.goalSelector.addGoal(3, new CustomRetaliationTargetGoal(this));
         this.goalSelector.addGoal(4, new CustomRangeTargetGoal<>(this, LivingEntity.class, 60, 48, true, entity -> this.shouldTargetEntity((LivingEntity) entity)));
         this.goalSelector.addGoal(3, new AgentAttackGoal(this, 4, 16, 48, 48));
@@ -58,4 +60,6 @@ public class Sniper extends AbstractAgentEntity {
     public boolean isEquipableMelee(ItemStack stack) {
         return config.allowMelees.contains(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
     }
+    public int getMaxVirtualAmmo(){return config.maxVirtualAmmo;}
+    public int getAmmoPerCharge(){return config.chargePerAmmo;}
 }

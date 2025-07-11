@@ -5,6 +5,7 @@ import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
 import com.github.ptran779.aegisops.goal.AgentAttackGoal;
 import com.github.ptran779.aegisops.goal.CustomRangeTargetGoal;
 import com.github.ptran779.aegisops.goal.CustomRetaliationTargetGoal;
+import com.github.ptran779.aegisops.goal.HealFriendly;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.DifficultyInstance;
@@ -35,6 +36,7 @@ public class Medic extends AbstractAgentEntity {
         this.goalSelector.addGoal(3, new CustomRetaliationTargetGoal(this));
         this.goalSelector.addGoal(4, new CustomRangeTargetGoal<>(this, LivingEntity.class, 60, 24, true, entity -> this.shouldTargetEntity((LivingEntity) entity)));
         this.goalSelector.addGoal(3, new AgentAttackGoal(this, 4, 12, 24, 28));
+        this.goalSelector.addGoal(2, new HealFriendly(this, 100));
     }
 
     public void tick() {
@@ -56,7 +58,7 @@ public class Medic extends AbstractAgentEntity {
         return config.allowGuns.contains(gunId);
     }
     public boolean isEquipableMelee(ItemStack stack) {
-        return config.allowMelees.contains(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+        return config.allowMelees.contains(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
     }
     public int getMaxVirtualAmmo(){return config.maxVirtualAmmo;}
     public int getAmmoPerCharge(){return config.chargePerAmmo;}

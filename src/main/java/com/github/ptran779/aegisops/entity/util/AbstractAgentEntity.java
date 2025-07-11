@@ -59,10 +59,9 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
   private int pathCooldown = 0;
 
   // auto sync variable. Useful for setting flag
-  private static final EntityDataAccessor<Boolean> AUTO_ARMOR_F = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.BOOLEAN);
   private static final EntityDataAccessor<Integer> MOVEMENT_F = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);
+  private static final EntityDataAccessor<Boolean> ALLOW_SPECIAL_F = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.BOOLEAN);
   private static final EntityDataAccessor<Integer> AUTO_HOSTILE_F = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);
-  private static final EntityDataAccessor<Boolean> PLAYER_HOSTILE_F = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.BOOLEAN);
   public static final EntityDataAccessor<Boolean> KEEP_EAT_F = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.BOOLEAN);
   public static final EntityDataAccessor<Integer> FOOD_VALUE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);
   private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.STRING);
@@ -104,12 +103,11 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
   // extra sync data for client and server
   protected void defineSynchedData(){
     super.defineSynchedData();
-    entityData.define(AUTO_ARMOR_F, false);
+    entityData.define(ALLOW_SPECIAL_F, false);
     entityData.define(MOVEMENT_F, 0);
     entityData.define(AUTO_HOSTILE_F, Utils.TargetMode.OFF.ordinal());
     entityData.define(KEEP_EAT_F, false);
     entityData.define(FOOD_VALUE, 0);
-    entityData.define(PLAYER_HOSTILE_F, false);
     entityData.define(ANI_MOVE, Utils.AniMove.NORM.ordinal());
 
     entityData.define(FEMALE, false);
@@ -129,8 +127,8 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     } else {setOwner("");}
   }
 
-  public boolean getAutoArmor() {return this.entityData.get(AUTO_ARMOR_F);}
-  public void setAutoArmor(boolean flag) {this.entityData.set(AUTO_ARMOR_F, flag);}
+  public boolean getAllowSpecial() {return this.entityData.get(ALLOW_SPECIAL_F);}
+  public void setAllowSpecial(boolean flag) {this.entityData.set(ALLOW_SPECIAL_F, flag);}
   public boolean getKeepEating() {return this.entityData.get(KEEP_EAT_F);}
   public void setKeepEating(boolean flag) {this.entityData.set(KEEP_EAT_F, flag);}
   //0: wander, 1: stand guard, 2: follow, 3(wip) patrol
@@ -141,15 +139,11 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
   }
   public Utils.TargetMode getTargetMode() {return Utils.TargetMode.fromId(this.entityData.get(AUTO_HOSTILE_F));}
   public void setTargetMode(Utils.TargetMode mode) {this.entityData.set(AUTO_HOSTILE_F, mode.ordinal());}
-  public Utils.TargetMode nextTargetMode() {
-    return Utils.TargetMode.nextTargetMode(this.entityData.get(AUTO_HOSTILE_F));
-  }
+  public Utils.TargetMode nextTargetMode() {return Utils.TargetMode.nextTargetMode(this.entityData.get(AUTO_HOSTILE_F));}
   public boolean haveWeapon(){return this.inventory.haveWeapon();}
 
   public int getVirtualAmmo(){return this.entityData.get(VIRTUAL_AMMO);}
   public void setVirtualAmmo(int ammo){this.entityData.set(VIRTUAL_AMMO, ammo);};
-  public boolean getAttackPlayer() {return this.entityData.get(PLAYER_HOSTILE_F);}
-  public void setAttackPlayer(boolean flag) {this.entityData.set(PLAYER_HOSTILE_F, flag);}
   public Integer getFood() {return this.entityData.get(FOOD_VALUE);}
   public void setFood(Integer val) {this.entityData.set(FOOD_VALUE, val);}
   public boolean getFemale() {return this.entityData.get(FEMALE);}
@@ -166,8 +160,9 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     this.goalSelector.addGoal(9, new CustomRandomStrollGoal(this, 0.4, 80));
 
     this.goalSelector.addGoal(3, new RechargeVirtualAmmo(this, 60));
-    this.goalSelector.addGoal(4, new EatFoodGoal(this));
+    this.goalSelector.addGoal(4, new EatFoodGoal(this));  // I still need to reduce food value from action
     this.goalSelector.addGoal(5, new FollowGoal(this));
+    this.goalSelector.addGoal(6, new Salute(this, 100));
   }
 
   public InteractionResult mobInteract(Player player, InteractionHand hand) {
@@ -300,11 +295,11 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     // save other data
     nbt.putInt("Food", this.getFood());
     if (getBossUUID() != null) {nbt.putUUID("owner_uuid", getBossUUID());}
-    nbt.putBoolean("auto_armor", this.getAutoArmor());
+    nbt.putBoolean("allow_special", this.getAllowSpecial());
     nbt.putInt("auto_hostile", this.entityData.get(AUTO_HOSTILE_F));
     nbt.putBoolean("is_female", getFemale());
     nbt.putString("skin", this.entityData.get(SKIN));
-    nbt.putBoolean("attack_player", this.getAttackPlayer());
+//    nbt.putBoolean("attack_player", this.getAttackPlayer());
     nbt.putInt("movement", this.getMovement());
     nbt.putInt("virtual_ammo", this.getVirtualAmmo());
   }
@@ -325,17 +320,18 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     if (nbt.contains("owner_uuid")){setBossUUID(nbt.getUUID("owner_uuid"));}
     else {setBossUUID(null);}
 
-    this.setAutoArmor(nbt.getBoolean("auto_armor"));
+    this.setAllowSpecial(nbt.getBoolean("allow_special"));
     this.setTargetMode(Utils.TargetMode.values()[nbt.getInt("auto_hostile")]);
     setFemale(nbt.getBoolean("is_female"));
     this.entityData.set(SKIN, nbt.getString("skin"));
-    this.setAttackPlayer(nbt.getBoolean("attack_player"));
+//    this.setAttackPlayer(nbt.getBoolean("attack_player"));
     this.setMovement(nbt.getInt("movement"), this.getBossUUID());
     this.setVirtualAmmo(nbt.getInt("virtual_ammo"));
   }
 
   public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag) {
     SpawnGroupData data = super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
+    this.setLeftHanded(false);  // everyone use right hand pls
     if (!persistedFromNBT) {
       boolean isFemale = ThreadLocalRandom.current().nextBoolean();
       this.setCustomName(Component.literal(Utils.randomName(isFemale)));
@@ -388,11 +384,12 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     this.heal(1);
   }
 
-  public void moveto(Entity pEntity, double pSpeed){
+  public boolean moveto(Entity pEntity, double pSpeed){
     if (--pathCooldown <= 0) {
-      this.getNavigation().moveTo(pEntity, pSpeed);
       this.pathCooldown = 10;  // only compute every 20 tick
+      return this.getNavigation().moveTo(pEntity, pSpeed);
     }
+    return true;
   }
 
   public void stopNav(){

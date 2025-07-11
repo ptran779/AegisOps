@@ -20,6 +20,8 @@ public class ServerConfig {
     public static ForgeConfigSpec.IntValue ENGI_WORK_RECHARGE;
     public static ForgeConfigSpec.IntValue VIRT_AMMO_REFILL;
 
+    public static ForgeConfigSpec.IntValue BANDAGE_HEALTH_REFILL;
+
     public static void register() {
         registerCommonConfig();
     }
@@ -80,6 +82,10 @@ public class ServerConfig {
         VIRT_AMMO_REFILL = builder
             .comment("How much virtual ammo can be refill per action")
             .defineInRange("VirtAmmoRefill", 20, 0, Integer.MAX_VALUE);
+
+        BANDAGE_HEALTH_REFILL = builder
+            .comment("How much health can bandage restore")
+            .defineInRange("BandageRestoreAmount", 6, 0, Integer.MAX_VALUE);
 
         builder.pop();
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, builder.build());

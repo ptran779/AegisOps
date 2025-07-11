@@ -2,14 +2,18 @@ package com.github.ptran779.aegisops;
 
 import com.github.ptran779.aegisops.entity.FallingDropPod;
 import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
+import com.github.ptran779.aegisops.entity.util.IEntityTeam;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Comparator;
 import java.util.List;
@@ -89,8 +93,10 @@ public class Utils {
     NORM,
     ATTACK,
     RELOAD,
-    SPECIAL,
-    DISP_RELOAD;
+    DISP_RELOAD,
+    SALUTE,
+    SPECIAL0,
+    SPECIAL1;
 
     public static final AniMove[] VALUES = values();
     public static AniMove fromId(int id) {
@@ -106,5 +112,20 @@ public class Utils {
     return entities.stream()
         .min(Comparator.comparingDouble(user::distanceToSqr))
         .orElse(null);
+  }
+
+  public static boolean hasFriendlyInLineOfFire(Mob user, LivingEntity target) {
+    if (!(user instanceof IEntityTeam userTeam)) return false;
+    Vec3 start = user.getEyePosition();
+    Vec3 end = target.getEyePosition();
+
+    AABB pathAABB = new AABB(start, end).inflate(0.5); // widen slightly for tall hitbox
+    List<LivingEntity> teammates = user.level().getEntitiesOfClass(
+        LivingEntity.class,pathAABB, other ->
+            other instanceof IEntityTeam otherTeam &&
+            userTeam.isFriendlyMod(otherTeam) &&
+            other.getBoundingBox().clip(start, end).isPresent()
+    );
+    return !teammates.isEmpty();
   }
 }

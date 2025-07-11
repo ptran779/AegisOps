@@ -48,28 +48,47 @@ public class AgentConfigManager {
   }
 
   // Make a default file if one doesn’t exist. Use defaultGunTypes to fill in the file
-  private static void generateDefaultIfMissing(String classId, List<GunTabType> defaultGunTypes, int maxVirtAmmo, int chargePerAmmp) {
+  private static void loadOrGenerateClassConfig(String classId, List<GunTabType> defaultGunTypes, int maxVirtAmmo, int chargePerAmmo) {
     Path path = CONFIG_DIR.resolve(classId + ".json");
-    if (!Files.exists(path)) {
-      //gun
-      AgentConfig config = new AgentConfig();
-      config.allowGuns = getDefaultGuns(defaultGunTypes); // properly assign the default guns
-      config.allowMelees = getDefaultMelees(); // for melee if missing
-      config.maxVirtualAmmo = maxVirtAmmo;
-      config.chargePerAmmo = chargePerAmmp;
 
-      try {
-        Files.createDirectories(CONFIG_DIR); // ensure folder exists
+    // Generate default
+    AgentConfig defaultConfig = new AgentConfig();
+    defaultConfig.allowGuns = getDefaultGuns(defaultGunTypes);
+    defaultConfig.allowMelees = getDefaultMelees();
+    defaultConfig.maxVirtualAmmo = maxVirtAmmo;
+    defaultConfig.chargePerAmmo = chargePerAmmo;
+
+    AgentConfig result;
+
+    try {
+      Files.createDirectories(CONFIG_DIR);
+
+      if (!Files.exists(path)) {
         try (Writer writer = Files.newBufferedWriter(path)) {
-          GSON.toJson(config, writer);
-//          System.out.println("[AegisOps] Generated default config for class: " + classId);
+          GSON.toJson(defaultConfig, writer);
+          result = defaultConfig;
         }
-      } catch (IOException e) {
-        System.err.println("[AegisOps] Failed to write default config for: " + classId);
-        e.printStackTrace();
+      } else {
+        try (Reader reader = Files.newBufferedReader(path)) {
+          AgentConfig loaded = GSON.fromJson(reader, AgentConfig.class);
+          if (loaded != null && loaded.isValid()) {
+            result = loaded;
+          } else {
+            System.err.println("[AegisOps] Invalid or incomplete config for " + classId + ", regenerating...");
+            try (Writer writer = Files.newBufferedWriter(path)) {
+              GSON.toJson(defaultConfig, writer);
+              result = defaultConfig;
+            }
+          }
+        }
       }
-      //skin // empty for now
+    } catch (IOException e) {
+      System.err.println("[AegisOps] Failed to load or write config for: " + classId);
+      e.printStackTrace();
+      result = defaultConfig; // fallback to something valid
     }
+
+    CLASS_CONFIGS.put(classId, result);
   }
 
   private static Set<String> getDefaultGuns(List<GunTabType> defaultGunTypes) {
@@ -116,13 +135,13 @@ public class AgentConfigManager {
   // IMPORTANT: make sure all class is register here
   public static void serverGenerateDefault() {
     // take care of generate missing default
-    generateDefaultIfMissing("soldier", List.of(GunTabType.PISTOL, GunTabType.RIFLE, GunTabType.SMG), 100, 1);
-    generateDefaultIfMissing("sniper", List.of(GunTabType.PISTOL, GunTabType.RIFLE, GunTabType.SNIPER), 50, 3);
-    generateDefaultIfMissing("heavy", List.of(GunTabType.PISTOL, GunTabType.SHOTGUN, GunTabType.MG), 200, 2);
-    generateDefaultIfMissing("demolition", List.of(GunTabType.PISTOL, GunTabType.SMG), 100, 1);
-    generateDefaultIfMissing("medic", List.of(GunTabType.PISTOL, GunTabType.SMG), 100, 1);
-    generateDefaultIfMissing("engineer", List.of(GunTabType.PISTOL, GunTabType.RIFLE), 100, 1);
-    generateDefaultIfMissing("swordman", List.of(GunTabType.PISTOL, GunTabType.SHOTGUN), 50, 2);
+    loadOrGenerateClassConfig("soldier", List.of(GunTabType.PISTOL, GunTabType.RIFLE, GunTabType.SMG), 100, 1);
+    loadOrGenerateClassConfig("sniper", List.of(GunTabType.PISTOL, GunTabType.RIFLE, GunTabType.SNIPER), 50, 3);
+    loadOrGenerateClassConfig("heavy", List.of(GunTabType.PISTOL, GunTabType.SHOTGUN, GunTabType.MG), 200, 2);
+    loadOrGenerateClassConfig("demolition", List.of(GunTabType.PISTOL, GunTabType.SMG), 100, 1);
+    loadOrGenerateClassConfig("medic", List.of(GunTabType.PISTOL, GunTabType.SMG), 100, 1);
+    loadOrGenerateClassConfig("engineer", List.of(GunTabType.PISTOL, GunTabType.RIFLE), 100, 1);
+    loadOrGenerateClassConfig("swordman", List.of(GunTabType.PISTOL, GunTabType.SHOTGUN), 50, 2);
 
     // load into memory cache
     reloadCache(); // load everything into memory afterward

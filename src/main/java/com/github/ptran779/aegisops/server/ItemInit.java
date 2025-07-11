@@ -54,4 +54,9 @@ public final class ItemInit {
 
     public static final RegistryObject<Item> ENGI_HAMMER_ITEM = ITEMS.register("engi_hammer",
         () -> new EngiHammerItem(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> BANDAGE_ITEM = ITEMS.register("bandage",
+        () -> new Bandage(new Item.Properties()));
+    public static final RegistryObject<Item> MORPHINE_ITEM = ITEMS.register("morphine",
+        () -> new Morphine(new Item.Properties()));
 }

@@ -8,29 +8,24 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class AgentBoolPacket {
+public class AgentDismissPacket {
   private final int entityId;
-  private final AgentCommandType cType;
   private final boolean payload;          //action payload -- expanse me if need more complex data communication
 
-  public AgentBoolPacket(int entityId, AgentCommandType cType, boolean flag){
+  public AgentDismissPacket(int entityId, boolean flag){
     this.entityId = entityId;
-    this.cType = cType;
     this.payload = flag;
   }
 
   public void encode(FriendlyByteBuf buf) {
     buf.writeInt(entityId);
-    buf.writeEnum(cType);
     buf.writeBoolean(payload);
   }
 
-  public static AgentBoolPacket decode(FriendlyByteBuf buf){
+  public static AgentDismissPacket decode(FriendlyByteBuf buf){
     int entityId = buf.readInt();
-    AgentCommandType cType = buf.readEnum(AgentCommandType.class);
     boolean payload = buf.readBoolean();
-//    UUID optinalData = buf.readUUID();
-    return new AgentBoolPacket(entityId, cType, payload);
+    return new AgentDismissPacket(entityId, payload);
   }
 
   public void handle(Supplier<NetworkEvent.Context> ctx) {
@@ -40,15 +35,9 @@ public class AgentBoolPacket {
 
       Entity e = player.level().getEntity(entityId);
       if (!(e instanceof AbstractAgentEntity agent)) return;
-      switch (cType) {
-        case AUTO_ARMOR   -> agent.setAutoArmor(payload);
-        case ATTACK_PLAYER -> agent.setAttackPlayer(payload);
-        case REMOVE -> {
-          agent.setBossUUID(null);
-        }
-        default -> {}
-      }
+      agent.setBossUUID(null);
     });
     ctx.get().setPacketHandled(true);
   }
 }
+//agent.setAllowSpecial(payload)

@@ -13,29 +13,25 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.EnumSet;
 
-public class WorkOnStructure extends Goal {
+public class WorkOnStructure extends AbstractThrottleGoal {
   AbstractAgentEntity agent;
   AbstractAgentStruct aStruct;
-  protected int checkInterval;
-  private int checkTime=0;
   protected int tickProgress = -1;
 
   public WorkOnStructure(AbstractAgentEntity agent, int checkInterval) {
+    super(agent, checkInterval);
     this.agent = agent;
-    this.checkInterval = checkInterval;
     this.setFlags(EnumSet.of(Flag.LOOK, Flag.MOVE, Flag.TARGET));
   }
 
   public boolean canUse() {
-    if (aStruct != null) {return false;}
-    if (agent.tickCount - checkTime < checkInterval) {return false;}
-    checkTime = agent.tickCount;  // reset counter
+    if (!agent.getAllowSpecial() || aStruct != null) {return false;}
+    if (!super.canUse()) return false;
     if (!(agent.getSpecialSlot().getItem() instanceof EngiHammerItem)){return false;}
     aStruct = Utils.findNearestEntity(agent, AbstractAgentStruct.class, 16, entity ->
         entity.isFriendlyMod(agent) && (entity.charge + ServerConfig.ENGI_WORK_RECHARGE.get() <= entity.getMaxCharge()));
@@ -47,18 +43,16 @@ public class WorkOnStructure extends Goal {
   }
 
   public void start() {
-//    System.out.println("target at " + aStruct.position());
     agent.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
     tickProgress = -1;
   }
-
   public void stop() {
     aStruct = null;  // ensure clean
     agent.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
     agent.setAniMove(Utils.AniMove.NORM);
   }
-
   public boolean requiresUpdateEveryTick() {return true;}
+  public boolean isInterruptable(){return false;}
 
   public void tick(){
     // god know why
@@ -67,23 +61,23 @@ public class WorkOnStructure extends Goal {
 
     agent.getLookControl().setLookAt(aStruct);
     if (agent.distanceToSqr(aStruct) > 4) {
-      agent.moveto(aStruct, agent.getAttribute(Attributes.MOVEMENT_SPEED).getValue());
+      if(!agent.moveto(aStruct, agent.getAttribute(Attributes.MOVEMENT_SPEED).getValue())) aStruct=null;
     } else if (tickProgress == -1) {
       PacketHandler.CHANNELS.send(
           PacketDistributor.TRACKING_ENTITY.with(() -> agent),
           new AgentRenderPacket(agent.getId(), 1)
       );
-      agent.setAniMove(Utils.AniMove.SPECIAL);
+      agent.setAniMove(Utils.AniMove.SPECIAL0);
       tickProgress = agent.tickCount;
     } else if (dummy == 10 || dummy == 20 || dummy == 30 || dummy == 40) {
       agent.level().playSound(null, aStruct, SoundEvents.DRIPSTONE_BLOCK_BREAK, SoundSource.BLOCKS, 1f, 1.0f);
     } else if (dummy == 60) {
       agent.equipSpecial();
     } else if (dummy == 85 || dummy == 100 || dummy == 115) {
-      agent.level().playSound(null, aStruct, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 1f, 1.0f);
-      ((ServerLevel) agent.level()).sendParticles(ParticleTypes.SCRAPE, aStruct.getX(), aStruct.getY()+1.8, aStruct.getZ(), 20, 0, 1, 0, 0.02);
+      agent.level().playSound(null, aStruct, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.8f, 1.0f);
+      ((ServerLevel) agent.level()).sendParticles(ParticleTypes.SCRAPE, aStruct.getX(), aStruct.getY()+1.8, aStruct.getZ(), 10, 0, 1, 0, 0.02);
     } else if (dummy > 120) {
-      aStruct.charge = Math.min(aStruct.charge +20, aStruct.getMaxCharge());   /// WIP config work order ALSO REPAIR
+      aStruct.charge = Math.min(aStruct.charge +20, aStruct.getMaxCharge());
       if (aStruct.getHealth() < aStruct.getMaxHealth()) {aStruct.heal(2);}
       aStruct = null;
     }

@@ -30,7 +30,7 @@ import java.text.DecimalFormat;
 public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventoryMenu>{
     private static final Font font = Minecraft.getInstance().font;
     private static final ResourceLocation CONTAINER_BACKGROUND = new ResourceLocation(AegisOps.MOD_ID,"textures/inventory.png");
-    private static final ResourceLocation BUTTON_STATE = new ResourceLocation(AegisOps.MOD_ID,"textures/button.png");
+//    private static final ResourceLocation BUTTON_STATE = new ResourceLocation(AegisOps.MOD_ID,"textures/button.png");
     private final Player player;
     private final AbstractAgentEntity agent;
     DecimalFormat df = new DecimalFormat("#.#");
@@ -58,13 +58,18 @@ public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventory
         targetingBtn.setTooltip(Tooltip.create(Component.literal("Toggle Targeting Mode")));
         addRenderableWidget(targetingBtn);
 
+        PlainTextButton specialBtn = new PlainTextButton(this.leftPos + 227, this.topPos + 65,
+            65, 25,Component.empty(),
+            btn -> PacketHandler.CHANNELS.sendToServer(new AgentSpecialPacket(agent.getId(), !agent.getAllowSpecial()))
+            , font
+        );
+        specialBtn.setTooltip(Tooltip.create(Component.literal("Toggle Special Move")));
+        addRenderableWidget(specialBtn);
+
         PlainTextButton dismissBtn = new PlainTextButton(this.leftPos + 227, this.topPos + 151,
             65, 15,Component.empty(),
             btn -> {
-                PacketHandler.CHANNELS.sendToServer(new AgentBoolPacket(
-                    agent.getId(),
-                    AgentCommandType.REMOVE,
-                    true));
+                PacketHandler.CHANNELS.sendToServer(new AgentDismissPacket(agent.getId(),true));
                 Minecraft.getInstance().setScreen(null);
             }, font
         );
@@ -118,24 +123,34 @@ public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventory
             case 2 -> "Follow";
             default -> "not sure";
         };
-        pGuiGraphics.drawString(font, followDisp, 245, 15, 0x00CFFF, false);
+        pGuiGraphics.drawString(font, followDisp, 242, 16, 0x00CFFF, false);
         String hostileDisp = switch (agent.getTargetMode()){
             case OFF -> "None";
             case HOSTILE_ONLY -> "Hostile";
             case ENEMY_AGENTS -> "Humanoid";
             case ALL -> "All";
         };
-        pGuiGraphics.drawString(font, hostileDisp, 245, 45, 0x00CFFF, false);
+        pGuiGraphics.drawString(font, hostileDisp, 242, 44, 0x00CFFF, false);
 
-        // debug val
-//        pGuiGraphics.drawString(this.font, "Food", 240, 80, 0x00CFFF, false);
-        pGuiGraphics.drawString(font, agent.getVirtualAmmo() + " / " +agent.getMaxVirtualAmmo(), 245, 95, 0x00CFFF, false);
-        pGuiGraphics.drawString(font, agent.getFood() + " / " +agent.maxfood, 245, 125, 0x00CFFF, false);
-//        pGuiGraphics.drawString(this.font, agent.getEntityData().get(SKIN) + " - " +agent.getEntityData().get(FEMALE), 237, 105, 4210752, false);
+        pGuiGraphics.drawString(font, agent.getAllowSpecial() ? "Spec On":"Spec Off", 242, 72, 0x00CFFF, false);
+
+        pGuiGraphics.drawString(font, agent.getVirtualAmmo() + "/" +agent.getMaxVirtualAmmo(), 242, 100, 0x00CFFF, false);
+        pGuiGraphics.drawString(font, agent.getFood() + "/" +agent.maxfood, 242, 128, 0x00CFFF, false);
     }
 
     @Override
     protected void renderTooltip(GuiGraphics pGuiGraphics, int x, int y) {
         super.renderTooltip(pGuiGraphics, x, y);
+        // Example condition — replace with hover bounds check
+        if (isHovering(x, y, this.leftPos + 227, this.topPos + 94, 65,25)) {
+            pGuiGraphics.renderTooltip(font, Component.literal("Virtual Ammo"), x, y);
+        } else if (isHovering(x, y, this.leftPos + 227, this.topPos + 123, 65,25)) {
+            pGuiGraphics.renderTooltip(font, Component.literal("Food"), x, y);
+        }
+    }
+
+    private boolean isHovering(int mouseX, int mouseY, int x, int y, int width, int height) {
+        return mouseX >= x && mouseX <= x + width &&
+            mouseY >= y && mouseY <= y + height;
     }
 }

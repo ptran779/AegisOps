@@ -28,6 +28,8 @@ public class CreativeTabInit {
         output.accept(ItemInit.DB_TURRET_ITEM.get());
         output.accept(ItemInit.PORT_DISP_ITEM.get());
         output.accept(ItemInit.ENGI_HAMMER_ITEM.get());
+        output.accept(ItemInit.BANDAGE_ITEM.get());
+        output.accept(ItemInit.MORPHINE_ITEM.get());
         // Add more if needed
       }).build()
     );

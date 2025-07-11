@@ -4,6 +4,8 @@ import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.client.animation.AgentAnimation;
 import com.github.ptran779.aegisops.client.model.AgentModel;
 import com.github.ptran779.aegisops.entity.Engineer;
+import com.github.ptran779.aegisops.entity.Medic;
+import com.github.ptran779.aegisops.entity.Sniper;
 import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.tacz.guns.item.ModernKineticGunItem;
@@ -17,8 +19,6 @@ import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.UseAnim;
-
-import java.util.Objects;
 
 import static com.github.ptran779.aegisops.client.AnimationHelper.animateHumanoid;
 
@@ -45,27 +45,35 @@ public class AgentEntityRender extends HumanoidMobRenderer<AbstractAgentEntity, 
     @Override
     public void render(AbstractAgentEntity agent, float pEntityYaw, float partialTicks, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
         this.model = agent.getFemale() ? slimModel : standardModel;
-
-        double speed = agent.getDeltaMovement().horizontalDistanceSqr(); // X² + Z²
         // pose reset
-        for (ModelPart part : model.BONE_PARTS.values()) {
-            part.resetPose();
-        }
+        for (ModelPart part : model.BONE_PARTS.values()) {part.resetPose();}
 
         //attack ani
         float aniTick = agent.tickCount - agent.timeTrigger + partialTicks;
+        Utils.AniMove aniMove = agent.getAniMove();
 
         // based animation
-        if (agent.getAniMove() == Utils.AniMove.SPECIAL) {
+        if (aniMove == Utils.AniMove.SPECIAL0) {
             if (agent instanceof Engineer && aniTick < 20 * AgentAnimation.BONK.lengthInSeconds()) {
                 animateHumanoid(model, AgentAnimation.BONK, model.BONE_PARTS, aniTick / 20f, 1, false);
+            } else if (agent instanceof Medic && aniTick < 20 * AgentAnimation.MEDIC_BANDAGE.lengthInSeconds()) {
+                animateHumanoid(model, AgentAnimation.MEDIC_BANDAGE, model.BONE_PARTS, aniTick / 20f, 1, false);
+            } else if (agent instanceof Sniper && aniTick < 20 * AgentAnimation.PRECISION_SHOT.lengthInSeconds()){
+                animateHumanoid(model, AgentAnimation.PRECISION_SHOT, model.BONE_PARTS, aniTick / 20f, 1, false);
             }
-        } else if (agent.getAniMove() == Utils.AniMove.DISP_RELOAD) {
+        } else if (aniMove == Utils.AniMove.SPECIAL1) {
+            if (agent instanceof Medic && aniTick < 20 * AgentAnimation.MEDIC_SYRINGE.lengthInSeconds()) {
+                animateHumanoid(model, AgentAnimation.MEDIC_SYRINGE, model.BONE_PARTS, aniTick / 20f, 1, false);
+            }
+        } else if (aniMove == Utils.AniMove.SALUTE) {
+            animateHumanoid(model, AgentAnimation.SALUTE, model.BONE_PARTS, aniTick / 20f, 1, false);
+        } else if (aniMove == Utils.AniMove.DISP_RELOAD) {
             animateHumanoid(model, AgentAnimation.STATION_RELOAD, model.BONE_PARTS, aniTick / 20f, 1, false);
+        } else if (aniMove == Utils.AniMove.ATTACK) {
+            animateHumanoid(model, AgentAnimation.STRIKE1, model.BONE_PARTS, aniTick / 15f, 1, false);
         } else {
-            if (aniTick < 15 * AgentAnimation.STRIKE1.lengthInSeconds()) {
-                animateHumanoid(model, AgentAnimation.STRIKE1, model.BONE_PARTS, aniTick / 15f, 1, false);
-            } else if (speed > 0.015) {
+            double speed = agent.getDeltaMovement().horizontalDistanceSqr(); // X² + Z²
+            if (speed > 0.015) {
                 animateHumanoid(model, AgentAnimation.RUN, model.BONE_PARTS, (agent.tickCount + partialTicks) / 20f, 1, true);
             } else if (speed > 0.001) {
                 animateHumanoid(model, AgentAnimation.WALK, model.BONE_PARTS, (agent.tickCount + partialTicks) / 20f, 1, true);
@@ -73,12 +81,12 @@ public class AgentEntityRender extends HumanoidMobRenderer<AbstractAgentEntity, 
                 animateHumanoid(model, AgentAnimation.IDLE, model.BONE_PARTS, (agent.tickCount + partialTicks) / 20f, 1, true);
             }
         }
-//        not sure what it for, so turn off tmp
-//        float headYaw = Mth.rotLerp(partialTicks, agent.yHeadRotO, agent.yHeadRot) - agent.yBodyRot;
-//        float headPitch = Mth.lerp(partialTicks, agent.xRotO, agent.getXRot());
-//        model.head.yRot += headYaw * (Mth.PI / 180F);
-//        model.head.xRot += headPitch * (Mth.PI / 180F);
-//        model.hat.copyFrom(model.head);
+        // render head looking
+        float headYaw = Mth.rotLerp(partialTicks, agent.yHeadRotO, agent.yHeadRot) - agent.yBodyRot;
+        float headPitch = Mth.lerp(partialTicks, agent.xRotO, agent.getXRot());
+        model.head.yRot += headYaw * (Mth.PI / 180F);
+        model.head.xRot += headPitch * (Mth.PI / 180F);
+        model.hat.copyFrom(model.head);
 
         //composite -- mostly what to do about hand
         if (agent.getAniMove() == Utils.AniMove.RELOAD && aniTick < 20 * AgentAnimation.RELOAD.lengthInSeconds()){

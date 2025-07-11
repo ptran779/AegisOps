@@ -67,13 +67,13 @@ public class AgentInventory extends SimpleContainer {
 
   // put on the armor, depending on if using auto equip or just whatever in the slot.
   public void loadArmor(){
-    if (agent.getAutoArmor()) {equipBestArmor();}
-    else {
-      for (int i : agent.gearSlots) {
-        ItemStack piece = getItem(i);
-        if (piece.getItem() instanceof ArmorItem armor) {
-          agent.setItemSlot(armor.getEquipmentSlot(), piece);}
-      }
+//    if (agent.getAllowSpecial()) {equipBestArmor();}
+//    else {
+    for (int i : agent.gearSlots) {
+      ItemStack piece = getItem(i);
+      if (piece.getItem() instanceof ArmorItem armor) {
+        agent.setItemSlot(armor.getEquipmentSlot(), piece);}
+//      }
     }
   }
 

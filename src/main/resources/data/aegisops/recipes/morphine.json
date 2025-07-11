@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "nnn",
+    "gfg",
+    "sfs"
+  ],
+  "key": {
+    "n": { "item": "minecraft:iron_nugget" },
+    "g": { "item": "minecraft:glass_pane" },
+    "f": { "item": "minecraft:fermented_spider_eye" },
+    "s": { "item": "minecraft:sugar" }
+  },
+  "result": {
+    "item": "aegisops:morphine",
+    "count": 1
+  },
+  "show_notification": true
+}

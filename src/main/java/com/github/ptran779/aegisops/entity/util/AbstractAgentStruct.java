@@ -1,6 +1,8 @@
 package com.github.ptran779.aegisops.entity.util;
 
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
@@ -26,6 +28,10 @@ public class AbstractAgentStruct extends Mob implements IEntityTeam {
     Entity entity = source.getEntity();
     if (entity != null) {
       if (entity instanceof LivingEntity living && !sameTeam(living)) {this.setTarget(living);}
+    }
+    if (level() instanceof ServerLevel serverLevel) {
+      serverLevel.sendParticles(ParticleTypes.DAMAGE_INDICATOR,getX(), getY() + 1, getZ(),4, 0.2, 0.2, 0.2, 0.01);
+      serverLevel.sendParticles(ParticleTypes.SMOKE,getX(), getY() + 1, getZ(),4, 0.2, 0.2, 0.2, 0.01);
     }
     return super.hurt(source, amount);
   }

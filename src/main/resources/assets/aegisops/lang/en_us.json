@@ -11,6 +11,8 @@
   "item.aegisops.port_disp": "Portable Dispenser",
   "item.aegisops.db_turret": "Double Barrel Turret",
   "item.aegisops.engi_hammer": "Engineering Hammer",
+  "item.aegisops.bandage": "Bandage",
+  "item.aegisops.morphine": "Morphine Shot",
 
   "block.aegisops.drop_pod_block": "Drop Pod",
   "block.aegisops.drop_pod_block_used": "Drop Pod",

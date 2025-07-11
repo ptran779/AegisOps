@@ -35,8 +35,8 @@ public class Engineer extends AbstractAgentEntity {
         super.registerGoals();
         this.goalSelector.addGoal(3, new CustomRetaliationTargetGoal(this));
         this.goalSelector.addGoal(4, new CustomRangeTargetGoal<>(this, LivingEntity.class, 60, 24, true, entity -> this.shouldTargetEntity((LivingEntity) entity)));
-        this.goalSelector.addGoal(2, new AgentAttackGoal(this, 4, 12, 24, 28));
-        this.goalSelector.addGoal(3, new WorkOnStructure(this, 20));
+        this.goalSelector.addGoal(3, new AgentAttackGoal(this, 4, 12, 24, 28));
+        this.goalSelector.addGoal(2, new WorkOnStructure(this, 20));
     }
     
     public void tick() {

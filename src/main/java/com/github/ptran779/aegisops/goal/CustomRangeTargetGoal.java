@@ -37,7 +37,7 @@ public class CustomRangeTargetGoal<T extends LivingEntity> extends NearestAttack
 
   public boolean canUse() {
     if (!modEntity.haveWeapon()) {return false;}
-    if (modEntity.getTarget() != null) {return false;}  // don't acquire target if already have one. combat will decide if target too far away
+    if (modEntity.getTarget() != null && modEntity.getTarget().isAlive()) {return false;}  // don't acquire target if already have one. combat will decide if target too far away
     if (modEntity.getTargetMode() == Utils.TargetMode.OFF || this.randomInterval > 0 && this.mob.getRandom().nextInt(this.randomInterval) != 0) {return false;}
     else {
       this.findTarget();

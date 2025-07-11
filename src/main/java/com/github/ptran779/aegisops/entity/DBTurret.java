@@ -7,9 +7,11 @@ import com.github.ptran779.aegisops.entity.util.IEntityTarget;
 import com.github.ptran779.aegisops.entity.util.IEntityTeam;
 import com.github.ptran779.aegisops.goal.CustomRangeTargetGoal;
 import com.github.ptran779.aegisops.goal.DBTurretAttackGoal;
+import com.github.ptran779.aegisops.item.EngiHammerItem;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import com.github.ptran779.aegisops.network.StructureRenderPacket;
 import com.github.ptran779.aegisops.server.EntityInit;
+import com.github.ptran779.aegisops.server.ItemInit;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -30,6 +32,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -121,6 +124,11 @@ public class DBTurret extends AbstractAgentStruct implements IEntityTarget {
             case ALL -> "Turret will aim at both hostile and other players";
           };
           player.displayClientMessage(Component.literal(disp), true);
+        } else if (player.getMainHandItem().getItem() instanceof EngiHammerItem){
+          this.spawnAtLocation(new ItemStack(ItemInit.DB_TURRET_ITEM.get()));
+          ((ServerLevel) level()).sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY(), getZ(), 5, 0, 2, 0, 0.02);
+          level().playSound(null, blockPosition(), SoundEvents.CONDUIT_DEACTIVATE, SoundSource.BLOCKS, 1.0f, 1.0f);
+          this.discard();
         } else {
           player.displayClientMessage(Component.literal("Turret has " + charge + "/" + getMaxCharge() + " charge").withStyle(ChatFormatting.GOLD), true);
         }
@@ -156,6 +164,7 @@ public class DBTurret extends AbstractAgentStruct implements IEntityTarget {
     // check ammo count
     if (charge <= 0) return;
     charge--;
+    if (Utils.hasFriendlyInLineOfFire(this, this.getTarget())) return;  // no firing with friend on the line
 
     // pick the barrel
     boolean gunBarrel = !this.entityData.get(LEFT_BARREL);

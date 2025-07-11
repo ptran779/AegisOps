@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CC",
+    "PS",
+    "CC"
+  ],
+  "key": {
+    "C": {
+      "item": "minecraft:white_carpet"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "S": {
+      "item": "minecraft:string"
+    }
+  },
+  "result": {
+    "item": "aegisops:bandage",
+    "count": 1
+  },
+  "show_notification": true
+}

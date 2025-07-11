@@ -11,12 +11,12 @@ public class CameraModePacket {
   // No data needed, so empty constructor
   public CameraModePacket() {}
 
-  public static void encode(CameraModePacket msg, FriendlyByteBuf buf) {}
+  public void encode(FriendlyByteBuf buf) {}
   public static CameraModePacket decode(FriendlyByteBuf buf) {
     return new CameraModePacket();
   }
 
-  public static void handle(CameraModePacket msg, Supplier<NetworkEvent.Context> ctx) {
+  public void handle(Supplier<NetworkEvent.Context> ctx) {
     ctx.get().enqueueWork(() -> {
       Minecraft.getInstance().options.setCameraType(CameraType.THIRD_PERSON_BACK);
     });

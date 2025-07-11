@@ -27,18 +27,17 @@ import net.minecraftforge.network.PacketDistributor;
 import java.util.EnumSet;
 
 public class AgentAttackGoal extends Goal {
-//  private static final int maxActionTime = 300;  // abandon target if stuck? need test with epic fight
-  private final AbstractAgentEntity agent;
-  private int attackCoolDown = 0;
-  private int seeTime=0;
-  private final double meleeRangeSq;       //use melee
-  private final double gunLowRangeSq;      //lower bound chasing gun range
-  private final double gunHighRangeSq;     //upper bound chasing gun range
-  private final double maxRangeSq;         //abandon if too far
+  protected final AbstractAgentEntity agent;
+  protected int attackCoolDown = 0;
+  protected int seeTime=0;
+  protected final double meleeRangeSq;       //use melee
+  protected final double gunLowRangeSq;      //lower bound chasing gun range
+  protected final double gunHighRangeSq;     //upper bound chasing gun range
+  protected final double maxRangeSq;         //abandon if too far
   IGunOperator op;
-  private int strikeTick = -1;
-  private boolean meleeYes = false;
-  private boolean gunYes = false;
+  protected int strikeTick = -1;
+  protected boolean meleeYes = false;
+  protected boolean gunYes = false;
   double targetDistSq = 0;
 
   public AgentAttackGoal(AbstractAgentEntity agent, double meleeRange, double gunLowRange, double gunHighRange, double maxRange) {
@@ -53,7 +52,13 @@ public class AgentAttackGoal extends Goal {
 
   private int computeAttackCooldown(){return (int) (20.0f/agent.getAttribute(AgentAttribute.AGENT_ATTACK_SPEED).getValue());}
 
-  private void shootGun(boolean precision){
+  protected void shootGun(boolean precision){
+    // check for friendly on line. else dont shoot and just move to cooldown
+    if (Utils.hasFriendlyInLineOfFire(agent, agent.getTarget())) {
+      attackCoolDown = computeAttackCooldown();  // we're not in the clear, do not cause friendly fire
+      return;
+    }
+
     prepAttack();
     agent.setYRot(agent.getYHeadRot());
     if (op.getSynIsBolting()) {op.aim(false);}
@@ -80,7 +85,7 @@ public class AgentAttackGoal extends Goal {
     }
   }
 
-  private void reloadGun(){
+  protected void reloadGun(){
     int reloadAmount = 0;
 
     ItemStack gunStack = agent.getMainHandItem();
@@ -128,8 +133,7 @@ public class AgentAttackGoal extends Goal {
     // just some extra check + update
     meleeYes = agent.inventory.meleeExist();
     gunYes = agent.inventory.gunExistWithAmmo();
-    targetDistSq = agent.distanceToSqr(agent.getTarget());
-    return (meleeYes || gunYes) && targetDistSq < maxRangeSq;
+    return meleeYes || gunYes;
   }
 
   public void start() {
@@ -141,9 +145,7 @@ public class AgentAttackGoal extends Goal {
   public void stop() {
     agent.setAniMove(Utils.AniMove.NORM);
     this.agent.setAggressive(false);
-    agent.clearTarget(); // should already clear but just in case
     agent.stopNav();
-//    IGunOperator op = IGunOperator.fromLivingEntity(agent);
     op.aim(false);  // turn off aiming
     this.agent.stopUsingItem();  // not sure if i need it, but why not
   }
@@ -154,19 +156,27 @@ public class AgentAttackGoal extends Goal {
     LivingEntity target = agent.getTarget();
     // if I clear target, it shit itself...
     if (target == null) {return;}
+    targetDistSq = agent.distanceToSqr(agent.getTarget());
+    if (targetDistSq > maxRangeSq) {
+      agent.clearTarget();
+      return;
+    }
+
     // strike delay handling
-    if (strikeTick >0){
-      if (--strikeTick == 0){
+    if (strikeTick > 0){
+      if (--strikeTick == 10){
         --strikeTick;  // set to -1, meaning no strike in query
         // forward motion -- cause it make sense
         Vec3 look = agent.getLookAngle();
         double dashSpeed = 0.5; // tune to taste, maybe 0.1–0.2
         agent.setDeltaMovement(look.x * dashSpeed, agent.getDeltaMovement().y, look.z * dashSpeed);
-/// WIP more strike ani + logic
+        /// WIP more strike ani + logic
         if (targetDistSq < getAttackReachSqr(target)) {
           agent.doHurtTarget(target);
           agent.getMainHandItem().hurtAndBreak(1, agent, (e) -> e.broadcastBreakEvent(InteractionHand.MAIN_HAND));
         }
+      } else if (strikeTick <= 0){
+        agent.setAniMove(Utils.AniMove.NORM);
         attackCoolDown = computeAttackCooldown();
       };
       return;
@@ -188,14 +198,14 @@ public class AgentAttackGoal extends Goal {
       // melee prioritize
       if (meleeYes && (targetDistSq < meleeRangeSq || !gunYes && targetDistSq < meleeRangeSq*4)) { // close quarter
         agent.equipMelee();
-        if (getAttackReachSqr(target) + 3 > targetDistSq) { // hit offset due to forward lunge ///WIP
+        if (getAttackReachSqr(target) + 2 > targetDistSq) { // hit offset due to forward lunge ///WIP
           prepAttack();
           agent.stopNav();
-          strikeTick = 5;
+          strikeTick = 15;
           PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new AgentRenderPacket(agent.getId(), 1));
           agent.setAniMove(Utils.AniMove.ATTACK);
         } else {
-          agent.moveto(target, agent.getAttribute(Attributes.MOVEMENT_SPEED).getValue());
+          if(!agent.moveto(target, agent.getAttribute(Attributes.MOVEMENT_SPEED).getValue())) agent.setTarget(null);
         }
       }
 
