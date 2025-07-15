@@ -2,9 +2,9 @@ package com.github.ptran779.aegisops.goal;
 
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.attribute.AgentAttribute;
-import com.github.ptran779.aegisops.client.animation.AgentAnimation;
+import com.github.ptran779.aegisops.client.animation.AgentLivingAnimation;
 import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
-import com.github.ptran779.aegisops.network.AgentRenderPacket;
+import com.github.ptran779.aegisops.network.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.entity.IGunOperator;
@@ -52,70 +52,70 @@ public class AgentAttackGoal extends Goal {
 
   private int computeAttackCooldown(){return (int) (20.0f/agent.getAttribute(AgentAttribute.AGENT_ATTACK_SPEED).getValue());}
 
-  protected void shootGun(boolean precision){
-    // check for friendly on line. else dont shoot and just move to cooldown
-    if (Utils.hasFriendlyInLineOfFire(agent, agent.getTarget())) {
-      attackCoolDown = computeAttackCooldown();  // we're not in the clear, do not cause friendly fire
-      return;
-    }
-
-    prepAttack();
-    agent.setYRot(agent.getYHeadRot());
-    if (op.getSynIsBolting()) {op.aim(false);}
-    if (op.getSynIsAiming() != precision) {
-      op.aim(precision);
-    }
-
-    switch (op.shoot(() -> agent.getViewXRot(1f), () -> agent.getViewYRot(1f))) {
-      case SUCCESS -> {attackCoolDown = computeAttackCooldown();}
-      case NOT_DRAW -> {
-        op.draw(agent::getMainHandItem);
-      }
-      case NEED_BOLT -> {
-        op.bolt();
-        attackCoolDown = computeAttackCooldown();  // mimic bolt action take twice as long
-      } case NO_AMMO -> {
-        reloadGun();
-        // ANI
-        PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new AgentRenderPacket(agent.getId(), 1));
-        agent.setAniMove(Utils.AniMove.RELOAD);
-        agent.level().playSound(null, agent, SoundEvents.SLIME_SQUISH, SoundSource.BLOCKS, 1.2f, 0.5f);
-        attackCoolDown =  computeAttackCooldown() + ((int) AgentAnimation.RELOAD.lengthInSeconds())*20;  // reload should take time
-      }
-    }
-  }
-
-  protected void reloadGun(){
-    int reloadAmount = 0;
-
-    ItemStack gunStack = agent.getMainHandItem();
-    AbstractGunItem gunItem = (AbstractGunItem)gunStack.getItem();
-    ResourceLocation gunResource = gunItem.getGunId(gunStack);
-    CommonGunIndex gunIndex = TimelessAPI.getCommonGunIndex(gunResource).orElse(null);
-    int maxAmmoCount = AttachmentDataUtils.getAmmoCountWithAttachment(gunStack, gunIndex.getGunData());
-    int curAmmoCount = agent.inventory.checkGunAmmo(gunStack, gunItem);
-
-    // if use virtual ammo
-    int virtAmmo = agent.getVirtualAmmo();
-    if (virtAmmo > 0){
-      reloadAmount = Math.min(virtAmmo, maxAmmoCount - curAmmoCount);
-      agent.setVirtualAmmo(virtAmmo - reloadAmount);
-    } else {
-      // find ammo
-      int i = agent.inventory.findGunAmmo(gunStack);
-      if (i == -1) return;
-      // compute amount
-      ItemStack ammoStack = agent.inventory.getItem(i);
-      if (ammoStack.getItem() instanceof IAmmoBox iAmmoBoxItem) {
-        reloadAmount = Math.min(maxAmmoCount - curAmmoCount, iAmmoBoxItem.getAmmoCount(ammoStack));
-        iAmmoBoxItem.setAmmoCount(ammoStack,iAmmoBoxItem.getAmmoCount(ammoStack)-reloadAmount);
-      } else if(ammoStack.getItem() instanceof IAmmo){
-        reloadAmount = Math.min(maxAmmoCount - curAmmoCount, ammoStack.getCount());
-        ammoStack.setCount(ammoStack.getCount() - reloadAmount);
-      }
-    }
-    gunItem.setCurrentAmmoCount(gunStack,curAmmoCount+reloadAmount);
-  }
+//  protected void shootGun(boolean precision){
+//    // check for friendly on line. else dont shoot and just move to cooldown
+//    if (Utils.hasFriendlyInLineOfFire(agent, agent.getTarget())) {
+//      attackCoolDown = computeAttackCooldown();  // we're not in the clear, do not cause friendly fire
+//      return;
+//    }
+//
+//    prepAttack();
+//    agent.setYRot(agent.getYHeadRot());
+//    if (op.getSynIsBolting()) {op.aim(false);}
+//    if (op.getSynIsAiming() != precision) {
+//      op.aim(precision);
+//    }
+//
+//    switch (op.shoot(() -> agent.getViewXRot(1f), () -> agent.getViewYRot(1f))) {
+//      case SUCCESS -> {attackCoolDown = computeAttackCooldown();}
+//      case NOT_DRAW -> {
+//        op.draw(agent::getMainHandItem);
+//      }
+//      case NEED_BOLT -> {
+//        op.bolt();
+//        attackCoolDown = computeAttackCooldown();  // mimic bolt action take twice as long
+//      } case NO_AMMO -> {
+//        reloadGun();
+//        // ANI
+//        PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new EntityRenderPacket(agent.getId(), 1));
+//        agent.setAniMove(Utils.AniMove.RELOAD);
+//        agent.level().playSound(null, agent, SoundEvents.SLIME_SQUISH, SoundSource.BLOCKS, 1.2f, 0.5f);
+//        attackCoolDown =  computeAttackCooldown() + ((int) AgentLivingAnimation.RELOAD.lengthInSeconds())*20;  // reload should take time
+//      }
+//    }
+//  }
+//
+//  protected void reloadGun(){
+//    int reloadAmount = 0;
+//
+//    ItemStack gunStack = agent.getMainHandItem();
+//    AbstractGunItem gunItem = (AbstractGunItem)gunStack.getItem();
+//    ResourceLocation gunResource = gunItem.getGunId(gunStack);
+//    CommonGunIndex gunIndex = TimelessAPI.getCommonGunIndex(gunResource).orElse(null);
+//    int maxAmmoCount = AttachmentDataUtils.getAmmoCountWithAttachment(gunStack, gunIndex.getGunData());
+//    int curAmmoCount = agent.inventory.checkGunAmmo(gunStack, gunItem);
+//
+//    // if use virtual ammo
+//    int virtAmmo = agent.getVirtualAmmo();
+//    if (virtAmmo > 0){
+//      reloadAmount = Math.min(virtAmmo, maxAmmoCount - curAmmoCount);
+//      agent.setVirtualAmmo(virtAmmo - reloadAmount);
+//    } else {
+//      // find ammo
+//      int i = agent.inventory.findGunAmmo(gunStack);
+//      if (i == -1) return;
+//      // compute amount
+//      ItemStack ammoStack = agent.inventory.getItem(i);
+//      if (ammoStack.getItem() instanceof IAmmoBox iAmmoBoxItem) {
+//        reloadAmount = Math.min(maxAmmoCount - curAmmoCount, iAmmoBoxItem.getAmmoCount(ammoStack));
+//        iAmmoBoxItem.setAmmoCount(ammoStack,iAmmoBoxItem.getAmmoCount(ammoStack)-reloadAmount);
+//      } else if(ammoStack.getItem() instanceof IAmmo){
+//        reloadAmount = Math.min(maxAmmoCount - curAmmoCount, ammoStack.getCount());
+//        ammoStack.setCount(ammoStack.getCount() - reloadAmount);
+//      }
+//    }
+//    gunItem.setCurrentAmmoCount(gunStack,curAmmoCount+reloadAmount);
+//  }
 
   protected double getAttackReachSqr(LivingEntity target) {return Math.pow((agent.getBbWidth() + target.getBbWidth())/2+2, 2);}
 
@@ -147,6 +147,7 @@ public class AgentAttackGoal extends Goal {
     this.agent.setAggressive(false);
     agent.stopNav();
     op.aim(false);  // turn off aiming
+    agent.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY); 
     this.agent.stopUsingItem();  // not sure if i need it, but why not
   }
 
@@ -202,7 +203,7 @@ public class AgentAttackGoal extends Goal {
           prepAttack();
           agent.stopNav();
           strikeTick = 15;
-          PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new AgentRenderPacket(agent.getId(), 1));
+          PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new EntityRenderPacket(agent.getId(), 1));
           agent.setAniMove(Utils.AniMove.ATTACK);
         } else {
           if(!agent.moveto(target, agent.getAttribute(Attributes.MOVEMENT_SPEED).getValue())) agent.setTarget(null);
@@ -215,10 +216,14 @@ public class AgentAttackGoal extends Goal {
           agent.moveto(target, agent.getAttribute(Attributes.MOVEMENT_SPEED).getValue());
         } else if (targetDistSq > gunLowRangeSq) { // snipe that
           agent.stopNav();
-          shootGun(true);
+          if (agent.shootGun(true)) {
+            attackCoolDown =  computeAttackCooldown() + ((int) AgentLivingAnimation.RELOAD.lengthInSeconds())*20;  // reload should take time
+          } else {attackCoolDown = computeAttackCooldown();};
         } else if (targetDistSq > meleeRangeSq || !meleeYes) { // too close , move further, or someone has no melee :(
           agent.getMoveControl().strafe(-0.5F, 0F);
-          shootGun(false);
+          if (agent.shootGun(false)) {
+            attackCoolDown =  computeAttackCooldown() + ((int) AgentLivingAnimation.RELOAD.lengthInSeconds())*20;  // reload should take time
+          } else {attackCoolDown = computeAttackCooldown();};
         }
       } else {// we have no weapon :)
         agent.clearTarget();  //trigger stop this goal

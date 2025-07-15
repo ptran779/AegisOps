@@ -11,8 +11,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 
-public class Bandage extends Item implements HealItemI{
-  public Bandage(Properties pProperties) {
+public class BandageItem extends Item implements IHealItem {
+  public BandageItem(Properties pProperties) {
     super(pProperties);
   }
   public boolean canHeal(LivingEntity entity) {return entity.getHealth() < entity.getMaxHealth() * 0.75;}
@@ -21,7 +21,7 @@ public class Bandage extends Item implements HealItemI{
     stack.shrink(1);
     ((ServerLevel) entity.level()).sendParticles(ParticleTypes.HEART, entity.getX(), entity.getY() + 1.8, entity.getZ(), 5, 0, 1, 0, 0.02);
   }
-  public Utils.AniMove getAniMove() {return Utils.AniMove.SPECIAL0;}
+  public int getAniMove() {return 0;}
   public boolean computeEffect(LivingEntity target, int tickcount, ItemStack stack) {
     if (tickcount == 10 || tickcount == 20 || tickcount == 30 || tickcount == 40 || tickcount == 50) {
       target.level().playSound(null, target, SoundEvents.DRIPSTONE_BLOCK_BREAK, SoundSource.BLOCKS, 1f, 1.0f);

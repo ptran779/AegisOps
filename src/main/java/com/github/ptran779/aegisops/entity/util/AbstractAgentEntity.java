@@ -2,8 +2,17 @@ package com.github.ptran779.aegisops.entity.util;
 
 import com.github.ptran779.aegisops.Config.SkinManager;
 import com.github.ptran779.aegisops.Utils;
+import com.github.ptran779.aegisops.client.animation.AgentLivingAnimation;
 import com.github.ptran779.aegisops.goal.*;
+import com.github.ptran779.aegisops.network.EntityRenderPacket;
+import com.github.ptran779.aegisops.network.PacketHandler;
+import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.entity.IGunOperator;
+import com.tacz.guns.api.item.IAmmo;
+import com.tacz.guns.api.item.IAmmoBox;
+import com.tacz.guns.api.item.gun.AbstractGunItem;
+import com.tacz.guns.resource.index.CommonGunIndex;
+import com.tacz.guns.util.AttachmentDataUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -14,6 +23,8 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
@@ -32,6 +43,7 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,9 +53,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.github.ptran779.aegisops.attribute.AgentAttribute.*;
 
-public abstract class AbstractAgentEntity extends PathfinderMob implements MenuProvider, IEntityTeam, IEntityTarget {
+public abstract class AbstractAgentEntity extends PathfinderMob implements MenuProvider, IEntityTeam, IEntityTarget, IEntityRender {
   public String agentType = "Template";
   private boolean persistedFromNBT = false;
+  public boolean invincible = false;
+  public IGunOperator op;
 
   //inventory slot
   public AgentInventory inventory = new AgentInventory(16, this);  // so I can handle inventory related stuff cleaner
@@ -68,6 +82,7 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
   private static final EntityDataAccessor<Integer> VIRTUAL_AMMO = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);  // for render purpose
 
   private static final EntityDataAccessor<Integer> ANI_MOVE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);  // for render purpose
+  private static final EntityDataAccessor<Integer> SPECIAL_MOVE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);  // for render purpose // there are a lot of these
   public static final EntityDataAccessor<Boolean> FEMALE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.BOOLEAN);
   public static final EntityDataAccessor<String> SKIN = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.STRING);
   //skin quick lookup
@@ -75,21 +90,19 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
 
   // animation -- client render only -- send packet to server to update when to play
   public float timeTrigger = -1000;
+  public void resetRenderTick() {timeTrigger = tickCount;}
 
   public AbstractAgentEntity(EntityType<? extends AbstractAgentEntity> entityType, Level level) {
     super(entityType, level);
     ((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(true);
     this.getNavigation().setCanFloat(true);
     setPersistenceRequired();  // do not despawn agent
+    this.op = IGunOperator.fromLivingEntity(this);  // for gun
   }
-
   public ResourceLocation getResolvedSkin() {
-    if (cachedSkin == null) {
-      cachedSkin = SkinManager.get(this.entityData.get(FEMALE), this.entityData.get(SKIN));  // Lookup in your skin manager
-    }
+    if (cachedSkin == null) {cachedSkin = SkinManager.get(this.entityData.get(FEMALE), this.entityData.get(SKIN));}
     return cachedSkin;
   }
-
   public static AttributeSupplier.@NotNull Builder createAttributes() {
     return Mob.createMobAttributes()
         .add(Attributes.MAX_HEALTH, 20)
@@ -99,8 +112,6 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
         .add(Attributes.ATTACK_DAMAGE, 1)
         .add(AGENT_ATTACK_SPEED, 1);
   }
-
-  // extra sync data for client and server
   protected void defineSynchedData(){
     super.defineSynchedData();
     entityData.define(ALLOW_SPECIAL_F, false);
@@ -109,6 +120,7 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     entityData.define(KEEP_EAT_F, false);
     entityData.define(FOOD_VALUE, 0);
     entityData.define(ANI_MOVE, Utils.AniMove.NORM.ordinal());
+    entityData.define(SPECIAL_MOVE, 0);
 
     entityData.define(FEMALE, false);
     entityData.define(SKIN, "");
@@ -150,6 +162,74 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
   public void setFemale(boolean flag) {this.entityData.set(FEMALE, flag);}
   public Utils.AniMove getAniMove() {return Utils.AniMove.fromId(this.entityData.get(ANI_MOVE));}
   public void setAniMove(Utils.AniMove move) {this.entityData.set(ANI_MOVE, move.ordinal());}
+  public int getSpecialMove() {return (this.entityData.get(SPECIAL_MOVE));}
+  public void setSpecialMove(int move) {  // quick overwrite
+    setAniMove(Utils.AniMove.SPECIAL);
+    this.entityData.set(SPECIAL_MOVE, move);
+  }
+
+  /// Combat
+  public boolean shootGun(boolean precision){   ///  true = long reload, false = just compute cooldown,
+    // check for friendly on line. else dont shoot and just move to cooldown
+    if (Utils.hasFriendlyInLineOfFire(this, getTarget())) {return false;}
+
+    prepAttack();
+    if (op.getSynIsBolting()) {op.aim(false);}
+    if (op.getSynIsAiming() != precision) {
+      op.aim(precision);
+    }
+
+    switch (op.shoot(() -> getViewXRot(1f), () -> getViewYRot(1f))) {
+      case SUCCESS -> {}
+      case NOT_DRAW -> {op.draw(this::getMainHandItem);}
+      case NEED_BOLT -> {op.bolt();}
+      case NO_AMMO -> {
+        reloadGun();
+        // ANI
+        PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> this),new EntityRenderPacket(this.getId(), 1));
+        setAniMove(Utils.AniMove.RELOAD);
+        level().playSound(null, this, SoundEvents.SLIME_SQUISH, SoundSource.BLOCKS, 1.2f, 0.5f);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  protected void prepAttack(){  // rotate the body identical to head to avoid award calculation
+    float snapYaw = getYHeadRot();
+    setYRot(snapYaw);
+    setYBodyRot(snapYaw);
+  }
+  public void reloadGun(){
+    int reloadAmount = 0;
+    ItemStack gunStack = getMainHandItem();
+    AbstractGunItem gunItem = (AbstractGunItem)gunStack.getItem();
+    ResourceLocation gunResource = gunItem.getGunId(gunStack);
+    CommonGunIndex gunIndex = TimelessAPI.getCommonGunIndex(gunResource).orElse(null);
+    int maxAmmoCount = AttachmentDataUtils.getAmmoCountWithAttachment(gunStack, gunIndex.getGunData());
+    int curAmmoCount = inventory.checkGunAmmo(gunStack, gunItem);
+
+    // if use virtual ammo
+    int virtAmmo = getVirtualAmmo();
+    if (virtAmmo > 0){
+      reloadAmount = Math.min(virtAmmo, maxAmmoCount - curAmmoCount);
+      setVirtualAmmo(virtAmmo - reloadAmount);
+    } else {
+      // find ammo
+      int i = inventory.findGunAmmo(gunStack);
+      if (i == -1) return;
+      // compute amount
+      ItemStack ammoStack = inventory.getItem(i);
+      if (ammoStack.getItem() instanceof IAmmoBox iAmmoBoxItem) {
+        reloadAmount = Math.min(maxAmmoCount - curAmmoCount, iAmmoBoxItem.getAmmoCount(ammoStack));
+        iAmmoBoxItem.setAmmoCount(ammoStack,iAmmoBoxItem.getAmmoCount(ammoStack)-reloadAmount);
+      } else if(ammoStack.getItem() instanceof IAmmo){
+        reloadAmount = Math.min(maxAmmoCount - curAmmoCount, ammoStack.getCount());
+        ammoStack.setCount(ammoStack.getCount() - reloadAmount);
+      }
+    }
+    gunItem.setCurrentAmmoCount(gunStack,curAmmoCount+reloadAmount);
+  }
 
   @Override
   protected void registerGoals() {
@@ -162,9 +242,8 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     this.goalSelector.addGoal(3, new RechargeVirtualAmmo(this, 60));
     this.goalSelector.addGoal(4, new EatFoodGoal(this));  // I still need to reduce food value from action
     this.goalSelector.addGoal(5, new FollowGoal(this));
-    this.goalSelector.addGoal(6, new Salute(this, 100));
+    this.goalSelector.addGoal(6, new SaluteGoal(this, 100));
   }
-
   public InteractionResult mobInteract(Player player, InteractionHand hand) {
     if(!this.level().isClientSide()) {
       if (getBossUUID() == null) {
@@ -203,7 +282,7 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
   }
 
   // check to make sure same owner, or owner in same team,
-  private boolean sameTeam(LivingEntity entity) {
+  public boolean sameTeam(LivingEntity entity) {
     if (entity instanceof Player player) {
       return isFriendlyPlayer(player);
     } else if (entity instanceof IEntityTeam teamer){
@@ -248,13 +327,15 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
 
   public boolean hurt(DamageSource source, float amount) {
     Entity entity = source.getEntity();
+    if (invincible) {
+      level().playSound(null, this, SoundEvents.SHIELD_BLOCK, SoundSource.BLOCKS, 1.0f, 0.5f);
+      return false;
+    }
     if (entity != null) {
       if (entity instanceof LivingEntity living && !sameTeam(living)) {this.setTarget(living);}
     }
     return super.hurt(source, amount);
   }
-
-  // damage calculation on armor, and auto equip new
   protected void hurtArmor(DamageSource pSource, float pDamage) {
     if (!(pDamage <= 0.0F)) {
       pDamage /= 4.0F;
@@ -276,7 +357,6 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
       }
     }
   }
-
   public void addAdditionalSaveData(CompoundTag nbt) {
     super.addAdditionalSaveData(nbt);
     // save inventory
@@ -303,7 +383,6 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     nbt.putInt("movement", this.getMovement());
     nbt.putInt("virtual_ammo", this.getVirtualAmmo());
   }
-  @Override
   public void readAdditionalSaveData(CompoundTag nbt) {
     super.readAdditionalSaveData(nbt);
     this.persistedFromNBT = true;
@@ -329,6 +408,12 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     this.setVirtualAmmo(nbt.getInt("virtual_ammo"));
   }
 
+  public void initCosmetic(){
+    boolean isFemale = ThreadLocalRandom.current().nextBoolean();
+    this.setCustomName(Component.literal(Utils.randomName(isFemale)));
+    setFemale(isFemale);
+    this.entityData.set(SKIN, SkinManager.renerateRandom(isFemale));
+  }
   public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag) {
     SpawnGroupData data = super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
     this.setLeftHanded(false);  // everyone use right hand pls
@@ -340,15 +425,6 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     }
     return data;
   }
-
-  public void initCosmetic(){
-    boolean isFemale = ThreadLocalRandom.current().nextBoolean();
-    this.setCustomName(Component.literal(Utils.randomName(isFemale)));
-    setFemale(isFemale);
-    this.entityData.set(SKIN, SkinManager.renerateRandom(isFemale));
-  }
-
-  @Override
   protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHit) {
     super.dropCustomDeathLoot(source, looting, recentlyHit);
     for (int i = 0; i < inventory.getContainerSize(); i++) {
@@ -359,6 +435,10 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     }
   }
 
+  private void passiveRegen() {
+    this.setFood(this.getFood() - 1);
+    this.heal(1);
+  }
   public void tick(){
     super.tick();
     if(!level().isClientSide() && tickCount % 80 == 0) {
@@ -379,11 +459,6 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     }
   }
 
-  private void passiveRegen() {
-    this.setFood(this.getFood() - 1);
-    this.heal(1);
-  }
-
   public boolean moveto(Entity pEntity, double pSpeed){
     if (--pathCooldown <= 0) {
       this.pathCooldown = 10;  // only compute every 20 tick
@@ -391,7 +466,6 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
     }
     return true;
   }
-
   public void stopNav(){
     this.getNavigation().stop();
     this.pathCooldown = 0;
@@ -402,23 +476,20 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements MenuP
   public AbstractContainerMenu createMenu(int containerID, Inventory inventory, Player player) {
     return new AgentInventoryMenu(containerID, inventory, this);
   }
-
-//  public void updateSwingTime(){super.updateSwingTime();}
-
   public void clearTarget() {setTarget(null);}
 
   //just stack to mainhand, perfrom check since it call draw, which take entity a few tick to process drawing
   public void equipGun() {
     if (getMainHandItem() != inventory.getItem(gunSlot)){
-      setItemSlot(EquipmentSlot.MAINHAND, inventory.getItem(gunSlot));
+      setItemInHand(InteractionHand.MAIN_HAND, inventory.getItem(gunSlot));
       IGunOperator op = IGunOperator.fromLivingEntity(this);
       op.draw(this::getMainHandItem);
     }
   }
   // just stack to mainhand
-  public void equipMelee() {setItemSlot(EquipmentSlot.MAINHAND, inventory.getItem(meleeSlot));}
+  public void equipMelee() {setItemInHand(InteractionHand.MAIN_HAND, inventory.getItem(meleeSlot));}
   // special
-  public void equipSpecial() {setItemSlot(EquipmentSlot.MAINHAND, inventory.getItem(specialSlot));}
+  public void equipSpecial(boolean mainhand) {setItemInHand(mainhand? InteractionHand.OFF_HAND: InteractionHand.MAIN_HAND, inventory.getItem(specialSlot));}
   public ItemStack getSpecialSlot() {return inventory.getItem(specialSlot);}
   public ItemStack getGunSlot(){return inventory.getItem(gunSlot);}
 

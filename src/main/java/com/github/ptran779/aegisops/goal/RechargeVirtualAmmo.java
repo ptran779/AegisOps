@@ -3,7 +3,7 @@ package com.github.ptran779.aegisops.goal;
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.PortDisp;
 import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
-import com.github.ptran779.aegisops.network.AgentRenderPacket;
+import com.github.ptran779.aegisops.network.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -35,6 +35,7 @@ public class RechargeVirtualAmmo extends AbstractThrottleGoal {
     if (agent.getVirtualAmmo() > agent.getMaxVirtualAmmo()*0.8){return false;} // refill when less than 20%
     portDisp = Utils.findNearestEntity(agent, PortDisp.class, 16, entity ->
         entity.isFriendlyMod(agent) && entity.charge >= agent.getAmmoPerCharge());
+    resetThrottle();
     return portDisp != null && portDisp.isAlive();
   }
 
@@ -59,7 +60,7 @@ public class RechargeVirtualAmmo extends AbstractThrottleGoal {
     if (agent.distanceToSqr(portDisp) > 3) {
       if(!(agent.moveto(portDisp, agent.getAttribute(Attributes.MOVEMENT_SPEED).getValue()))) {portDisp = null;};
     } else if (tickProgress == -1) {
-      PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new AgentRenderPacket(agent.getId(), 1));
+      PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new EntityRenderPacket(agent.getId(), 1));
       agent.setAniMove(Utils.AniMove.DISP_RELOAD);
       tickProgress = agent.tickCount;
       portDisp.setOpen(true);

@@ -43,6 +43,9 @@ public final class ItemInit {
     public static final RegistryObject<Item> DROP_POD_ITEM = ITEMS.register("drop_pod",
         () -> new DropPodItem(new Item.Properties()));
 
+    public static final RegistryObject<Item> HELL_POD_ITEM = ITEMS.register("hell_pod",
+        () -> new HellPodItem(new Item.Properties()));
+
     public static final RegistryObject<Item> BEACON_ITEM = ITEMS.register("beacon",
         () -> new BeaconItem(new Item.Properties()));
 
@@ -56,7 +59,9 @@ public final class ItemInit {
         () -> new EngiHammerItem(new Item.Properties().stacksTo(1)));
 
     public static final RegistryObject<Item> BANDAGE_ITEM = ITEMS.register("bandage",
-        () -> new Bandage(new Item.Properties()));
+        () -> new BandageItem(new Item.Properties()));
     public static final RegistryObject<Item> MORPHINE_ITEM = ITEMS.register("morphine",
-        () -> new Morphine(new Item.Properties()));
+        () -> new MorphineItem(new Item.Properties()));
+    public static final RegistryObject<Item> MODULAR_SHIELD_ITEM = ITEMS.register("modular_shield",
+        () -> new ModularShieldItem(new Item.Properties().durability(600)));
 }

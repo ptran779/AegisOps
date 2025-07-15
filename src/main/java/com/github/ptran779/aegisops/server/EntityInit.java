@@ -30,6 +30,12 @@ public final class EntityInit {
           .sized(1.0f, 1.5f)  // ← 1×1.5 block hit‐box so it’s clickable
           .build(new ResourceLocation(AegisOps.MOD_ID, "falling_drop_pod").toString()));
 
+  public static final RegistryObject<EntityType<FallingHellPod>> FALLING_HELL_POD =
+      ENTITIES.register("falling_hell_pod", () ->
+          EntityType.Builder.of(FallingHellPod::new, MobCategory.MISC)
+              .sized(1.0f, 1.5f)  // ← 1×1.5 block hit‐box so it’s clickable
+              .build(new ResourceLocation(AegisOps.MOD_ID, "falling_hell_pod").toString()));
+
   public static final RegistryObject<EntityType<DBTurret>> BD_TURRET =
       ENTITIES.register("db_turret", () ->
           EntityType.Builder.of(DBTurret::new, MobCategory.MISC)

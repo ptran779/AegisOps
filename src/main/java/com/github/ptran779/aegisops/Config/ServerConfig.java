@@ -28,9 +28,7 @@ public class ServerConfig {
 
     private static void registerCommonConfig() {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-
         builder.comment("Drop Pod Settings").push("droppod");
-
         CLUSTER_SIZE_MIN = builder
             .comment("Min number of drop pods spawned in a single event")
             .defineInRange("clusterSizeMin", 2, 0, 64);
@@ -58,9 +56,9 @@ public class ServerConfig {
         MAX_SPAWN_DISTANCE = builder
             .comment("Max distance from player where drop pods can spawn")
             .defineInRange("maxSpawnDistance", 128, 16, Integer.MAX_VALUE);
+        builder.pop();
 
         builder.comment("Structure Settings").push("structure");
-
         BD_TURRET_DPS = builder
             .comment("Double Barrel Bullet Damage per shot")
                 .defineInRange("BDTurretDps", 6f, 0f, Float.MAX_VALUE);
@@ -72,9 +70,9 @@ public class ServerConfig {
         PORT_DIS_CHARGE_MAX = builder
             .comment("Portable Dispenser Max Charge")
             .defineInRange("PortDisMaxCharge", 100, 0, Integer.MAX_VALUE);
+        builder.pop();
 
         builder.comment("Agents settings").push("agent");
-
         ENGI_WORK_RECHARGE = builder
             .comment("How much charge per work should engineer refill")
                 .defineInRange("EngiWorkVal", 20, 0, Integer.MAX_VALUE);

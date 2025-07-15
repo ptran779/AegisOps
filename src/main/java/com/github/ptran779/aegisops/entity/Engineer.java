@@ -5,7 +5,7 @@ import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
 import com.github.ptran779.aegisops.goal.AgentAttackGoal;
 import com.github.ptran779.aegisops.goal.CustomRangeTargetGoal;
 import com.github.ptran779.aegisops.goal.CustomRetaliationTargetGoal;
-import com.github.ptran779.aegisops.goal.WorkOnStructure;
+import com.github.ptran779.aegisops.goal.WorkOnStructureGoal;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.DifficultyInstance;
@@ -36,7 +36,7 @@ public class Engineer extends AbstractAgentEntity {
         this.goalSelector.addGoal(3, new CustomRetaliationTargetGoal(this));
         this.goalSelector.addGoal(4, new CustomRangeTargetGoal<>(this, LivingEntity.class, 60, 24, true, entity -> this.shouldTargetEntity((LivingEntity) entity)));
         this.goalSelector.addGoal(3, new AgentAttackGoal(this, 4, 12, 24, 28));
-        this.goalSelector.addGoal(2, new WorkOnStructure(this, 20));
+        this.goalSelector.addGoal(2, new WorkOnStructureGoal(this, 20));
     }
     
     public void tick() {

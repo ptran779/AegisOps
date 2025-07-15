@@ -24,12 +24,14 @@ public class CreativeTabInit {
         output.accept(ItemInit.ENGINEER_SPAWN_EGG.get());
         output.accept(ItemInit.SWORDMAN_SPAWN_EGG.get());
         output.accept(ItemInit.DROP_POD_ITEM.get());
+        output.accept(ItemInit.HELL_POD_ITEM.get());
         output.accept(ItemInit.BEACON_ITEM.get());
         output.accept(ItemInit.DB_TURRET_ITEM.get());
         output.accept(ItemInit.PORT_DISP_ITEM.get());
         output.accept(ItemInit.ENGI_HAMMER_ITEM.get());
         output.accept(ItemInit.BANDAGE_ITEM.get());
         output.accept(ItemInit.MORPHINE_ITEM.get());
+        output.accept(ItemInit.MODULAR_SHIELD_ITEM.get());
         // Add more if needed
       }).build()
     );

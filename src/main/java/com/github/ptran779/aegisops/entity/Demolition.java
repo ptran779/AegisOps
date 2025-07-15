@@ -58,4 +58,6 @@ public class Demolition extends AbstractAgentEntity {
     public boolean isEquipableMelee(ItemStack stack) {
         return config.allowMelees.contains(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
     }
+    public int getMaxVirtualAmmo(){return config.maxVirtualAmmo;}
+    public int getAmmoPerCharge(){return config.chargePerAmmo;}
 }

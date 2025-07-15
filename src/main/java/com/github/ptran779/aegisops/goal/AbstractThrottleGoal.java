@@ -13,9 +13,11 @@ public class AbstractThrottleGoal extends Goal {
     this.checkInterval = checkInterval;
   }
 
+  public void resetThrottle() {
+    checkTime = user.tickCount;
+  }
+
   public boolean canUse() {
-    if (user.tickCount - checkTime < checkInterval) {return false;}
-    checkTime = user.tickCount;  // reset counter
-    return true;
+    return user.tickCount - checkTime >= checkInterval;
   }
 }

@@ -3,6 +3,7 @@ package com.github.ptran779.aegisops.entity;
 import com.github.ptran779.aegisops.Config.ServerConfig;
 import com.github.ptran779.aegisops.entity.util.AbstractAgentStruct;
 import com.github.ptran779.aegisops.item.EngiHammerItem;
+import com.github.ptran779.aegisops.network.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import com.github.ptran779.aegisops.network.StructureRenderPacket;
 import com.github.ptran779.aegisops.server.ItemInit;
@@ -47,13 +48,13 @@ public class PortDisp extends AbstractAgentStruct {
       if (!oldOpen) {
         PacketHandler.CHANNELS.send(
             PacketDistributor.TRACKING_ENTITY.with(() -> this),
-            new StructureRenderPacket(this.getId(), 0.0f)
+            new EntityRenderPacket(this.getId(), 1)
         );
       }
     } else {
       PacketHandler.CHANNELS.send(
           PacketDistributor.TRACKING_ENTITY.with(() -> this),
-          new StructureRenderPacket(this.getId(), 0.0f)
+          new EntityRenderPacket(this.getId(), 1)
       );
     }
   }
@@ -99,4 +100,5 @@ public class PortDisp extends AbstractAgentStruct {
   }
 
   public int getMaxCharge(){return ServerConfig.PORT_DIS_CHARGE_MAX.get();}
+  public void resetRenderTick() {timeTrigger = tickCount;}
 }

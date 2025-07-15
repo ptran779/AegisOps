@@ -5,6 +5,7 @@ import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
 import com.github.ptran779.aegisops.goal.AgentAttackGoal;
 import com.github.ptran779.aegisops.goal.CustomRangeTargetGoal;
 import com.github.ptran779.aegisops.goal.CustomRetaliationTargetGoal;
+import com.github.ptran779.aegisops.goal.ShieldBashGoal;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.DifficultyInstance;
@@ -32,6 +33,7 @@ public class Heavy extends AbstractAgentEntity {
 
     protected void registerGoals() {
         super.registerGoals();
+        this.goalSelector.addGoal(2, new ShieldBashGoal(this, 600));
         this.goalSelector.addGoal(3, new CustomRetaliationTargetGoal(this));
         this.goalSelector.addGoal(4, new CustomRangeTargetGoal<>(this, LivingEntity.class, 30, 24, true, entity -> this.shouldTargetEntity((LivingEntity) entity)));
         this.goalSelector.addGoal(3, new AgentAttackGoal(this, 4, 6, 24, 32));

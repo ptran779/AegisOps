@@ -2,21 +2,21 @@ package com.github.ptran779.aegisops.goal;
 
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
-import com.github.ptran779.aegisops.network.AgentRenderPacket;
+import com.github.ptran779.aegisops.network.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.EnumSet;
 
-public class Salute extends AbstractThrottleGoal {
+public class SaluteGoal extends AbstractThrottleGoal {
   boolean toggle = false;
   public static final int SALUTE_COOLDOWN = 1200;
   protected int saluteTimer = -SALUTE_COOLDOWN;
   Player boss = null;
 
   AbstractAgentEntity agent;
-  public Salute(AbstractAgentEntity agent, int checkInterval) {
+  public SaluteGoal(AbstractAgentEntity agent, int checkInterval) {
     super(agent, checkInterval);
     this.agent = agent;
     this.checkInterval = checkInterval;
@@ -28,6 +28,7 @@ public class Salute extends AbstractThrottleGoal {
     if (!super.canUse()) return false;
 
     boss = Utils.findNearestEntity(agent, Player.class, 8, entity -> agent.getBossUUID().equals(entity.getUUID()));
+    resetThrottle();
 
     if (boss == null) {
       toggle = false;
@@ -45,7 +46,7 @@ public class Salute extends AbstractThrottleGoal {
 
   public void start() {
     agent.stopNav();
-    PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent), new AgentRenderPacket(agent.getId(), 1));
+    PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent), new EntityRenderPacket(agent.getId(), 1));
     agent.setAniMove(Utils.AniMove.SALUTE);
   }
   public void stop() {agent.setAniMove(Utils.AniMove.NORM);}

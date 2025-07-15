@@ -20,6 +20,7 @@ public class ModServerEvent {
         event.put(EntityInit.ENGINEER.get(), Heavy.createAttributes().build());
         event.put(EntityInit.SWORDMAN.get(), Heavy.createAttributes().build());
         event.put(EntityInit.FALLING_DROP_POD.get(), FallingDropPod.createAttributes().build());
+        event.put(EntityInit.FALLING_HELL_POD.get(), FallingDropPod.createAttributes().build());
         event.put(EntityInit.BD_TURRET.get(), DBTurret.createAttributes().build());
         event.put(EntityInit.PORT_DISP.get(), PortDisp.createAttributes().build());
     }

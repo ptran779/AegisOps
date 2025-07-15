@@ -11,11 +11,11 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
-public class DropPodFallingRender extends EntityRenderer<FallingDropPod> {
+public class FallingDropPodRender extends EntityRenderer<FallingDropPod> {
   private static final ResourceLocation TEXTURE = new ResourceLocation(AegisOps.MOD_ID, "textures/block/drop_pod.png");
   private final DropPodModel model;
 
-  public DropPodFallingRender(EntityRendererProvider.Context pContext) {
+  public FallingDropPodRender(EntityRendererProvider.Context pContext) {
     super(pContext);
     this.model = new DropPodModel(pContext.bakeLayer(DropPodModel.LAYER_LOCATION));
   }

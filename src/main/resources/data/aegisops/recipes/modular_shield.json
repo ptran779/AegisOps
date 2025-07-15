@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CIC",
+    "CSC",
+    " P "
+  ],
+  "key": {
+    "C": { "item": "minecraft:cyan_dye" },
+    "I": { "item": "minecraft:iron_ingot" },
+    "S": { "item": "minecraft:shield" },
+    "P": { "item": "minecraft:piston" }
+  },
+  "result": {
+    "item": "aegisops:modular_shield"
+  },
+  "show_notification": true
+}

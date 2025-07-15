@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 import java.util.Collections;
 import java.util.UUID;
 
-public class AbstractAgentStruct extends Mob implements IEntityTeam {
+public abstract class AbstractAgentStruct extends Mob implements IEntityTeam, IEntityRender {
   private UUID bossUUID;
   public int charge = 0;  // for engineer to use
 

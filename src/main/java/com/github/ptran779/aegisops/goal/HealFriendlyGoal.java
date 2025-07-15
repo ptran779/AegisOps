@@ -2,8 +2,8 @@ package com.github.ptran779.aegisops.goal;
 
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
-import com.github.ptran779.aegisops.item.HealItemI;
-import com.github.ptran779.aegisops.network.AgentRenderPacket;
+import com.github.ptran779.aegisops.item.IHealItem;
+import com.github.ptran779.aegisops.network.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -12,12 +12,12 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.EnumSet;
 
-public class HealFriendly extends AbstractThrottleGoal {
+public class HealFriendlyGoal extends AbstractThrottleGoal {
   AbstractAgentEntity agent;
   AbstractAgentEntity nearbyAgent;
   protected int tickProgress = -1;
 
-  public HealFriendly(AbstractAgentEntity agent, int checkInterval) {
+  public HealFriendlyGoal(AbstractAgentEntity agent, int checkInterval) {
     super(agent, checkInterval);
     this.agent = agent;
     this.setFlags(EnumSet.of(Flag.LOOK, Flag.MOVE, Flag.TARGET));
@@ -26,9 +26,10 @@ public class HealFriendly extends AbstractThrottleGoal {
   public boolean canUse() {
     if (!agent.getAllowSpecial() || !(nearbyAgent == null)) {return false;}
     if (!super.canUse()) return false;
-    if (!(agent.getSpecialSlot().getItem() instanceof HealItemI healitem)){return false;}
+    if (!(agent.getSpecialSlot().getItem() instanceof IHealItem healitem)){return false;}
     nearbyAgent = Utils.findNearestEntity(agent, AbstractAgentEntity.class, 16, entity ->
         entity != agent && agent.isFriendlyMod(entity) && (healitem.canHeal(entity)));
+    resetThrottle();
     return nearbyAgent != null && nearbyAgent.isAlive();
   }
 
@@ -54,12 +55,12 @@ public class HealFriendly extends AbstractThrottleGoal {
 
     if (agent.distanceToSqr(nearbyAgent) > 4) {
       if(!agent.moveto(nearbyAgent, agent.getAttribute(Attributes.MOVEMENT_SPEED).getValue())) nearbyAgent = null;
-    } else if (agent.getSpecialSlot().getItem() instanceof HealItemI healItem){
+    } else if (agent.getSpecialSlot().getItem() instanceof IHealItem healItem){
       if (tickProgress == -1) {
-        PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent), new AgentRenderPacket(agent.getId(), 1));
-        agent.setAniMove(healItem.getAniMove());
+        PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent), new EntityRenderPacket(agent.getId(), 1));
+        agent.setSpecialMove(healItem.getAniMove());
         tickProgress = agent.tickCount;
-        agent.equipSpecial();
+        agent.equipSpecial(false);
       } else {
         if(healItem.computeEffect(nearbyAgent, dummy, agent.getSpecialSlot())) nearbyAgent = null;  // complete healing sequence
       }

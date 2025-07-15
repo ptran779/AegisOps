@@ -10,8 +10,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 
-public class Morphine extends Item implements HealItemI{
-  public Morphine(Properties pProperties) {
+public class MorphineItem extends Item implements IHealItem {
+  public MorphineItem(Properties pProperties) {
     super(pProperties);
   }
 
@@ -21,7 +21,7 @@ public class Morphine extends Item implements HealItemI{
     stack.shrink(1);
     ((ServerLevel) entity.level()).sendParticles(ParticleTypes.HEART, entity.getX(), entity.getY() + 1.8, entity.getZ(), 5, 0, 1, 0, 0.02);
   }
-  public Utils.AniMove getAniMove() {return Utils.AniMove.SPECIAL1;}
+  public int getAniMove() {return 1;}
   public boolean computeEffect(LivingEntity target, int tickcount, ItemStack stack) {
     if (tickcount == 15) {
       target.level().playSound(null, target, SoundEvents.HONEY_DRINK, SoundSource.BLOCKS, 1f, 1.0f);

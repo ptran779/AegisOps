@@ -1,6 +1,7 @@
 package com.github.ptran779.aegisops;
 
 import com.github.ptran779.aegisops.entity.FallingDropPod;
+import com.github.ptran779.aegisops.entity.FallingHellPod;
 import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
 import com.github.ptran779.aegisops.entity.util.IEntityTeam;
 import net.minecraft.core.BlockPos;
@@ -59,9 +60,9 @@ public class Utils {
 
   public static void summonReinforcement(double x, double y, double z, ServerLevel level){
     // generate random trajectory, and perform squad spawning
-    float xRandTraj = (level.random.nextFloat()-0.5f) * 0.05f;
-    float zRandTraj = (level.random.nextFloat()-0.5f) * 0.05f;
-    FallingDropPod pod = new FallingDropPod(FALLING_DROP_POD.get(), level);
+    float xRandTraj = (level.random.nextFloat()-0.5f) * 0.025f;
+    float zRandTraj = (level.random.nextFloat()-0.5f) * 0.025f;
+    FallingHellPod pod = new FallingHellPod(FALLING_HELL_POD.get(), level);
     pod.setDrift(xRandTraj, zRandTraj);
     pod.setPos(x, y, z);
     level.addFreshEntity(pod);
@@ -90,13 +91,8 @@ public class Utils {
   }
 
   public enum AniMove {
-    NORM,
-    ATTACK,
-    RELOAD,
-    DISP_RELOAD,
-    SALUTE,
-    SPECIAL0,
-    SPECIAL1;
+    NORM, ATTACK, RELOAD, DISP_RELOAD, SALUTE, SPECIAL;
+//    NORM, ATTACK, RELOAD, DISP_RELOAD, SALUTE, SPECIAL0, SPECIAL1, SPECIAL2, SPECIAL3;
 
     public static final AniMove[] VALUES = values();
     public static AniMove fromId(int id) {

@@ -13,11 +13,15 @@
   "item.aegisops.engi_hammer": "Engineering Hammer",
   "item.aegisops.bandage": "Bandage",
   "item.aegisops.morphine": "Morphine Shot",
+  "item.aegisops.modular_shield": "Modular Shield",
 
   "block.aegisops.drop_pod_block": "Drop Pod",
   "block.aegisops.drop_pod_block_used": "Drop Pod",
   "block.aegisops.beacon_block_unused": "Beacon",
   "block.aegisops.beacon_block": "Beacon Core",
+  "block.aegisops.hell_pod_block": "Hell Pod",
+  "block.aegisops.hell_pod_block_bot": "Hell Pod",
+  "block.aegisops.hell_pod_block_top": "Hell Pod",
 
   "entity.aegisops.port_disp": "Portable Dispenser",
   "entity.aegisops.db_turret": "Double Barrel Turret"

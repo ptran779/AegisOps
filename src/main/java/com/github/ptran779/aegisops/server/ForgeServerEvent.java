@@ -3,8 +3,7 @@ package com.github.ptran779.aegisops.server;
 import com.github.ptran779.aegisops.Config.ServerConfig;
 import com.github.ptran779.aegisops.Config.SkinManager;
 import com.github.ptran779.aegisops.Utils;
-import com.github.ptran779.aegisops.entity.FallingDropPod;
-import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
+import com.github.ptran779.aegisops.entity.FallingHellPod;
 import com.github.ptran779.aegisops.network.CameraModePacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -22,9 +21,8 @@ import com.github.ptran779.aegisops.AegisOps;
 import com.github.ptran779.aegisops.Config.AgentConfigManager;
 import net.minecraftforge.network.PacketDistributor;
 
-import static com.github.ptran779.aegisops.Utils.getRandomAgent;
 import static com.github.ptran779.aegisops.network.PacketHandler.CHANNELS;
-import static com.github.ptran779.aegisops.server.EntityInit.FALLING_DROP_POD;
+import static com.github.ptran779.aegisops.server.EntityInit.FALLING_HELL_POD;
 
 @Mod.EventBusSubscriber(modid = AegisOps.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeServerEvent {
@@ -36,7 +34,7 @@ public class ForgeServerEvent {
   }
 
   @SubscribeEvent
-  public static void deployDroppod(TickEvent.ServerTickEvent event) {
+  public static void deployHellPod(TickEvent.ServerTickEvent event) {
     if (event.phase != TickEvent.Phase.END) return;
     // This is guaranteed to be server-side already
     ServerLevel level = event.getServer().getLevel(Level.OVERWORLD);
@@ -86,7 +84,7 @@ public class ForgeServerEvent {
       // 🚀 This is the first join!
       player.sendSystemMessage(Component.literal("Welcome to Aegis, Survivor."));
       // spawn pod, play sound, set tags, etc.
-      FallingDropPod pod = new FallingDropPod(FALLING_DROP_POD.get(), player.level());
+      FallingHellPod pod = new FallingHellPod(FALLING_HELL_POD.get(), player.level());
       pod.setPos(player.getX(), player.level().getMaxBuildHeight()-1, player.getZ());
       player.level().addFreshEntity(pod);
       player.startRiding(pod, true);

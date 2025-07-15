@@ -1,6 +1,6 @@
 package com.github.ptran779.aegisops.network;
 
-import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
+import com.github.ptran779.aegisops.entity.util.IEntityRender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.FriendlyByteBuf;
@@ -10,11 +10,11 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 // test for swing for now
-public class AgentRenderPacket {
+public class EntityRenderPacket {
   private final int entityId;
   private final int payload;          //action payload -- not sure why I need this...
 
-  public AgentRenderPacket(int entityId, int payload){
+  public EntityRenderPacket(int entityId, int payload){
     this.entityId = entityId;
     this.payload = payload;
   }
@@ -24,10 +24,10 @@ public class AgentRenderPacket {
     buf.writeInt(payload);
   }
 
-  public static AgentRenderPacket decode(FriendlyByteBuf buf){
+  public static EntityRenderPacket decode(FriendlyByteBuf buf){
     int entityId = buf.readInt();
     int payload = buf.readInt();
-    return new AgentRenderPacket(entityId, payload);
+    return new EntityRenderPacket(entityId, payload);
   }
 
   public void handle(Supplier<NetworkEvent.Context> ctx) {
@@ -36,8 +36,9 @@ public class AgentRenderPacket {
       if (level == null) return;
 
       Entity entity = level.getEntity(entityId);
-      if (!(entity instanceof AbstractAgentEntity agent)) return;
-      agent.timeTrigger = agent.tickCount;  // reset swing progress
+      if (!(entity instanceof IEntityRender iEntity)) return;
+      iEntity.resetRenderTick();
+//      agent.timeTrigger = agent.tickCount;  // reset swing progress
     });
     ctx.get().setPacketHandled(true);
   }

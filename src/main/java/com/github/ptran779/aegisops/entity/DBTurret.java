@@ -8,8 +8,8 @@ import com.github.ptran779.aegisops.entity.util.IEntityTeam;
 import com.github.ptran779.aegisops.goal.CustomRangeTargetGoal;
 import com.github.ptran779.aegisops.goal.DBTurretAttackGoal;
 import com.github.ptran779.aegisops.item.EngiHammerItem;
+import com.github.ptran779.aegisops.network.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
-import com.github.ptran779.aegisops.network.StructureRenderPacket;
 import com.github.ptran779.aegisops.server.EntityInit;
 import com.github.ptran779.aegisops.server.ItemInit;
 import net.minecraft.ChatFormatting;
@@ -187,7 +187,10 @@ public class DBTurret extends AbstractAgentStruct implements IEntityTarget {
     level().playSound(null, this, SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.HOSTILE, 0.6f, 1.2f);
     PacketHandler.CHANNELS.send(
         PacketDistributor.TRACKING_ENTITY.with(() -> this),
-        new StructureRenderPacket(this.getId(), 0.0f) // or any float to signal timing
+        new EntityRenderPacket(this.getId(), 1) // or any float to signal timing
     );
   }
+
+  @Override
+  public void resetRenderTick() {cannonProgress = tickCount;}
 }
