@@ -4,7 +4,7 @@ import com.github.ptran779.aegisops.AegisOps;
 import com.github.ptran779.aegisops.client.AnimationHelper;
 import com.github.ptran779.aegisops.client.animation.PortDispAnimation;
 import com.github.ptran779.aegisops.client.model.PortDispModel;
-import com.github.ptran779.aegisops.entity.PortDisp;
+import com.github.ptran779.aegisops.entity.structure.PortDisp;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -35,9 +35,9 @@ public class PortDispRender extends EntityRenderer<PortDisp> {
 
     float aniTick = disp.tickCount - disp.timeTrigger + pPartialTick;
     if (disp.getOpen()){
-      AnimationHelper.animate(model, PortDispAnimation.DEPLOY, aniTick / 20f, 1);
+      AnimationHelper.animate(model, PortDispAnimation.DEPLOY, aniTick / 20f, 1, false);
     } else if (aniTick < PortDispAnimation.DEPLOY.lengthInSeconds() * 20) {
-      AnimationHelper.animate(model, PortDispAnimation.DEPLOY, PortDispAnimation.DEPLOY.lengthInSeconds() - aniTick  / 20f, 1);
+      AnimationHelper.animate(model, PortDispAnimation.DEPLOY, PortDispAnimation.DEPLOY.lengthInSeconds() - aniTick  / 20f, 1, false);
     } else {
       model.getRoot().getAllParts().forEach(ModelPart::resetPose);  // clean animation
     }

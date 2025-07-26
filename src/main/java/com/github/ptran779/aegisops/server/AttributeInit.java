@@ -11,5 +11,5 @@ import static com.github.ptran779.aegisops.attribute.AgentAttribute.AGENT_ATTACK
 public class AttributeInit {
   public static final DeferredRegister<Attribute> ATTRIBUTES = DeferredRegister.create(Registries.ATTRIBUTE, AegisOps.MOD_ID);
 
-  public static final RegistryObject<Attribute> AGENT_ATTACK_SPEED_INIT =ATTRIBUTES.register("agent_attack_speed", ()-> AGENT_ATTACK_SPEED);
+  public static final RegistryObject<Attribute> AGENT_ATTACK_SPEED_ATTR =ATTRIBUTES.register("agent_attack_speed", ()-> AGENT_ATTACK_SPEED);
 }

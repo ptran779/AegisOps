@@ -2,7 +2,7 @@ package com.github.ptran779.aegisops.client.render;
 
 import com.github.ptran779.aegisops.AegisOps;
 import com.github.ptran779.aegisops.client.model.TurretBulletModel;
-import com.github.ptran779.aegisops.entity.TurretBullet;
+import com.github.ptran779.aegisops.entity.extra.TurretBullet;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;

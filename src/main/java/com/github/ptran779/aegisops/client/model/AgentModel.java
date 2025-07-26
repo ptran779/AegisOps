@@ -1,6 +1,6 @@
 package com.github.ptran779.aegisops.client.model;
 
-import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
+import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 

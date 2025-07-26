@@ -37,9 +37,9 @@ public class ModularShieldRender extends BlockEntityWithoutLevelRenderer {
     if (tag.contains("DeployTick")){
       long deployTick = stack.getOrCreateTag().getLong("DeployTick");
       long currentTick = Minecraft.getInstance().level.getGameTime();
-      AnimationHelper.animate(model, ModularShieldAnimation.DEPLOY, (float) (currentTick - deployTick) /20, 1);
+      AnimationHelper.animate(model, ModularShieldAnimation.DEPLOY, (float) (currentTick - deployTick) /20, 1, false);
     } else {
-      AnimationHelper.animate(model, ModularShieldAnimation.DEPLOY, (float) 0, 1);   /// FIXME
+      AnimationHelper.animate(model, ModularShieldAnimation.DEPLOY, (float) 0, 1, false);   /// FIXME
     }
 
     poseStack.pushPose();

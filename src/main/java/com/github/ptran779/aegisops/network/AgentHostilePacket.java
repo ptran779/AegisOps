@@ -1,7 +1,7 @@
 package com.github.ptran779.aegisops.network;
 
 import com.github.ptran779.aegisops.Utils;
-import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
+import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;

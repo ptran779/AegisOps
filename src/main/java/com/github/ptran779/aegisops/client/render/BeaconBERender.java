@@ -36,7 +36,7 @@ public class BeaconBERender implements BlockEntityRenderer<BeaconBE> {
     VertexConsumer consumer = buffer.getBuffer(RenderType.entityTranslucent(TEXTURE));
 
     float time = (entity.step + partialTick) / 20f;    // seconds = ticks/20
-    AnimationHelper.animate(model, BeaconAnimation.beaconDeploy, time, 1);
+    AnimationHelper.animate(model, BeaconAnimation.beaconDeploy, time, 1, false);
     // 3. Render model
     float alpha = 1f;
     if (entity.step> 1060 && entity.step < 1260){ // alpha fade out

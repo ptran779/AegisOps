@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ifi",
+    "ggg",
+    "igi"
+  ],
+  "key": {
+    "i": { "item": "minecraft:iron_nugget" },
+    "f": { "item": "minecraft:flint" },
+    "g": { "item": "minecraft:gunpowder" }
+  },
+  "result": {
+    "item": "aegisops:grenade",
+    "count": 1
+  },
+  "show_notification": true
+}

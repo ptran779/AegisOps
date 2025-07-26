@@ -3,6 +3,7 @@ package com.github.ptran779.aegisops.client.render;
 import com.github.ptran779.aegisops.AegisOps;
 import com.github.ptran779.aegisops.block.HellPodBE;
 import com.github.ptran779.aegisops.client.AnimationHelper;
+import com.github.ptran779.aegisops.client.ShareModel;
 import com.github.ptran779.aegisops.client.animation.HellPodAnimation;
 import com.github.ptran779.aegisops.client.model.HellpodModel;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -20,7 +21,7 @@ public class HellPodBERender implements BlockEntityRenderer<HellPodBE> {
   private static final ResourceLocation TEXTURE = new ResourceLocation(AegisOps.MOD_ID, "textures/block/hell_pod.png");
 
   public HellPodBERender(BlockEntityRendererProvider.Context context) {
-    this.model = new HellpodModel(context.bakeLayer(HellpodModel.LAYER_LOCATION));
+    this.model = ShareModel.prepHellPodModel(context.bakeLayer(HellpodModel.LAYER_LOCATION));
   }
 
 
@@ -33,7 +34,7 @@ public class HellPodBERender implements BlockEntityRenderer<HellPodBE> {
     poseStack.scale(1.0F, -1.0F, 1.0F);  // Flip Y for Minecraft convention
 
     float aniTick = (bEntity.stepCounter + partialTick);
-    AnimationHelper.animate(model, HellPodAnimation.DEPLOY2, aniTick / 20, 1);
+    AnimationHelper.animate(model, HellPodAnimation.DEPLOY2, aniTick / 20, 1, false);
 
     VertexConsumer builder = buffer.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
     model.renderToBuffer(poseStack, builder, packedLight, packedOverlay, 1, 1, 1, 1);

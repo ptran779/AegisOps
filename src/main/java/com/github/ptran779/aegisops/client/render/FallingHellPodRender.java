@@ -2,13 +2,13 @@ package com.github.ptran779.aegisops.client.render;
 
 import com.github.ptran779.aegisops.AegisOps;
 import com.github.ptran779.aegisops.client.AnimationHelper;
+import com.github.ptran779.aegisops.client.ShareModel;
 import com.github.ptran779.aegisops.client.animation.HellPodAnimation;
 import com.github.ptran779.aegisops.client.model.HellpodModel;
-import com.github.ptran779.aegisops.entity.FallingHellPod;
+import com.github.ptran779.aegisops.entity.extra.FallingHellPod;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -21,7 +21,7 @@ public class FallingHellPodRender extends EntityRenderer<FallingHellPod> {
 
   public FallingHellPodRender(EntityRendererProvider.Context pContext) {
     super(pContext);
-    this.model = new HellpodModel(pContext.bakeLayer(HellpodModel.LAYER_LOCATION));
+    this.model = ShareModel.prepHellPodModel(pContext.bakeLayer(HellpodModel.LAYER_LOCATION));
   }
 
   public void render(FallingHellPod pEntity, float pEntityYaw, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
@@ -32,9 +32,9 @@ public class FallingHellPodRender extends EntityRenderer<FallingHellPod> {
 
     if (pEntity.isDeployed()) {
       float aniTick = (pEntity.tickCount - pEntity.timeTrigger + pPartialTick);
-      AnimationHelper.animate(model, HellPodAnimation.DEPLOY1, aniTick / 20, 1);
+      AnimationHelper.animate(model, HellPodAnimation.DEPLOY1, aniTick / 20, 1, false);
     } else {
-      AnimationHelper.animate(model, HellPodAnimation.DEPLOY1, 0, 1);
+      AnimationHelper.animate(model, HellPodAnimation.DEPLOY1, 0, 1, false);
       float spin = (pEntity.tickCount + pPartialTick) * 5F;
       pPoseStack.mulPose(Axis.YP.rotationDegrees(spin));
     }

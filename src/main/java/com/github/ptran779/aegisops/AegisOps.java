@@ -20,6 +20,8 @@ public class AegisOps {
         MenuInit.MENU_TYPES.register(modEventBus);
 
         AttributeInit.ATTRIBUTES.register(modEventBus);
+        EffectInit.EFFECTS.register(modEventBus);
+
         BlockInit.BLOCKS.register(modEventBus);
         BlockEntityInit.BLOCK_ENTITY.register(modEventBus);
 

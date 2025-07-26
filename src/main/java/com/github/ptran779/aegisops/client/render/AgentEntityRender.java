@@ -4,11 +4,7 @@ import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.client.animation.AgentLivingAnimation;
 import com.github.ptran779.aegisops.client.animation.AgentSpecialAnimation;
 import com.github.ptran779.aegisops.client.model.AgentModel;
-import com.github.ptran779.aegisops.entity.Engineer;
-import com.github.ptran779.aegisops.entity.Heavy;
-import com.github.ptran779.aegisops.entity.Medic;
-import com.github.ptran779.aegisops.entity.Sniper;
-import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
+import com.github.ptran779.aegisops.entity.agent.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.tacz.guns.item.ModernKineticGunItem;
 import net.minecraft.client.model.HumanoidModel;
@@ -109,6 +105,23 @@ public class AgentEntityRender extends HumanoidMobRenderer<AbstractAgentEntity, 
           }
         }
       }
+      else if (agent instanceof Soldier) {
+        if (agent.getSpecialMove() == 0) {
+          animateHumanoid(model, AgentSpecialAnimation.SODIER_HYPE, model.BONE_PARTS, aniTick / 20f, 1, false);
+        }
+      }
+      else if (agent instanceof Demolition) {
+        switch (agent.getSpecialMove()) {
+          case 0:{
+            animateHumanoid(model, AgentSpecialAnimation.GRENADE_THROW, model.BONE_PARTS, aniTick / 20f, 1, false);
+            break;
+          }
+          case 1: {
+            animateHumanoid(model, AgentSpecialAnimation.TERMINAL_ACTIVATE, model.BONE_PARTS, aniTick / 20f, 1, false);
+            break;
+          }
+        }
+      }
     } else if (aniMove == Utils.AniMove.SALUTE) {
       animateHumanoid(model, AgentLivingAnimation.SALUTE, model.BONE_PARTS, aniTick / 20f, 1, false);
     } else if (aniMove == Utils.AniMove.DISP_RELOAD) {
@@ -124,6 +137,26 @@ public class AgentEntityRender extends HumanoidMobRenderer<AbstractAgentEntity, 
       } else {
         animateHumanoid(model,AgentLivingAnimation.IDLE, model.BONE_PARTS, (agent.tickCount + partialTicks) / 20f, 1, true);
       }
+
+      //composite -- mostly what to do about hand
+      if (agent.getAniMove() == Utils.AniMove.RELOAD && aniTick < 20 * AgentLivingAnimation.RELOAD.lengthInSeconds()){
+        // strict impose
+        model.leftArm.resetPose();
+        model.rightArm.resetPose();
+        animateHumanoid(model, AgentLivingAnimation.RELOAD, model.BONE_PARTS, aniTick / 20f, 1, false);
+      } else if (agent.getMainHandItem().getItem() instanceof ModernKineticGunItem) {
+        model.rightArm.yRot = model.head.yRot;
+        model.leftArm.yRot = 0.5F + model.head.yRot;
+        // tilt correction
+        model.rightArm.xRot = (-(float)Math.PI / 2F) + model.head.xRot;
+        model.leftArm.xRot = (-(float)Math.PI / 2F) + model.head.xRot;
+
+        // Copy to sleeves
+        model.leftSleeve.copyFrom(model.leftArm);
+        model.rightSleeve.copyFrom(model.rightArm);
+      } else if (agent.isUsingItem() && (agent.getUseItem().getUseAnimation() == UseAnim.EAT || agent.getUseItem().getUseAnimation() == UseAnim.DRINK)) {
+        animateHumanoid(model, AgentLivingAnimation.EATING, model.BONE_PARTS, aniTick / 20f, 1, true);
+      }
     }
     // render head looking
     float headYaw = Mth.rotLerp(partialTicks, agent.yHeadRotO, agent.yHeadRot) - agent.yBodyRot;
@@ -131,26 +164,6 @@ public class AgentEntityRender extends HumanoidMobRenderer<AbstractAgentEntity, 
     model.head.yRot += headYaw * (Mth.PI / 180F);
     model.head.xRot += headPitch * (Mth.PI / 180F);
     model.hat.copyFrom(model.head);
-
-    //composite -- mostly what to do about hand
-    if (agent.getAniMove() == Utils.AniMove.RELOAD && aniTick < 20 * AgentLivingAnimation.RELOAD.lengthInSeconds()){
-      // strict impose
-      model.leftArm.resetPose();
-      model.rightArm.resetPose();
-      animateHumanoid(model, AgentLivingAnimation.RELOAD, model.BONE_PARTS, aniTick / 20f, 1, false);
-    } else if (agent.getMainHandItem().getItem() instanceof ModernKineticGunItem) {
-      model.rightArm.yRot = model.head.yRot;
-      model.leftArm.yRot = 0.5F + model.head.yRot;
-      // tilt correction
-      model.rightArm.xRot = (-(float)Math.PI / 2F) + model.head.xRot;
-      model.leftArm.xRot = (-(float)Math.PI / 2F) + model.head.xRot;
-
-      // Copy to sleeves
-      model.leftSleeve.copyFrom(model.leftArm);
-      model.rightSleeve.copyFrom(model.rightArm);
-    } else if (agent.isUsingItem() && (agent.getUseItem().getUseAnimation() == UseAnim.EAT || agent.getUseItem().getUseAnimation() == UseAnim.DRINK)) {
-      animateHumanoid(model, AgentLivingAnimation.EATING, model.BONE_PARTS, aniTick / 20f, 1, true);
-    }
 
     super.render(agent, pEntityYaw, partialTicks, pPoseStack, pBuffer, pPackedLight);
   }

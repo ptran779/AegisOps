@@ -2,7 +2,7 @@ package com.github.ptran779.aegisops.client.render;
 
 import com.github.ptran779.aegisops.AegisOps;
 import com.github.ptran779.aegisops.client.model.DropPodModel;
-import com.github.ptran779.aegisops.entity.FallingDropPod;
+import com.github.ptran779.aegisops.entity.extra.FallingDropPod;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;

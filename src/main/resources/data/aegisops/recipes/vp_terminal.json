@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " r s",
+    "ctc",
+    "iai"
+  ],
+  "key": {
+    "r": { "item": "minecraft:repeater" },
+    "a": { "item": "minecraft:amethyst_shard" },
+    "c": { "item": "minecraft:cyan_dye" },
+    "t": { "item": "minecraft:tnt" },
+    "i": { "item": "minecraft:iron_ingot" }
+  },
+  "result": {
+    "item": "aegisops:vp_terminal",
+    "count": 1
+  },
+  "show_notification": true
+}

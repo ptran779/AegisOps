@@ -1,9 +1,8 @@
 package com.github.ptran779.aegisops;
 
-import com.github.ptran779.aegisops.entity.FallingDropPod;
-import com.github.ptran779.aegisops.entity.FallingHellPod;
-import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
-import com.github.ptran779.aegisops.entity.util.IEntityTeam;
+import com.github.ptran779.aegisops.entity.extra.FallingHellPod;
+import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
+import com.github.ptran779.aegisops.entity.api.IEntityTeam;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -119,7 +118,7 @@ public class Utils {
     List<LivingEntity> teammates = user.level().getEntitiesOfClass(
         LivingEntity.class,pathAABB, other ->
             other instanceof IEntityTeam otherTeam &&
-            userTeam.isFriendlyMod(otherTeam) &&
+            userTeam.isFriendlyMod(otherTeam, other.level()) &&
             other.getBoundingBox().clip(start, end).isPresent()
     );
     return !teammates.isEmpty();

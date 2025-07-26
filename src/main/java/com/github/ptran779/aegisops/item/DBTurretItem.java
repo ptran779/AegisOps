@@ -1,6 +1,6 @@
 package com.github.ptran779.aegisops.item;
 
-import com.github.ptran779.aegisops.entity.DBTurret;
+import com.github.ptran779.aegisops.entity.structure.DBTurret;
 import com.github.ptran779.aegisops.server.EntityInit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;

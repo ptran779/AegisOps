@@ -14,6 +14,8 @@
   "item.aegisops.bandage": "Bandage",
   "item.aegisops.morphine": "Morphine Shot",
   "item.aegisops.modular_shield": "Modular Shield",
+  "item.aegisops.grenade": "Grenade",
+  "item.aegisops.vp_terminal": "Vector Pursuer Terminal",
 
   "block.aegisops.drop_pod_block": "Drop Pod",
   "block.aegisops.drop_pod_block_used": "Drop Pod",

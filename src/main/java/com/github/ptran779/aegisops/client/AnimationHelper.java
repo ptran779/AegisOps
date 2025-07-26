@@ -1,6 +1,6 @@
 package com.github.ptran779.aegisops.client;
 
-import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
+import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
 import net.minecraft.client.animation.AnimationChannel;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.animation.Keyframe;
@@ -14,9 +14,9 @@ import java.util.Map;
 
 public class AnimationHelper {
   private static final Vector3f scratch = new Vector3f();
-  public static void animate(IBoneHierachy model, AnimationDefinition animDef, float timeSeconds, float scale) {
+  public static void animate(IBoneHierachy model, AnimationDefinition animDef, float timeSeconds, float scale, boolean loop) {
     model.getRoot().getAllParts().forEach(ModelPart::resetPose);  // clean animation
-    recurseAndApply(model.getRootBoneName(), model, animDef.boneAnimations(), timeSeconds, scale);
+    recurseAndApply(model.getRootBoneName(), model, animDef.boneAnimations(), loop ? timeSeconds % animDef.lengthInSeconds() : timeSeconds, scale);
   }
 
   public static void animateHumanoid(PlayerModel<AbstractAgentEntity> model, AnimationDefinition animDef, Map<String, ModelPart> boneKeys, float timeSeconds, float scale, boolean loop){

@@ -64,4 +64,8 @@ public final class ItemInit {
         () -> new MorphineItem(new Item.Properties()));
     public static final RegistryObject<Item> MODULAR_SHIELD_ITEM = ITEMS.register("modular_shield",
         () -> new ModularShieldItem(new Item.Properties().durability(600)));
+    public static final RegistryObject<Item> GRENADE_ITEM = ITEMS.register("grenade",
+        () -> new GrenadeItem(new Item.Properties()));
+    public static final RegistryObject<Item> VP_ITEM = ITEMS.register("vp_terminal",
+        () -> new VPTerminalItem(new Item.Properties()));
 }

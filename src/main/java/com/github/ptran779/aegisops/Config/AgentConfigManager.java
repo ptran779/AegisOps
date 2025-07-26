@@ -1,6 +1,6 @@
 package com.github.ptran779.aegisops.Config;
 
-import com.github.ptran779.aegisops.entity.*;
+import com.github.ptran779.aegisops.entity.agent.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tacz.guns.api.TimelessAPI;

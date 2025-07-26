@@ -5,7 +5,7 @@ import com.github.ptran779.aegisops.client.AnimationHelper;
 import com.github.ptran779.aegisops.client.animation.DBTurretAnimation;
 import com.github.ptran779.aegisops.client.model.DBTurretModel;
 import com.github.ptran779.aegisops.client.model.DBTurretReadyModel;
-import com.github.ptran779.aegisops.entity.DBTurret;
+import com.github.ptran779.aegisops.entity.structure.DBTurret;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -37,7 +37,7 @@ public class DBTurretRender extends EntityRenderer<DBTurret> {
     // if deployed already
     if (!pEntity.getEntityData().get(DBTurret.DEPLOYED)){
       float time = Math.max((pEntity.tickCount + pPartialTick + DBTurret.T_OFFSET) / 20f, 0);    // seconds = ticks/20
-      AnimationHelper.animate(model, DBTurretAnimation.deploy, time, 1);
+      AnimationHelper.animate(model, DBTurretAnimation.deploy, time, 1, false);
 
       VertexConsumer vertexConsumer = pBuffer.getBuffer(model.renderType(TEXTURE));
       model.renderToBuffer(pPoseStack, vertexConsumer, pPackedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);

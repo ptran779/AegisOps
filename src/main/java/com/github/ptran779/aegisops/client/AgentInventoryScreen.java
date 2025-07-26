@@ -2,8 +2,8 @@ package com.github.ptran779.aegisops.client;
 
 import com.github.ptran779.aegisops.AegisOps;
 import com.github.ptran779.aegisops.Utils;
-import com.github.ptran779.aegisops.entity.util.AbstractAgentEntity;
-import com.github.ptran779.aegisops.entity.util.AgentInventoryMenu;
+import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
+import com.github.ptran779.aegisops.entity.inventory.AgentInventoryMenu;
 import com.github.ptran779.aegisops.network.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

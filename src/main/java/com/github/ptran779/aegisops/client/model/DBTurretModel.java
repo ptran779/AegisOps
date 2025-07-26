@@ -4,10 +4,6 @@ package com.github.ptran779.aegisops.client.model;// Made with Blockbench 4.12.4
 
 
 import com.github.ptran779.aegisops.AegisOps;
-import com.github.ptran779.aegisops.client.IBoneHierachy;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -15,15 +11,12 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DBTurretModel extends Model implements IBoneHierachy {
+public class DBTurretModel extends AbstractAniModel {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(AegisOps.MOD_ID, "dbturret_layer"), "main");
-	private ModelPart rootBody;
-	public final Map<String, ModelPart> BONE_PARTS = new HashMap<>();
 	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
 			Map.entry("root", List.of("Main")),
 			Map.entry("Main", List.of("Neck", "S1", "E1", "N1", "W1")),
@@ -45,8 +38,7 @@ public class DBTurretModel extends Model implements IBoneHierachy {
 			Map.entry("W3", List.of("W4"))
 	);
 	public DBTurretModel(ModelPart root) {
-		super(RenderType::entityCutoutNoCull);
-		rootBody = root.getChild("Main");
+		super(RenderType::entityCutoutNoCull, root.getChild("Main"));
 
 		put("Main", root.getChild("Main"));
 
@@ -79,10 +71,6 @@ public class DBTurretModel extends Model implements IBoneHierachy {
 		put("W3", get("W2").getChild("W3"));
 		put("W4", get("W3").getChild("W4"));
 	}
-
-	private void put(String name, ModelPart part) {BONE_PARTS.put(name, part);}
-	public ModelPart get(String name) {return BONE_PARTS.get(name);}
-
 	public static LayerDefinition createBodyLayer() {
 		MeshDefinition meshdefinition = new MeshDefinition();
 		PartDefinition partdefinition = meshdefinition.getRoot();
@@ -141,19 +129,6 @@ public class DBTurretModel extends Model implements IBoneHierachy {
 
 		return LayerDefinition.create(meshdefinition, 128, 128);
 	}
-
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-		rootBody.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-	}
-
 	public String getRootBoneName() {return "Main";}
-
-	public ModelPart getRoot() {return rootBody;}
-
-	@Override
-	public Map<String, List<String>> getFullBoneHierachy() {return BONE_HIERARCHY;}
-
-	@Override
 	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
 }

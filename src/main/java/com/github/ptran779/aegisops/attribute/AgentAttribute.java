@@ -8,9 +8,9 @@ import java.util.UUID;
 
 public class AgentAttribute {
   /// original
-  public static Attribute AGENT_ATTACK_SPEED= new RangedAttribute("attribute.name." +AegisOps.MOD_ID + ".agent_attack_speed", (double)20.0F, (double)1.0F, (double)1024.0F).setSyncable(true);
+  public static Attribute AGENT_ATTACK_SPEED= new RangedAttribute("attribute.name." +AegisOps.MOD_ID + ".agent_attack_speed", 20.0F, 0.000001F, 400.0F).setSyncable(true);
 
   /// Modifier
-  public static final UUID WELL_FEED_SPEED_BOOST_UUID = UUID.fromString("5f27715e-f97d-4266-a4a5-f76cf488414b");
-  public static final AttributeModifier WELL_FEED_SPEED_BOOST = new AttributeModifier(WELL_FEED_SPEED_BOOST_UUID, "Well-fed speed boost", 0.20, AttributeModifier.Operation.MULTIPLY_BASE);
+//  public static final UUID WELL_FEED_SPEED_BOOST_UUID = UUID.fromString("5f27715e-f97d-4266-a4a5-f76cf488414b");
+  public static final AttributeModifier WELL_FEED_SPEED_BOOST = new AttributeModifier(UUID.fromString("5f27715e-f97d-4266-a4a5-f76cf488414b"), "Well-fed speed boost", 0.20, AttributeModifier.Operation.MULTIPLY_BASE);
 }

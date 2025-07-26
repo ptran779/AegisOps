@@ -1,7 +1,7 @@
 package com.github.ptran779.aegisops.server;
 
 import com.github.ptran779.aegisops.AegisOps;
-import com.github.ptran779.aegisops.entity.util.AgentInventoryMenu;
+import com.github.ptran779.aegisops.entity.inventory.AgentInventoryMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.registries.DeferredRegister;

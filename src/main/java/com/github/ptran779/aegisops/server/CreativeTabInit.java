@@ -32,6 +32,8 @@ public class CreativeTabInit {
         output.accept(ItemInit.BANDAGE_ITEM.get());
         output.accept(ItemInit.MORPHINE_ITEM.get());
         output.accept(ItemInit.MODULAR_SHIELD_ITEM.get());
+        output.accept(ItemInit.GRENADE_ITEM.get());
+        output.accept(ItemInit.VP_ITEM.get());
         // Add more if needed
       }).build()
     );

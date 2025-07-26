@@ -1,7 +1,10 @@
 package com.github.ptran779.aegisops.server;
 
 import com.github.ptran779.aegisops.AegisOps;
-import com.github.ptran779.aegisops.entity.*;
+import com.github.ptran779.aegisops.entity.agent.*;
+import com.github.ptran779.aegisops.entity.extra.*;
+import com.github.ptran779.aegisops.entity.structure.DBTurret;
+import com.github.ptran779.aegisops.entity.structure.PortDisp;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -52,4 +55,19 @@ public final class EntityInit {
           EntityType.Builder.of(PortDisp::new, MobCategory.MISC)
               .sized(1.0f, 1f)  // ← 1×1.5 block hit‐box so it’s clickable
               .build(new ResourceLocation(AegisOps.MOD_ID, "port_disp").toString()));
+
+  public static final RegistryObject<EntityType<Grenade>> GRENADE =
+      ENTITIES.register("grenade", () ->
+          EntityType.Builder.of(Grenade::new, MobCategory.MISC)
+              .sized(0.3f, 0.3f)
+              .clientTrackingRange(64)
+              .build(new ResourceLocation(AegisOps.MOD_ID, "grenade").toString())
+      );
+
+  public static final RegistryObject<EntityType<VectorPursuer>> VECTOR_PURSUER =
+      ENTITIES.register("vector_pursuer", () ->
+          EntityType.Builder.of(VectorPursuer::new, MobCategory.MISC)
+              .sized(0.5f, 0.5f)
+              .build(new ResourceLocation(AegisOps.MOD_ID, "vector_pursuer").toString())
+      );
 }

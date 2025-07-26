@@ -22,6 +22,10 @@ public class ServerConfig {
 
     public static ForgeConfigSpec.IntValue BANDAGE_HEALTH_REFILL;
 
+    public static ForgeConfigSpec.IntValue GRENADE_CLUSTER;
+    public static ForgeConfigSpec.IntValue VP_MIN_TARGET_HEALTH;
+
+
     public static void register() {
         registerCommonConfig();
     }
@@ -84,6 +88,14 @@ public class ServerConfig {
         BANDAGE_HEALTH_REFILL = builder
             .comment("How much health can bandage restore")
             .defineInRange("BandageRestoreAmount", 6, 0, Integer.MAX_VALUE);
+
+        GRENADE_CLUSTER = builder
+            .comment("How many entity needed within the target enemy cluster so demolition decided to throw the grenade?")
+            .defineInRange("EnemyCluster", 3, 0, Integer.MAX_VALUE);
+
+        VP_MIN_TARGET_HEALTH = builder
+            .comment("How much health require minimum for vector pursuer to trigger (so only chase after high value target)")
+            .defineInRange("VPMinimumHeathTarget", 30, 0, Integer.MAX_VALUE);
 
         builder.pop();
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, builder.build());

@@ -1,6 +1,6 @@
 package com.github.ptran779.aegisops.network;
 
-import com.github.ptran779.aegisops.entity.util.IEntityRender;
+import com.github.ptran779.aegisops.entity.api.IEntityRender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.FriendlyByteBuf;

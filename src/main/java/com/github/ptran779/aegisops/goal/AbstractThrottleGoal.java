@@ -8,7 +8,7 @@ public class AbstractThrottleGoal extends Goal {
   private int checkTime=0;
   LivingEntity user;
 
-  AbstractThrottleGoal(LivingEntity user, int checkInterval) {
+  protected AbstractThrottleGoal(LivingEntity user, int checkInterval) {
     this.user = user;
     this.checkInterval = checkInterval;
   }

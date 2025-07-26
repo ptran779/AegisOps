@@ -3,7 +3,7 @@ package com.github.ptran779.aegisops.server;
 import com.github.ptran779.aegisops.Config.ServerConfig;
 import com.github.ptran779.aegisops.Config.SkinManager;
 import com.github.ptran779.aegisops.Utils;
-import com.github.ptran779.aegisops.entity.FallingHellPod;
+import com.github.ptran779.aegisops.entity.extra.FallingHellPod;
 import com.github.ptran779.aegisops.network.CameraModePacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;

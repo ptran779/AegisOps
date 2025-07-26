@@ -2,10 +2,6 @@ package com.github.ptran779.aegisops.client.model;
 
 
 import com.github.ptran779.aegisops.AegisOps;
-import com.github.ptran779.aegisops.client.IBoneHierachy;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -13,23 +9,20 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PortDispModel extends Model implements IBoneHierachy {
+public class PortDispModel extends AbstractAniModel {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(AegisOps.MOD_ID, "dispenser_layer"), "main");
-	public final Map<String, ModelPart> BONE_PARTS = new HashMap<>();
-	private final ModelPart bone;
 	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
 			Map.entry("root", List.of("bone")),
 			Map.entry("bone", List.of("LeftSlot", "RightSlot", "BottomSlot", "TopPanel2", "TopPanel1", "EPan","WPan","SPan","NPan"))
 	);
 
 	public PortDispModel(ModelPart root) {
-		super(RenderType::entityCutoutNoCull);
-		bone = root.getChild("bone");
+		super(RenderType::entityCutoutNoCull, root.getChild("bone"));
+
 		put("bone", root.getChild("bone"));
 		put("LeftSlot", get("bone").getChild("LeftSlot"));
 		put("RightSlot", get("bone").getChild("RightSlot"));
@@ -99,22 +92,6 @@ public class PortDispModel extends Model implements IBoneHierachy {
 
 		return LayerDefinition.create(meshdefinition, 256, 256);
 	}
-	private void put(String name, ModelPart part) {BONE_PARTS.put(name, part);}
-	public ModelPart get(String name) {return BONE_PARTS.get(name);}
-
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-		bone.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-	}
-
 	public String getRootBoneName() {return "bone";}
-
-	@Override
-	public Map<String, List<String>> getFullBoneHierachy() {return BONE_HIERARCHY;}
-
-	@Override
 	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
-
-	@Override
-	public ModelPart getRoot() {return bone;}
 }

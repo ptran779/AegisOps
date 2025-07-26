@@ -1,7 +1,7 @@
 package com.github.ptran779.aegisops.network;
 
-import com.github.ptran779.aegisops.entity.DBTurret;
-import com.github.ptran779.aegisops.entity.PortDisp;
+import com.github.ptran779.aegisops.entity.structure.DBTurret;
+import com.github.ptran779.aegisops.entity.structure.PortDisp;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.FriendlyByteBuf;

@@ -4,34 +4,27 @@ package com.github.ptran779.aegisops.client.model;// Made with Blockbench 4.12.4
 
 
 import com.github.ptran779.aegisops.AegisOps;
-import com.github.ptran779.aegisops.client.IBoneHierachy;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ModularShieldModel extends Model implements IBoneHierachy {
+public class ModularShieldModel extends AbstractAniModel {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(AegisOps.MOD_ID, "modular_shield_layer"), "main");
-	public final Map<String, ModelPart> BONE_PARTS = new HashMap<>();
 	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
 			Map.entry("root", List.of("Main")),
 			Map.entry("Main", List.of("Handle","Plate")),
 			Map.entry("Plate", List.of("LPan","RPan","BPan","TPan"))
 	);
-	public final ModelPart rootBody;
 
 	public ModularShieldModel(ModelPart root) {
-    super(RenderType::entityCutoutNoCull);
-		this.rootBody = root.getChild("Main");
+    super(RenderType::entityCutoutNoCull, root.getChild("Main"));
+
 		put("Main", root.getChild("Main"));
 		put("Handle", get("Main").getChild("Handle"));
 		put("Plate", get("Main").getChild("Plate"));
@@ -55,16 +48,6 @@ public class ModularShieldModel extends Model implements IBoneHierachy {
 		PartDefinition Handle = Main.addOrReplaceChild("Handle", CubeListBuilder.create().texOffs(0, 20).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 6.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -11.0F, -1.0F));
 		return LayerDefinition.create(meshdefinition, 64, 64);
 	}
-
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-		rootBody.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-	}
-
-	private void put(String name, ModelPart part) {BONE_PARTS.put(name, part);}
-	public ModelPart get(String name) {return BONE_PARTS.get(name);}
-	public Map<String, List<String>> getFullBoneHierachy() {return BONE_HIERARCHY;}
 	public String getRootBoneName() {return "Main";}
-	public ModelPart getRoot() {return rootBody;}
 	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
 }

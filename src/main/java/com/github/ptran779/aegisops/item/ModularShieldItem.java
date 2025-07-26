@@ -21,11 +21,9 @@ public class ModularShieldItem extends ShieldItem {
     super(pProperties);
   }
 
-  @Override
   @OnlyIn(Dist.CLIENT)
   public void initializeClient(Consumer<IClientItemExtensions> consumer) {
     consumer.accept(new IClientItemExtensions() {
-      @Override
       public BlockEntityWithoutLevelRenderer getCustomRenderer() {
         return ModClientEvents.MODULAR_SHIELD_RENDER_INSTANCE; // Your renderer here
       }
@@ -38,11 +36,10 @@ public class ModularShieldItem extends ShieldItem {
       CompoundTag tag = stack.getOrCreateTag();
       if (!player.isShiftKeyDown()) {
         if (!tag.contains("DeployTick")) {
-          tag.putLong("DeployTick", Minecraft.getInstance().level.getGameTime());
+          tag.putLong("DeployTick", level.getGameTime());
         }
-      } else {
-        tag.remove("DeployTick");
       }
+      else {tag.remove("DeployTick");}
     }
     // fallback: normal right-click
     return super.use(level, player, hand);
