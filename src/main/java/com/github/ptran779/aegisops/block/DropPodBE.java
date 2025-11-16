@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-import static com.github.ptran779.aegisops.Config.ServerConfig.DROP_POD_DELAY_OPEN;
+import static com.github.ptran779.aegisops.config.ServerConfig.DROP_POD_DELAY_OPEN;
 
 //Logic go here
 public class DropPodBE extends BlockEntity{

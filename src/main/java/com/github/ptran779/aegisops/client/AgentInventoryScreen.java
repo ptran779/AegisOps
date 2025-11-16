@@ -3,8 +3,13 @@ package com.github.ptran779.aegisops.client;
 import com.github.ptran779.aegisops.AegisOps;
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
+import com.github.ptran779.aegisops.entity.inventory.AgentAdvanceConfigMenu;
 import com.github.ptran779.aegisops.entity.inventory.AgentInventoryMenu;
 import com.github.ptran779.aegisops.network.*;
+import com.github.ptran779.aegisops.network.Agent.AgentDismissPacket;
+import com.github.ptran779.aegisops.network.Agent.AgentFollowPacket;
+import com.github.ptran779.aegisops.network.Agent.AgentHostilePacket;
+import com.github.ptran779.aegisops.network.Agent.AgentSpecialPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -24,8 +29,6 @@ import org.joml.Quaternionf;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
-
-
 @OnlyIn(Dist.CLIENT)
 public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventoryMenu>{
     private static final Font font = Minecraft.getInstance().font;
@@ -40,9 +43,8 @@ public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventory
         PlainTextButton movementBtn = new PlainTextButton(this.leftPos + 227, this.topPos + 7,
             65, 25,Component.empty(),
             btn -> {
-                PacketHandler.CHANNELS.sendToServer(new AgentFollowPacket(agent.getId(),
-                    agent.getMovement() == 2 ? 0 : agent.getMovement() + 1,
-                    this.player.getUUID()));
+                int next = (agent.getFollowMode().ordinal() + 1) % Utils.FollowMode.values().length;
+                PacketHandler.CHANNELS.sendToServer(new AgentFollowPacket(agent.getId(), next, this.player.getUUID()));
             }, font
         );
         movementBtn.setTooltip(Tooltip.create(Component.literal("Toggle Movement Mode")));
@@ -75,6 +77,17 @@ public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventory
         );
         dismissBtn.setTooltip(Tooltip.create(Component.literal("Dismiss Agent")));
         addRenderableWidget(dismissBtn);
+
+        PlainTextButton advanceCfg = new PlainTextButton(this.leftPos + 205, this.topPos + 37,
+            18, 18,Component.empty(),
+            btn -> {
+                Minecraft.getInstance().setScreen(new AgentAdvanceConfigScreen(
+                    new AgentAdvanceConfigMenu(this.menu.containerId, this.player.getInventory(), this.menu.agent),
+                    player.getInventory(), this.playerInventoryTitle));
+            }, font
+        );
+        advanceCfg.setTooltip(Tooltip.create(Component.literal("Advance Configuration")));
+        addRenderableWidget(advanceCfg);
     }
 
     public AgentInventoryScreen(AgentInventoryMenu container, Inventory pPlayerInventory, Component pTitle) {
@@ -117,11 +130,10 @@ public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventory
         // control flag
         pGuiGraphics.drawString(font, agent.getName().getString() +" the " + agent.agentType, 65, 15, 0x00CFFF, false);
         pGuiGraphics.drawString(font, "Commander: " + agent.getOwner(), 65, 40, 0x00CFFF, false);
-        String followDisp = switch (agent.getMovement()){
-            case 0 -> "Wander";
-            case 1 -> "Guard";
-            case 2 -> "Follow";
-            default -> "not sure";
+        String followDisp = switch (agent.getFollowMode()){
+            case STAY -> "Guard";
+            case FOLLOW -> "Follow";
+            case WANDER -> "Wander";
         };
         pGuiGraphics.drawString(font, followDisp, 242, 16, 0x00CFFF, false);
         String hostileDisp = switch (agent.getTargetMode()){

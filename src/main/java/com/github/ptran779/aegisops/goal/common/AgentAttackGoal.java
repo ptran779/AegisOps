@@ -4,7 +4,7 @@ import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.attribute.AgentAttribute;
 import com.github.ptran779.aegisops.client.animation.AgentLivingAnimation;
 import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
-import com.github.ptran779.aegisops.network.EntityRenderPacket;
+import com.github.ptran779.aegisops.network.render.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;

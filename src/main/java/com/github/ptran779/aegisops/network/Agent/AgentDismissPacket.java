@@ -1,4 +1,4 @@
-package com.github.ptran779.aegisops.network;
+package com.github.ptran779.aegisops.network.Agent;
 
 import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
 import net.minecraft.network.FriendlyByteBuf;

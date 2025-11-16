@@ -89,6 +89,23 @@ public class Utils {
     }
   }
 
+  public enum FollowMode {
+    WANDER,     // Move around randomly
+    STAY,       // Stay in place
+    FOLLOW;     // Follow the owner/player
+
+    public static final FollowMode[] VALUES = values();
+
+    public static FollowMode fromId(int id) {
+      return VALUES[id];
+    }
+
+    public static FollowMode nextFollowMode(int id) {
+      int next = (id + 1) % VALUES.length;
+      return VALUES[next];
+    }
+  }
+
   public enum AniMove {
     NORM, ATTACK, RELOAD, DISP_RELOAD, SALUTE, SPECIAL;
 //    NORM, ATTACK, RELOAD, DISP_RELOAD, SALUTE, SPECIAL0, SPECIAL1, SPECIAL2, SPECIAL3;
@@ -98,7 +115,6 @@ public class Utils {
       return VALUES[id];
     }
   }
-
 
   public static <U extends Entity, T extends Entity> T findNearestEntity(U user, Class<T> type, double radius, Predicate<T> func) {
     AABB box = user.getBoundingBox().inflate(radius);

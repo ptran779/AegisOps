@@ -5,7 +5,7 @@ import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
 import com.github.ptran779.aegisops.entity.extra.VectorPursuer;
 import com.github.ptran779.aegisops.goal.AbstractThrottleGoal;
 import com.github.ptran779.aegisops.item.VPTerminalItem;
-import com.github.ptran779.aegisops.network.EntityRenderPacket;
+import com.github.ptran779.aegisops.network.render.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import com.github.ptran779.aegisops.server.EntityInit;
 import net.minecraft.sounds.SoundEvents;
@@ -17,7 +17,7 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.EnumSet;
 
-import static com.github.ptran779.aegisops.Config.ServerConfig.VP_MIN_TARGET_HEALTH;
+import static com.github.ptran779.aegisops.config.ServerConfig.VP_MIN_TARGET_HEALTH;
 
 public class DeployVPGoal extends AbstractThrottleGoal {
   AbstractAgentEntity agent;

@@ -4,7 +4,7 @@ import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
 import com.github.ptran779.aegisops.goal.AbstractThrottleGoal;
 import com.github.ptran779.aegisops.item.IHealItem;
-import com.github.ptran779.aegisops.network.EntityRenderPacket;
+import com.github.ptran779.aegisops.network.render.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;

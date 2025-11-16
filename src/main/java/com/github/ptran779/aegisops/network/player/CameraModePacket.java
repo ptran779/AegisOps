@@ -1,4 +1,4 @@
-package com.github.ptran779.aegisops.network;
+package com.github.ptran779.aegisops.network.player;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.CameraType;

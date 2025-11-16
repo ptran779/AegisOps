@@ -1,8 +1,8 @@
 package com.github.ptran779.aegisops.entity.structure;
 
-import com.github.ptran779.aegisops.Config.ServerConfig;
+import com.github.ptran779.aegisops.config.ServerConfig;
 import com.github.ptran779.aegisops.item.EngiHammerItem;
-import com.github.ptran779.aegisops.network.EntityRenderPacket;
+import com.github.ptran779.aegisops.network.render.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import com.github.ptran779.aegisops.server.ItemInit;
 import net.minecraft.ChatFormatting;
@@ -19,8 +19,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;

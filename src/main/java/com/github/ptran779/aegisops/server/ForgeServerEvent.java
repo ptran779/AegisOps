@@ -1,24 +1,31 @@
 package com.github.ptran779.aegisops.server;
 
-import com.github.ptran779.aegisops.Config.ServerConfig;
-import com.github.ptran779.aegisops.Config.SkinManager;
+import com.github.ptran779.aegisops.config.ServerConfig;
+import com.github.ptran779.aegisops.config.SkinManager;
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.extra.FallingHellPod;
-import com.github.ptran779.aegisops.network.CameraModePacket;
+import com.github.ptran779.aegisops.network.player.CameraModePacket;
+import com.github.ptran779.aegisops.player.TaticalCommandProvider;
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 import com.github.ptran779.aegisops.AegisOps;
-import com.github.ptran779.aegisops.Config.AgentConfigManager;
+import com.github.ptran779.aegisops.config.AgentConfigManager;
 import net.minecraftforge.network.PacketDistributor;
 
 import static com.github.ptran779.aegisops.network.PacketHandler.CHANNELS;
@@ -90,5 +97,29 @@ public class ForgeServerEvent {
       player.startRiding(pod, true);
       CHANNELS.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new CameraModePacket());
     }
+  }
+
+  // Capabilities stuff
+  @SubscribeEvent
+  public static void onAttachCapabilitiesPlayer(AttachCapabilitiesEvent<Entity> event) {
+    if(event.getObject() instanceof Player) {
+      if(!event.getObject().getCapability(TaticalCommandProvider.TATICAL_COMMAND_CAPABILITY).isPresent()) {
+        event.addCapability(new ResourceLocation(AegisOps.MOD_ID, "properties"), new TaticalCommandProvider());
+      }
+    }
+  }
+  @SubscribeEvent
+  public static void onPlayerCloned(PlayerEvent.Clone event) {
+    if(event.isWasDeath()){
+      event.getOriginal().getCapability(TaticalCommandProvider.TATICAL_COMMAND_CAPABILITY).ifPresent(oldStore -> {
+        event.getOriginal().getCapability(TaticalCommandProvider.TATICAL_COMMAND_CAPABILITY).ifPresent(newStore -> {
+          newStore.copyFrom(oldStore);
+        });
+      });
+    }
+  }
+  @SubscribeEvent
+  public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
+    event.register(TaticalCommandProvider.class);
   }
 }

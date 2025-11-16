@@ -26,5 +26,10 @@
   "block.aegisops.hell_pod_block_top": "Hell Pod",
 
   "entity.aegisops.port_disp": "Portable Dispenser",
-  "entity.aegisops.db_turret": "Double Barrel Turret"
+  "entity.aegisops.db_turret": "Double Barrel Turret",
+
+  "key.category.aegisops.aegisops": "AegisOps Controls",
+  "key.category.aegisops.follow_mode": "Toggle Follow Mode",
+  "key.category.aegisops.target_mode": "Toggle Target Mode",
+  "key.category.aegisops.special_mode": "Activate Special Ability"
 }

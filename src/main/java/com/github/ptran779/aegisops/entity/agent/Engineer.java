@@ -1,6 +1,6 @@
 package com.github.ptran779.aegisops.entity.agent;
 
-import com.github.ptran779.aegisops.Config.AgentConfig;
+import com.github.ptran779.aegisops.config.AgentConfig;
 import com.github.ptran779.aegisops.goal.common.AgentAttackGoal;
 import com.github.ptran779.aegisops.goal.common.CustomRangeTargetGoal;
 import com.github.ptran779.aegisops.goal.common.CustomRetaliationTargetGoal;

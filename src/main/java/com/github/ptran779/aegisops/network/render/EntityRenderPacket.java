@@ -1,4 +1,4 @@
-package com.github.ptran779.aegisops.network;
+package com.github.ptran779.aegisops.network.render;
 
 import com.github.ptran779.aegisops.entity.api.IEntityRender;
 import net.minecraft.client.Minecraft;

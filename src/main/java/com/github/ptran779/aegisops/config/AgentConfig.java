@@ -1,4 +1,4 @@
-package com.github.ptran779.aegisops.Config;
+package com.github.ptran779.aegisops.config;
 
 import java.util.Set;
 

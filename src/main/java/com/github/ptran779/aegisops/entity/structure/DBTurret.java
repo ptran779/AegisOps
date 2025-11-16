@@ -1,14 +1,13 @@
 package com.github.ptran779.aegisops.entity.structure;
 
-import com.github.ptran779.aegisops.Config.ServerConfig;
+import com.github.ptran779.aegisops.config.ServerConfig;
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.extra.TurretBullet;
 import com.github.ptran779.aegisops.entity.api.IEntityTarget;
-import com.github.ptran779.aegisops.entity.api.IEntityTeam;
 import com.github.ptran779.aegisops.goal.common.CustomRangeTargetGoal;
 import com.github.ptran779.aegisops.goal.structure.DBTurretAttackGoal;
 import com.github.ptran779.aegisops.item.EngiHammerItem;
-import com.github.ptran779.aegisops.network.EntityRenderPacket;
+import com.github.ptran779.aegisops.network.render.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import com.github.ptran779.aegisops.server.EntityInit;
 import com.github.ptran779.aegisops.server.ItemInit;
@@ -28,9 +27,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
@@ -38,7 +34,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
 
-import static com.github.ptran779.aegisops.Config.ServerConfig.BD_TURRET_DPS;
+import static com.github.ptran779.aegisops.config.ServerConfig.BD_TURRET_DPS;
 
 public class DBTurret extends AbstractAgentStruct implements IEntityTarget {
   public static final int T_OFFSET = -40;
