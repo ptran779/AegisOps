@@ -1,4 +1,4 @@
-package com.github.ptran779.aegisops.Config;
+package com.github.ptran779.aegisops.config;
 
 import com.github.ptran779.aegisops.AegisOps;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -84,6 +84,10 @@ public class SkinManager {
       System.err.println("[AegisOps] Failed to walk folder: " + folder);
       e.printStackTrace();
     }
+  }
+
+  public static Set<String> getAllSkin(boolean isFemale){
+    return isFemale ? FEMALE_SKINS.keySet() : MALE_SKINS.keySet();
   }
 
   public static ResourceLocation get(boolean slim, String key) {

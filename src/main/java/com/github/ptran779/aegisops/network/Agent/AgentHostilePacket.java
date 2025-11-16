@@ -1,43 +1,41 @@
-package com.github.ptran779.aegisops.network;
+package com.github.ptran779.aegisops.network.Agent;
 
+import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class AgentSpecialPacket {
+public class AgentHostilePacket {
   private final int entityId;
-  private final boolean payload;          //action payload -- expanse me if need more complex data communication
+  private final int payload;          //action payload -- expanse me if need more complex data communication
 
-  public AgentSpecialPacket(int entityId, boolean flag){
+  public AgentHostilePacket(int entityId, int flag){
     this.entityId = entityId;
     this.payload = flag;
   }
 
   public void encode(FriendlyByteBuf buf) {
     buf.writeInt(entityId);
-    buf.writeBoolean(payload);
+    buf.writeInt(payload);
   }
 
-  public static AgentSpecialPacket decode(FriendlyByteBuf buf){
+  public static AgentHostilePacket decode(FriendlyByteBuf buf){
     int entityId = buf.readInt();
-    boolean payload = buf.readBoolean();
-    return new AgentSpecialPacket(entityId, payload);
+    int payload = buf.readInt();
+    return new AgentHostilePacket(entityId, payload);
   }
 
   public void handle(Supplier<NetworkEvent.Context> ctx) {
     ctx.get().enqueueWork(() -> {
       ServerPlayer player = ctx.get().getSender();
       if (player == null) return;
-
-      Entity e = player.level().getEntity(entityId);
-      if (!(e instanceof AbstractAgentEntity agent)) return;
-      agent.setAllowSpecial(payload);
+      if (player.level().getEntity(entityId) instanceof AbstractAgentEntity agent) {
+        agent.setTargetMode(Utils.TargetMode.values()[payload]);
+      }
     });
     ctx.get().setPacketHandled(true);
   }
 }
-//agent.setAllowSpecial(payload)

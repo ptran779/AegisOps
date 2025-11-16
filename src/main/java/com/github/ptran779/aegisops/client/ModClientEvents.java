@@ -1,7 +1,7 @@
 package com.github.ptran779.aegisops.client;
 
 import com.github.ptran779.aegisops.AegisOps;
-import com.github.ptran779.aegisops.Config.SkinManager;
+import com.github.ptran779.aegisops.config.SkinManager;
 import com.github.ptran779.aegisops.client.model.*;
 import com.github.ptran779.aegisops.client.render.*;
 import com.github.ptran779.aegisops.server.BlockEntityInit;
@@ -13,6 +13,7 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -70,12 +71,20 @@ public final class ModClientEvents {
         GRENADE_RENDER_INSTANCE = new GrenadeItemRender(dispatcher, modelSet);
     }
 
+    @SubscribeEvent
+    public static void onKeyRegister(RegisterKeyMappingsEvent event) {
+        event.register(KeyBinding.FOLLOW_KEY);
+        event.register(KeyBinding.TARGET_KEY);
+        event.register(KeyBinding.SPECIAL_KEY);
+    }
+
     //Screen
     @SubscribeEvent
     public static void clientSetup(final FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             // menu
-            MenuScreens.register(MenuInit.AEGISOPS_MENU.get(), AgentInventoryScreen::new);
+            MenuScreens.register(MenuInit.AEGISOPS_MENU1.get(), AgentInventoryScreen::new);
+            MenuScreens.register(MenuInit.AEGISOPS_MENU2.get(), AgentAdvanceConfigScreen::new);
             //custom skin manager
             SkinManager.init();
         });

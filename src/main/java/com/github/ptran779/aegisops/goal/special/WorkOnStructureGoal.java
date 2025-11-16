@@ -1,12 +1,12 @@
 package com.github.ptran779.aegisops.goal.special;
 
-import com.github.ptran779.aegisops.Config.ServerConfig;
+import com.github.ptran779.aegisops.config.ServerConfig;
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.structure.AbstractAgentStruct;
 import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
 import com.github.ptran779.aegisops.goal.AbstractThrottleGoal;
 import com.github.ptran779.aegisops.item.EngiHammerItem;
-import com.github.ptran779.aegisops.network.EntityRenderPacket;
+import com.github.ptran779.aegisops.network.render.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;

@@ -5,7 +5,7 @@ import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
 import com.github.ptran779.aegisops.entity.extra.Grenade;
 import com.github.ptran779.aegisops.goal.AbstractThrottleGoal;
 import com.github.ptran779.aegisops.item.GrenadeItem;
-import com.github.ptran779.aegisops.network.EntityRenderPacket;
+import com.github.ptran779.aegisops.network.render.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import com.github.ptran779.aegisops.server.EntityInit;
 import net.minecraft.world.InteractionHand;
@@ -18,7 +18,7 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.EnumSet;
 
-import static com.github.ptran779.aegisops.Config.ServerConfig.GRENADE_CLUSTER;
+import static com.github.ptran779.aegisops.config.ServerConfig.GRENADE_CLUSTER;
 
 public class ThrowGrenadeGoal extends AbstractThrottleGoal {
   AbstractAgentEntity agent;

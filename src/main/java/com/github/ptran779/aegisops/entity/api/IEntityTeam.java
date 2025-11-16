@@ -7,6 +7,11 @@ import java.util.UUID;
 
 // for agent and turret
 public interface IEntityTeam {
+  default boolean isBoss(Player player) {
+    if (getBossUUID() == null) {return false;}
+    return (getBossUUID().equals(player.getUUID()));
+  }
+
   default boolean isFriendlyPlayer(Player player, Level level) {
     // Boss
     if (getBossUUID() == null) {return false;}

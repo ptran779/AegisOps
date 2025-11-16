@@ -3,7 +3,7 @@ package com.github.ptran779.aegisops.goal.special;
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
 import com.github.ptran779.aegisops.goal.AbstractThrottleGoal;
-import com.github.ptran779.aegisops.network.EntityRenderPacket;
+import com.github.ptran779.aegisops.network.render.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import com.github.ptran779.aegisops.server.EffectInit;
 import net.minecraft.world.effect.MobEffectInstance;

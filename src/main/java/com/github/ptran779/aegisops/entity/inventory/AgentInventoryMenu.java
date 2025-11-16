@@ -23,7 +23,7 @@ public class AgentInventoryMenu extends AbstractContainerMenu {
 
     //server construct
     public AgentInventoryMenu(int containerId, Inventory playerInventory, AbstractAgentEntity agent) {
-        super(MenuInit.AEGISOPS_MENU.get(), containerId);
+        super(MenuInit.AEGISOPS_MENU1.get(), containerId);
         this.agent = agent;
         this.agentInv = agent.inventory;
         this.playerInv = playerInventory;
