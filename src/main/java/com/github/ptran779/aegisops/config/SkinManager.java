@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
 
+import java.text.Normalizer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -60,19 +61,48 @@ public class SkinManager {
     }
   }
 
+  private static String makeSafeSkinName(String rawFileName) {
+    if (rawFileName == null || rawFileName.isEmpty()) return "skin_default";
+
+    // 1. Strip extension if present
+    int dotIndex = rawFileName.lastIndexOf('.');
+    String base = (dotIndex > 0 ? rawFileName.substring(0, dotIndex) : rawFileName);
+
+    // 2. Lowercase
+    base = base.toLowerCase(Locale.ROOT);
+
+    // 3. Normalize Unicode → ASCII
+    base = Normalizer.normalize(base, Normalizer.Form.NFKD)
+        .replaceAll("\\p{M}", ""); // removes diacritics
+
+    // 4. Replace illegal ResourceLocation characters with _
+    base = base.replaceAll("[^a-z0-9._-]", "_");
+
+    // 5. Collapse multiple underscores and trim edges
+    base = base.replaceAll("_+", "_")
+        .replaceAll("^_|_$", "");
+
+    // 6. Fallback if empty after cleaning
+    if (base.isEmpty()) base = "skin";
+
+    // 7. Append short hash to avoid collisions
+    String hash = Integer.toHexString(rawFileName.hashCode());
+    return base + "_" + hash;
+  }
+
   private static void loadSkinsFromFolder(String genderKey, Path folder, Map<String, ResourceLocation> skinMap) {
     try (Stream<Path> stream = Files.walk(folder)) {
       stream.filter(Files::isRegularFile)
         .filter(p -> p.toString().endsWith(".png"))
         .forEach(path -> {
-          String fileName = path.getFileName().toString().replace(".png", "").toLowerCase();
-          String id = genderKey + "/" + fileName;
+          String fileName = path.getFileName().toString().replace(".png", "");
+          String id = genderKey + "/" + makeSafeSkinName(fileName);
           ResourceLocation rl = new ResourceLocation(NAMESPACE, id);
 
           try (InputStream in = Files.newInputStream(path)) {
             NativeImage img = NativeImage.read(in);
             DynamicTexture dynTex = new DynamicTexture(img);
-            MC.getTextureManager().register(rl, dynTex);  //important: register to mc manager. need to purge at each reload
+            MC.getTextureManager().register(rl, dynTex);  //important: register to mc manager. need to purge at each reload //fixme critical
             skinMap.put(fileName, rl);
             REGISTERED_TEXTURES.add(rl);
           } catch (IOException e) {

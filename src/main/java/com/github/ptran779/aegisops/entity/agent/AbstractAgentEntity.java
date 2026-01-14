@@ -52,6 +52,7 @@ import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -72,7 +73,7 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
   public final int specialSlot = 6;
 
   // agent custom config
-  private UUID bossUUID = null;
+//  private UUID bossUUID = null;
   public UUID followPlayer = null;
   public int maxfood = 40;
   private int pathCooldown = 0;
@@ -83,9 +84,9 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
   private static final EntityDataAccessor<Integer> AUTO_HOSTILE_F = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);
   public static final EntityDataAccessor<Boolean> KEEP_EAT_F = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.BOOLEAN);
   public static final EntityDataAccessor<Integer> FOOD_VALUE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);
-  private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.STRING);
   private static final EntityDataAccessor<Integer> VIRTUAL_AMMO = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);  // for render purpose
 
+  private static final EntityDataAccessor<Optional<UUID>> BOSS_UUID = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.OPTIONAL_UUID);
   private static final EntityDataAccessor<Integer> ANI_MOVE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);  // for render purpose
   private static final EntityDataAccessor<Integer> SPECIAL_MOVE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);  // for render purpose // there are a lot of these
   public static final EntityDataAccessor<Boolean> FEMALE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.BOOLEAN);
@@ -134,19 +135,24 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
 
     entityData.define(FEMALE, false);
     entityData.define(SKIN, "");
-    entityData.define(OWNER, "");
+    entityData.define(BOSS_UUID, Optional.empty());
     entityData.define(VIRTUAL_AMMO, 0);
   }
 
-  public String getOwner() {return this.entityData.get(OWNER);}
-  public void setOwner(String boss) {this.entityData.set(OWNER, boss);}
+  public String getOwner() {
+    UUID bossUUID = getBossUUID();
+    if (bossUUID == null) return "";
+    Player boss = this.level().getPlayerByUUID(bossUUID);
+    if (boss == null) return "";
+    return boss.getGameProfile().getName();
+  }
 
-  public UUID getBossUUID() {return this.bossUUID;}
+  public UUID getBossUUID() {
+    return this.entityData.get(BOSS_UUID).orElse(null);
+  }
   public void setBossUUID(UUID uuid) {
-    this.bossUUID = uuid;
-    Player boss = this.level().getServer().getPlayerList().getPlayer(uuid);
-    if (boss != null) {setOwner(boss.getGameProfile().getName());
-    } else {setOwner("");}
+    if (uuid == null) {this.entityData.set(BOSS_UUID, Optional.empty());}
+    else {this.entityData.set(BOSS_UUID, Optional.of(uuid));}
   }
 
   public boolean getAllowSpecial() {return this.entityData.get(ALLOW_SPECIAL_F);}
