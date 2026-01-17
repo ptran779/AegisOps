@@ -40,7 +40,6 @@ public class AgentAdvanceConfigScreen extends AbstractContainerScreen<AgentAdvan
         Set<String> skinNames = SkinManager.getAllSkin(agent.getFemale());
 
         DropDownWidget skinDropdown = new DropDownWidget(this.leftPos + 64, this.topPos + 27,74,11,
-        DropDownWidget skinDropdown = new DropDownWidget(this.leftPos + 63, this.topPos + 28,75,12,
             skinNames, agent.getSkin(),
             selected -> {
                 PacketHandler.CHANNELS.sendToServer(new ChangeSkinPacket(agent.getId(), selected)); // server sync

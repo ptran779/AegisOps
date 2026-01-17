@@ -4,6 +4,7 @@ package com.github.ptran779.aegisops.item;
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.extra.VectorPursuer;
 import com.github.ptran779.aegisops.server.EntityInit;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -11,8 +12,12 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class VPTerminalItem extends Item {
   public VPTerminalItem(Properties pProperties) {
@@ -41,6 +46,10 @@ public class VPTerminalItem extends Item {
     }
 
     return InteractionResultHolder.consume(stack);
+  }
+  public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+    pTooltipComponents.add(Component.literal("Demolition Special Item. Deploy a seeker kamikaze drone for high health target (configurable)."));
+    super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
   }
 }
 

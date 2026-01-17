@@ -2,12 +2,18 @@ package com.github.ptran779.aegisops.item;
 
 import com.github.ptran779.aegisops.config.ServerConfig;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 
 public class BandageItem extends Item implements IHealItem {
@@ -29,6 +35,12 @@ public class BandageItem extends Item implements IHealItem {
       heal(target, stack);
       return true;
     } else return false;
+  }
+
+  @Override
+  public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+    pTooltipComponents.add(Component.literal("Medic Special Item. Use to heal nearby ally"));
+    super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
   }
 }
 
