@@ -17,10 +17,10 @@ import java.util.Map;
 public class GrenadeModel extends AbstractAniModel {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(AegisOps.MOD_ID, "grenade_layer"), "main");
-	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
-			Map.entry("root", List.of("Main")),
-			Map.entry("Main", List.of("Bot", "Top"))
-	);
+//	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
+//			Map.entry("root", List.of("Main")),
+//			Map.entry("Main", List.of("Bot", "Top"))
+//	);
 	public GrenadeModel(ModelPart root) {
 		super(RenderType::entityCutout, root.getChild("Main"));
 		put("Main", root.getChild("Main"));
@@ -45,7 +45,7 @@ public class GrenadeModel extends AbstractAniModel {
 		return LayerDefinition.create(meshdefinition, 64, 64);
 	}
 
-	@Override
-	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
-	public String getRootBoneName() {return "Main";}
+//	@Override
+//	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
+//	public String getRootBoneName() {return "Main";}
 }

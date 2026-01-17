@@ -102,6 +102,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.apache.commons:commons-math3:3.6.1'
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.0'
 
     // Real mod deobf dependency examples - these get remapped to your current mappings
@@ -117,7 +118,7 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     implementation fg.deobf("curse.maven:jei-238222:6600311")
     implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:6654541")
-    implementation fg.deobf("curse.maven:epic-fight-mod-405076:6632324")
+//    implementation fg.deobf("curse.maven:epic-fight-mod-405076:6632324")
 //    implementation fg.deobf("curse.maven:epic-tactical-epic-fight-compat-1277045:6599734")
     implementation fg.deobf("curse.maven:jade-324717:6271651")
     implementation 'org.spongepowered:mixin:0.8.5'
@@ -125,11 +126,9 @@ dependencies {
     implementation fg.deobf("curse.maven:observable-509575:5643037")
     implementation fg.deobf("curse.maven:architectury-api-419699:5137938")
     implementation fg.deobf("curse.maven:kotlin-for-forge-351264:5402061")
-//
-//    implementation fg.deobf("curse.maven:better-mob-combat-1058798:6125563")
-//    implementation fg.deobf("curse.maven:better-combat-by-daedelus-639842:5625757")
-//    implementation fg.deobf("curse.maven:mob-player-animator-1058791:6125584")
-//    implementation fg.deobf("curse.maven:playeranimator-658587:4587214")
+    implementation fg.deobf("curse.maven:embeddium-908741:5681725")
+    // util
+    implementation 'org.apache.commons:commons-math3:3.6.1'
 }
 
 // Example for how to get properties into the manifest for reading at runtime.

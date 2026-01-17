@@ -2,7 +2,6 @@ package com.github.ptran779.aegisops.client.model;// Made with Blockbench 4.12.4
 // Exported for Minecraft version 1.17 or later with Mojang mappings
 // Paste this class into your mod and generate all required imports
 
-
 import com.github.ptran779.aegisops.AegisOps;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -11,32 +10,9 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.List;
-import java.util.Map;
-
 public class DBTurretModel extends AbstractAniModel {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(AegisOps.MOD_ID, "dbturret_layer"), "main");
-	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
-			Map.entry("root", List.of("Main")),
-			Map.entry("Main", List.of("Neck", "S1", "E1", "N1", "W1")),
-			Map.entry("Neck", List.of("Head")),
-			Map.entry("Head", List.of("RBarrel", "LBarrel")),
-			Map.entry("RBarrel", List.of("RCtip")),
-			Map.entry("LBarrel", List.of("LCtip")),
-			Map.entry("S1", List.of("S2")),
-			Map.entry("S2", List.of("S3")),
-			Map.entry("S3", List.of("S4")),
-			Map.entry("E1", List.of("E2")),
-			Map.entry("E2", List.of("E3")),
-			Map.entry("E3", List.of("E4")),
-			Map.entry("N1", List.of("N2")),
-			Map.entry("N2", List.of("N3")),
-			Map.entry("N3", List.of("N4")),
-			Map.entry("W1", List.of("W2")),
-			Map.entry("W2", List.of("W3")),
-			Map.entry("W3", List.of("W4"))
-	);
 	public DBTurretModel(ModelPart root) {
 		super(RenderType::entityCutoutNoCull, root.getChild("Main"));
 
@@ -129,6 +105,4 @@ public class DBTurretModel extends AbstractAniModel {
 
 		return LayerDefinition.create(meshdefinition, 128, 128);
 	}
-	public String getRootBoneName() {return "Main";}
-	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
 }

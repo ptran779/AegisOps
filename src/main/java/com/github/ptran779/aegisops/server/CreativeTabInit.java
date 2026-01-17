@@ -34,6 +34,7 @@ public class CreativeTabInit {
         output.accept(ItemInit.MODULAR_SHIELD_ITEM.get());
         output.accept(ItemInit.GRENADE_ITEM.get());
         output.accept(ItemInit.VP_ITEM.get());
+        output.accept(ItemInit.BRAIN_CHIP_ITEM.get());
         // Add more if needed
       }).build()
     );

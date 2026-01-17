@@ -17,13 +17,13 @@ import java.util.Map;
 public class VectorPursuerModel extends AbstractAniModel {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(AegisOps.MOD_ID, "vector_pursuer"), "main");
-	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
-			Map.entry("root", List.of("Main")),
-			Map.entry("Main", List.of("LWing", "RWing", "Tail", "Tail2")),
-			Map.entry("LWing", List.of("Lcore", "LThrust")),
-			Map.entry("RWing", List.of("Rcore", "RThrust")),
-			Map.entry("Tail", List.of("Tcore", "TThrust"))
-	);
+//	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
+//			Map.entry("root", List.of("Main")),
+//			Map.entry("Main", List.of("LWing", "RWing", "Tail", "Tail2")),
+//			Map.entry("LWing", List.of("Lcore", "LThrust")),
+//			Map.entry("RWing", List.of("Rcore", "RThrust")),
+//			Map.entry("Tail", List.of("Tcore", "TThrust"))
+//	);
 
 	public VectorPursuerModel(ModelPart root) {
 		super(RenderType::entityCutoutNoCull, root.getChild("Main"));
@@ -93,6 +93,6 @@ public class VectorPursuerModel extends AbstractAniModel {
 		return LayerDefinition.create(meshdefinition, 64, 64);
 	}
 
-	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
-	public String getRootBoneName() {return "Main";}
+//	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
+//	public String getRootBoneName() {return "Main";}
 }

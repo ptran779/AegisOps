@@ -12,7 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public abstract class AbstractAniModel extends Model implements IBoneHierachy {
+public abstract class AbstractAniModel extends Model{
+//  public abstract class AbstractAniModel extends Model implements IBoneHierachy {
   protected final Map<String, ModelPart> BONE_PARTS = new HashMap<>();
   public final ModelPart rootBody;
 
@@ -21,6 +22,7 @@ public abstract class AbstractAniModel extends Model implements IBoneHierachy {
     this.rootBody = rootBody;
   }
 
+  public Map<String, ModelPart> getFullBones(){return BONE_PARTS;}
   public ModelPart getRoot() {return rootBody;}
   public void put(String name, ModelPart part) {BONE_PARTS.put(name, part);}
   public ModelPart get(String name) {return BONE_PARTS.get(name);}

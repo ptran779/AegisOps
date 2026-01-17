@@ -17,11 +17,11 @@ import java.util.Map;
 public class HellpodModel extends AbstractAniModel {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(AegisOps.MOD_ID, "hellpod_layer"), "main");
-	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
-			Map.entry("root", List.of("Main")),
-			Map.entry("Main", List.of("Shell", "Lift", "Fins")),
-			Map.entry("Fins", List.of("n1", "s1", "e1", "w1", "EHatch", "WHatch"))
-	);
+//	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
+//			Map.entry("root", List.of("Main")),
+//			Map.entry("Main", List.of("Shell", "Lift", "Fins")),
+//			Map.entry("Fins", List.of("n1", "s1", "e1", "w1", "EHatch", "WHatch"))
+//	);
 
 	public HellpodModel(ModelPart root) {
 		super(RenderType::entityCutoutNoCull, root.getChild("Main"));
@@ -119,6 +119,6 @@ public class HellpodModel extends AbstractAniModel {
 
 		return LayerDefinition.create(meshdefinition, 256, 256);
 	}
-	public String getRootBoneName() {return "Main";}
-	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
+//	public String getRootBoneName() {return "Main";}
+//	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
 }

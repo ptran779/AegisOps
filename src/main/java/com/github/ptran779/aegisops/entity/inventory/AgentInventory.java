@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class AgentInventory extends SimpleContainer {
   private final AbstractAgentEntity agent;
-  private int lastAmmoSlot = -1;  // use in quick lookup for reload logic when needed
+  private int availAmmoSlot = -1;  // use in quick lookup for reload logic when needed
   public AgentInventory(int size, AbstractAgentEntity owner) {
     super(size);
     this.agent = owner;
@@ -79,7 +79,8 @@ public class AgentInventory extends SimpleContainer {
     for (int i=0; i<getContainerSize(); i++){if (getItem(i).isEdible()) {return true;}}
     return false;
   }
-  //inv prety small, just find me the best one
+
+  //inv prety small, just find me the best one -- return empty stack if no food
   public ItemStack getBestFood() {
     ItemStack out = ItemStack.EMPTY;
     for (int i=0; i<getContainerSize(); i++) {
@@ -101,40 +102,52 @@ public class AgentInventory extends SimpleContainer {
   public boolean gunExistWithAmmo(){
     ItemStack stack = getItem(agent.gunSlot);
     if (stack.getItem() instanceof ModernKineticGunItem gunItem) {
-      return checkGunAmmo(stack, gunItem) > 0 || agent.getVirtualAmmo() > 0 || findGunAmmo(stack) != -1;
+      return checkAmmoInChamber(stack, gunItem) > 0 || agent.getVirtualAmmo() > 0 || findGunAmmo(stack) != -1;
     }
     return false;
   }
 
-  public int checkGunAmmo(ItemStack gunStack, AbstractGunItem gunItem){return gunItem.getCurrentAmmoCount(gunStack);}
+  public int gunExistTotalAmmoCount(){  // fixme later
+    ItemStack stack = getItem(agent.gunSlot);
+    if (stack.getItem() instanceof ModernKineticGunItem gunItem) {
+      int total = checkAmmoInChamber(stack, gunItem) + agent.getVirtualAmmo();  // need to count entire inventory :(
+      for (int i=0; i<this.getContainerSize(); i++) {
+        total += countAmmoGunSlot(i, stack);
+      }
+      return total;
+    }
+    return 0;
+  }
 
-  private int isAmmoGunSlot(int slotId, ItemStack gunStack){
+  public int checkAmmoInChamber(ItemStack gunStack, AbstractGunItem gunItem){return gunItem.getCurrentAmmoCount(gunStack);}
+
+  private int countAmmoGunSlot(int slotId, ItemStack gunStack){
     ItemStack checkAmmoStack = getItem(slotId);
     if (checkAmmoStack.getItem() instanceof IAmmo iAmmo) {
       if (iAmmo.isAmmoOfGun(gunStack, checkAmmoStack)) {
-        lastAmmoSlot = slotId;
-        return slotId;
+        availAmmoSlot = slotId;
+        return checkAmmoStack.getCount();
       }
     } else if (checkAmmoStack.getItem() instanceof IAmmoBox iAmmoBox) {
       if (iAmmoBox.isAmmoBoxOfGun(gunStack, checkAmmoStack)){
-        lastAmmoSlot = slotId;
-        return slotId;
+        availAmmoSlot = slotId;
+        return iAmmoBox.getAmmoCount(checkAmmoStack);
       }
     }
-    return -1;
+    return 0;
   }
 
   public int findGunAmmo(ItemStack gunStack){
-    int out;
+    int ammoCount;
     // check cache
-    if (this.lastAmmoSlot != -1){
-      out = isAmmoGunSlot(this.lastAmmoSlot, gunStack);
-      if (out != -1){return out;}
+    if (availAmmoSlot != -1){
+      ammoCount = countAmmoGunSlot(this.availAmmoSlot, gunStack);
+      if (ammoCount != 0){return availAmmoSlot;}
     }
     //scan all inv
     for (int i=0; i<getContainerSize(); i++){
-      out = isAmmoGunSlot(i, gunStack);
-      if (out != -1){return out;}
+      ammoCount = countAmmoGunSlot(i, gunStack);
+      if (ammoCount != 0){return i;}
     }
     return -1;
   };

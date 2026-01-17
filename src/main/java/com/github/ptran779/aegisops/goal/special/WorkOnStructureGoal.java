@@ -2,6 +2,7 @@ package com.github.ptran779.aegisops.goal.special;
 
 import com.github.ptran779.aegisops.Config.ServerConfig;
 import com.github.ptran779.aegisops.Utils;
+import com.github.ptran779.aegisops.client.animation.AnimationLibrary;
 import com.github.ptran779.aegisops.entity.structure.AbstractAgentStruct;
 import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
 import com.github.ptran779.aegisops.goal.AbstractThrottleGoal;
@@ -51,6 +52,7 @@ public class WorkOnStructureGoal extends AbstractThrottleGoal {
   public void stop() {
     aStruct = null;  // ensure clean
     agent.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+    agent.setAniMoveStatic(AnimationLibrary.A_LIVING);
     agent.setAniMove(Utils.AniMove.NORM);
   }
   public boolean requiresUpdateEveryTick() {return true;}
@@ -69,7 +71,8 @@ public class WorkOnStructureGoal extends AbstractThrottleGoal {
           PacketDistributor.TRACKING_ENTITY.with(() -> agent),
           new EntityRenderPacket(agent.getId(), 1)
       );
-      agent.setSpecialMove(0);
+      agent.setAniMoveStatic(AnimationLibrary.A_BONK);
+      PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent), new EntityRenderPacket(agent.getId(), 1));
       tickProgress = agent.tickCount;
     } else if (dummy == 10 || dummy == 20 || dummy == 30 || dummy == 40) {
       agent.level().playSound(null, aStruct, SoundEvents.DRIPSTONE_BLOCK_BREAK, SoundSource.BLOCKS, 1f, 1.0f);
@@ -82,6 +85,8 @@ public class WorkOnStructureGoal extends AbstractThrottleGoal {
       aStruct.charge = Math.min(aStruct.charge +20, aStruct.getMaxCharge());
       if (aStruct.getHealth() < aStruct.getMaxHealth()) {aStruct.heal(2);}
       aStruct = null;
+      agent.setAniMoveTransition(AnimationLibrary.A_BONK, AnimationLibrary.A_IDLE, 6f, 0f, 0.5f);
+      PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent), new EntityRenderPacket(agent.getId(), 1));
     }
   }
 }

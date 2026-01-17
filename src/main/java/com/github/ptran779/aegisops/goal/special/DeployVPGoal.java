@@ -52,7 +52,6 @@ public class DeployVPGoal extends AbstractThrottleGoal {
   public boolean requiresUpdateEveryTick() {return true;}
   public boolean isInterruptable(){return false;}
   public void start() {
-    agent.setSpecialMove(1);
     PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new EntityRenderPacket(agent.getId(), 1));
     lastCooldown = agent.tickCount;
     done = false;

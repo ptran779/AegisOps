@@ -2,6 +2,7 @@ package com.github.ptran779.aegisops.entity.agent;
 
 import com.github.ptran779.aegisops.Config.SkinManager;
 import com.github.ptran779.aegisops.Utils;
+import com.github.ptran779.aegisops.client.animation.AnimationLibrary;
 import com.github.ptran779.aegisops.entity.inventory.AgentInventory;
 import com.github.ptran779.aegisops.entity.inventory.AgentInventoryMenu;
 import com.github.ptran779.aegisops.entity.api.IEntityRender;
@@ -48,6 +49,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
@@ -87,15 +89,47 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
   private static final EntityDataAccessor<Integer> VIRTUAL_AMMO = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);  // for render purpose
 
   private static final EntityDataAccessor<Integer> ANI_MOVE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);  // for render purpose
-  private static final EntityDataAccessor<Integer> SPECIAL_MOVE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);  // for render purpose // there are a lot of these
+
+  private static final EntityDataAccessor<Boolean> ANI_MOVE_STATE_CHANGE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.BOOLEAN);  // for render purpose when animation has more than 1 option
+  private static final EntityDataAccessor<Integer> ANI_MOVE_POSE_START = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);
+  private static final EntityDataAccessor<Integer> ANI_MOVE_POSE_END = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.INT);
+  private static final EntityDataAccessor<Float> ANI_MOVE_TIME_START = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.FLOAT);
+  private static final EntityDataAccessor<Float> ANI_MOVE_TIME_END = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.FLOAT);
+  private static final EntityDataAccessor<Float> ANI_MOVE_TIME_TRAN = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.FLOAT);
+
   public static final EntityDataAccessor<Boolean> FEMALE = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.BOOLEAN);
   public static final EntityDataAccessor<String> SKIN = SynchedEntityData.defineId(AbstractAgentEntity.class, EntityDataSerializers.STRING);
   //skin quick lookup
   private transient ResourceLocation cachedSkin;
 
   // animation -- client render only -- send packet to server to update when to play
-  public float timeTrigger = -1000;
-  public void resetRenderTick() {timeTrigger = tickCount;}
+  public float renderTimeTrigger = -1000;
+  public void resetRenderTick() {
+    renderTimeTrigger = tickCount;}
+
+  // for testing purpose, with transition, use both. with static, use start only
+  public void setAniMoveTransition(int pStart, int pEnd, float tStart, float tEnd, float tTran) {
+    entityData.set(ANI_MOVE_POSE_START, pStart);
+    entityData.set(ANI_MOVE_POSE_END, pEnd);
+    entityData.set(ANI_MOVE_TIME_START, tStart);
+    entityData.set(ANI_MOVE_TIME_END, tEnd);
+    entityData.set(ANI_MOVE_TIME_TRAN, tTran);
+    entityData.set(ANI_MOVE_STATE_CHANGE, true);
+  }
+
+  public void setAniMoveStatic(int pStart) {
+    entityData.set(ANI_MOVE_POSE_START, pStart);
+    entityData.set(ANI_MOVE_STATE_CHANGE, false);
+  }
+
+  public int getAniMovePoseStart() {return entityData.get(ANI_MOVE_POSE_START);}
+  public int getAniMovePoseEnd() {return entityData.get(ANI_MOVE_POSE_END);}
+  public float getAniMoveTimeStart() {return entityData.get(ANI_MOVE_TIME_START);}
+  public float getAniMoveTimeEnd() {return entityData.get(ANI_MOVE_TIME_END);}
+  public float getAniMoveTimeTran() {return entityData.get(ANI_MOVE_TIME_TRAN);}
+
+  public boolean getAniMoveStateChange() {return this.entityData.get(ANI_MOVE_STATE_CHANGE);}
+  public void setAniMoveStateChange(boolean flag) {this.entityData.set(ANI_MOVE_STATE_CHANGE, flag);}
 
   public AbstractAgentEntity(EntityType<? extends AbstractAgentEntity> entityType, Level level) {
     super(entityType, level);
@@ -127,7 +161,13 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
     entityData.define(KEEP_EAT_F, false);
     entityData.define(FOOD_VALUE, 0);
     entityData.define(ANI_MOVE, Utils.AniMove.NORM.ordinal());
-    entityData.define(SPECIAL_MOVE, 0);
+
+    entityData.define(ANI_MOVE_STATE_CHANGE, false);
+    entityData.define(ANI_MOVE_POSE_START, AnimationLibrary.A_LIVING);
+    entityData.define(ANI_MOVE_POSE_END, AnimationLibrary.A_LIVING);
+    entityData.define(ANI_MOVE_TIME_START, 0f);
+    entityData.define(ANI_MOVE_TIME_END, 0f);
+    entityData.define(ANI_MOVE_TIME_TRAN, 0f);
 
     entityData.define(FEMALE, false);
     entityData.define(SKIN, "");
@@ -167,18 +207,17 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
   public void setFood(Integer val) {this.entityData.set(FOOD_VALUE, val);}
   public boolean getFemale() {return this.entityData.get(FEMALE);}
   public void setFemale(boolean flag) {this.entityData.set(FEMALE, flag);}
-  public Utils.AniMove getAniMove() {return Utils.AniMove.fromId(this.entityData.get(ANI_MOVE));}
-  public void setAniMove(Utils.AniMove move) {this.entityData.set(ANI_MOVE, move.ordinal());}
-  public int getSpecialMove() {return (this.entityData.get(SPECIAL_MOVE));}
-  public void setSpecialMove(int move) {  // quick overwrite
-    setAniMove(Utils.AniMove.SPECIAL);
-    this.entityData.set(SPECIAL_MOVE, move);
-  }
 
-  /// Combat
+  // fixme get rid of everything down here
+//  public int getAniMove() {return this.entityData.get(ANI_MOVE);}
+//  public Utils.AniMove getAniMove() {return Utils.AniMove.fromId(this.entityData.get(ANI_MOVE));}
+//  public void setAniMove(int move) {this.entityData.set(ANI_MOVE, move);}
+  public void setAniMove(Utils.AniMove move) {this.entityData.set(ANI_MOVE, move.ordinal());}
+
+  /// Combat -- why is it here again?
   public boolean shootGun(boolean precision){   ///  true = long reload, false = just compute cooldown,
     // check for friendly on line. else dont shoot and just move to cooldown
-    if (Utils.hasFriendlyInLineOfFire(this, getTarget())) {return false;}
+//    if (Utils.hasFriendlyInLineOfFire(this, getTarget())) {return false;}
 
     prepAttack();
     if (op.getSynIsBolting()) {op.aim(false);}
@@ -194,7 +233,8 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
         reloadGun();
         // ANI
         PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> this),new EntityRenderPacket(this.getId(), 1));
-        setAniMove(Utils.AniMove.RELOAD);
+//        setAniMove(Utils.AniMove.RELOAD);
+        setAniMoveStatic(AnimationLibrary.A_RELOAD);
         level().playSound(null, this, SoundEvents.SLIME_SQUISH, SoundSource.BLOCKS, 1.2f, 0.5f);
         return true;
       }
@@ -207,6 +247,7 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
     setYRot(snapYaw);
     setYBodyRot(snapYaw);
   }
+
   public void reloadGun(){
     int reloadAmount = 0;
     ItemStack gunStack = getMainHandItem();
@@ -214,7 +255,7 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
     ResourceLocation gunResource = gunItem.getGunId(gunStack);
     CommonGunIndex gunIndex = TimelessAPI.getCommonGunIndex(gunResource).orElse(null);
     int maxAmmoCount = AttachmentDataUtils.getAmmoCountWithAttachment(gunStack, gunIndex.getGunData());
-    int curAmmoCount = inventory.checkGunAmmo(gunStack, gunItem);
+    int curAmmoCount = inventory.checkAmmoInChamber(gunStack, gunItem);
 
     // if use virtual ammo
     int virtAmmo = getVirtualAmmo();
@@ -513,6 +554,15 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
     }
     return true;
   }
+
+  public boolean moveto(Vec3 target, double pSpeed){
+    if (--pathCooldown <= 0) {
+      this.pathCooldown = 10;  // only compute every 20 tick
+      return this.getNavigation().moveTo(target.x, target.y, target.z, pSpeed);
+    }
+    return true;
+  }
+
   public void stopNav(){
     this.getNavigation().stop();
     this.pathCooldown = 0;

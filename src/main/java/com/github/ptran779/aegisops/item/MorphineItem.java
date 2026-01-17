@@ -1,6 +1,5 @@
 package com.github.ptran779.aegisops.item;
 
-import com.github.ptran779.aegisops.Utils;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;

@@ -6,7 +6,6 @@ import com.github.ptran779.aegisops.goal.AbstractThrottleGoal;
 import com.github.ptran779.aegisops.item.ModularShieldItem;
 import com.github.ptran779.aegisops.network.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
-import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -82,7 +81,6 @@ public class ShieldBashGoal extends AbstractThrottleGoal {
     agent.getLookControl().setLookAt(target);
     if (phase == 0){  // prep shield
       if (tickProgress == -1) {
-        agent.setSpecialMove(0);
         tickProgress = agent.tickCount;
         PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new EntityRenderPacket(agent.getId(), 1));
       } else if (dummy == 15) {
@@ -91,7 +89,6 @@ public class ShieldBashGoal extends AbstractThrottleGoal {
         agent.getSpecialSlot().getOrCreateTag().putLong("DeployTick", agent.level().getGameTime());
       } else if (dummy >= 80) {
         agent.level().playSound(null, agent, SoundEvents.VINDICATOR_CELEBRATE, SoundSource.BLOCKS, 1F, 1F);
-        agent.setSpecialMove(1);
         tickProgress = agent.tickCount;
         PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new EntityRenderPacket(agent.getId(), 1));
         phase++;
@@ -104,7 +101,6 @@ public class ShieldBashGoal extends AbstractThrottleGoal {
         agent.moveto(target, agent.getAttribute(Attributes.MOVEMENT_SPEED).getValue()*1.05);
       } else {
         agent.stopNav();
-        agent.setSpecialMove(2);
         tickProgress = agent.tickCount;
         PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new EntityRenderPacket(agent.getId(), 1));
         phase++;
@@ -131,7 +127,6 @@ public class ShieldBashGoal extends AbstractThrottleGoal {
       if (dummy >= 100){
         phase++;  // just skip for now
         tickProgress = agent.tickCount;
-        agent.setSpecialMove(3);
         PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new EntityRenderPacket(agent.getId(), 1));
       }
     }
@@ -160,12 +155,10 @@ public class ShieldBashGoal extends AbstractThrottleGoal {
         PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new EntityRenderPacket(agent.getId(), 1));
         tickProgress = agent.tickCount;
         if (agent.inventory.gunExistWithAmmo()){
-          agent.setSpecialMove(5);
           agent.equipGun();
           phase+=2;
         }
         else {
-          agent.setSpecialMove(4);
           phase++;
         }
       }

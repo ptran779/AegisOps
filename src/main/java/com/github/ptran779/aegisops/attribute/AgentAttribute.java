@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class AgentAttribute {
   /// original
-  public static Attribute AGENT_ATTACK_SPEED= new RangedAttribute("attribute.name." +AegisOps.MOD_ID + ".agent_attack_speed", 20.0F, 0.000001F, 400.0F).setSyncable(true);
+  public static Attribute AGENT_ATTACK_SPEED= new RangedAttribute("attribute.name." +AegisOps.MOD_ID + ".agent_attack_speed", 2.0F, 0.000001F, 400.0F).setSyncable(true);
 
   /// Modifier
 //  public static final UUID WELL_FEED_SPEED_BOOST_UUID = UUID.fromString("5f27715e-f97d-4266-a4a5-f76cf488414b");

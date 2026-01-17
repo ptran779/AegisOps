@@ -90,7 +90,7 @@ public class Utils {
   }
 
   public enum AniMove {
-    NORM, ATTACK, RELOAD, DISP_RELOAD, SALUTE, SPECIAL;
+    NORM, ATTACK, RELOAD, DISP_RELOAD, SALUTE, SPECIAL, RECOVER;
 //    NORM, ATTACK, RELOAD, DISP_RELOAD, SALUTE, SPECIAL0, SPECIAL1, SPECIAL2, SPECIAL3;
 
     public static final AniMove[] VALUES = values();
@@ -111,6 +111,7 @@ public class Utils {
 
   public static boolean hasFriendlyInLineOfFire(Mob user, LivingEntity target) {
     if (!(user instanceof IEntityTeam userTeam)) return false;
+    if (target == null) return false;
     Vec3 start = user.getEyePosition();
     Vec3 end = target.getEyePosition();
 

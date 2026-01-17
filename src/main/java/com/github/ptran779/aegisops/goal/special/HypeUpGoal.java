@@ -32,7 +32,6 @@ public class HypeUpGoal extends AbstractThrottleGoal {
     done = false;
     this.resetThrottle();
     tickAction = agent.tickCount;
-    agent.setSpecialMove(0);
     PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new EntityRenderPacket(agent.getId(), 1));
   }
   public void stop() {agent.setAniMove(Utils.AniMove.NORM);}

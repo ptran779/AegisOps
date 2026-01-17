@@ -69,7 +69,6 @@ public class PrecisionShotGoal extends AbstractThrottleGoal {
     if(this.seeTime == 20) {
       int dummy = agent.tickCount-tickAction;
       if (tickAction == -1) {
-        agent.setSpecialMove(0);
         tickAction = agent.tickCount;
         PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent),new EntityRenderPacket(agent.getId(), 1));
       } else if (dummy == 60) {

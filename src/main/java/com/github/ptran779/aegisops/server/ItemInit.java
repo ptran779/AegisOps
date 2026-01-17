@@ -2,6 +2,7 @@ package com.github.ptran779.aegisops.server;
 
 import com.github.ptran779.aegisops.AegisOps;
 import com.github.ptran779.aegisops.item.*;
+import com.github.ptran779.aegisops.item.brain.BrainChipItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.registries.DeferredRegister;
@@ -68,4 +69,7 @@ public final class ItemInit {
         () -> new GrenadeItem(new Item.Properties()));
     public static final RegistryObject<Item> VP_ITEM = ITEMS.register("vp_terminal",
         () -> new VPTerminalItem(new Item.Properties()));
+
+    public static final RegistryObject<Item> BRAIN_CHIP_ITEM = ITEMS.register("chip_brain",
+        () -> new BrainChipItem(new Item.Properties().stacksTo(1)));
 }

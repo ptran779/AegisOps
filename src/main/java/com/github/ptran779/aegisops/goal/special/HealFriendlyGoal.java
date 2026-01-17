@@ -59,7 +59,6 @@ public class HealFriendlyGoal extends AbstractThrottleGoal {
     } else if (agent.getSpecialSlot().getItem() instanceof IHealItem healItem){
       if (tickProgress == -1) {
         PacketHandler.CHANNELS.send(PacketDistributor.TRACKING_ENTITY.with(() -> agent), new EntityRenderPacket(agent.getId(), 1));
-        agent.setSpecialMove(healItem.getAniMove());
         tickProgress = agent.tickCount;
         agent.equipSpecial(false);
       } else {

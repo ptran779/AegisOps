@@ -16,11 +16,11 @@ import java.util.Map;
 public class ModularShieldModel extends AbstractAniModel {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(AegisOps.MOD_ID, "modular_shield_layer"), "main");
-	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
-			Map.entry("root", List.of("Main")),
-			Map.entry("Main", List.of("Handle","Plate")),
-			Map.entry("Plate", List.of("LPan","RPan","BPan","TPan"))
-	);
+//	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
+//			Map.entry("root", List.of("Main")),
+//			Map.entry("Main", List.of("Handle","Plate")),
+//			Map.entry("Plate", List.of("LPan","RPan","BPan","TPan"))
+//	);
 
 	public ModularShieldModel(ModelPart root) {
     super(RenderType::entityCutoutNoCull, root.getChild("Main"));
@@ -48,6 +48,6 @@ public class ModularShieldModel extends AbstractAniModel {
 		PartDefinition Handle = Main.addOrReplaceChild("Handle", CubeListBuilder.create().texOffs(0, 20).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 6.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -11.0F, -1.0F));
 		return LayerDefinition.create(meshdefinition, 64, 64);
 	}
-	public String getRootBoneName() {return "Main";}
-	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
+//	public String getRootBoneName() {return "Main";}
+//	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
 }

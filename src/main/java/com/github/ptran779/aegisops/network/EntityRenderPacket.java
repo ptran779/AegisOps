@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 // test for swing for now
 public class EntityRenderPacket {
   private final int entityId;
-  private final int payload;          //action payload -- not sure why I need this...
+  private final int payload;          //fixme action payload -- not sure why I need this...
 
   public EntityRenderPacket(int entityId, int payload){
     this.entityId = entityId;

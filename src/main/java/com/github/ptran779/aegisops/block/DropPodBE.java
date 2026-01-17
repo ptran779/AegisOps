@@ -67,7 +67,7 @@ public class DropPodBE extends BlockEntity{
     handleUpdateTag(pkt.getTag());
   }
 
-  public void tick() {//FIXME reoptimized to redude sync
+  public void tick() {
     if (level != null && !level.isClientSide){
       if (DROP_POD_DELAY_OPEN.get() > -1 && ++delayOpenTick >= DROP_POD_DELAY_OPEN.get()) openDoor = true;
 

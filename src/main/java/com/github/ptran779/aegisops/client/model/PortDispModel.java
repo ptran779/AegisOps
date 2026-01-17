@@ -15,10 +15,10 @@ import java.util.Map;
 public class PortDispModel extends AbstractAniModel {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(AegisOps.MOD_ID, "dispenser_layer"), "main");
-	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
-			Map.entry("root", List.of("bone")),
-			Map.entry("bone", List.of("LeftSlot", "RightSlot", "BottomSlot", "TopPanel2", "TopPanel1", "EPan","WPan","SPan","NPan"))
-	);
+//	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
+//			Map.entry("root", List.of("bone")),
+//			Map.entry("bone", List.of("LeftSlot", "RightSlot", "BottomSlot", "TopPanel2", "TopPanel1", "EPan","WPan","SPan","NPan"))
+//	);
 
 	public PortDispModel(ModelPart root) {
 		super(RenderType::entityCutoutNoCull, root.getChild("bone"));
@@ -92,6 +92,6 @@ public class PortDispModel extends AbstractAniModel {
 
 		return LayerDefinition.create(meshdefinition, 256, 256);
 	}
-	public String getRootBoneName() {return "bone";}
-	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
+//	public String getRootBoneName() {return "bone";}
+//	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
 }

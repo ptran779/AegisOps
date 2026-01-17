@@ -18,24 +18,24 @@ public class BeaconModel extends AbstractAniModel {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(AegisOps.MOD_ID, "beacon_layer"), "main");
 
-	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
-			Map.entry("root", List.of("Body")),
-			Map.entry("Body", List.of("Leg1", "Leg2", "Leg3", "Leg4", "head")),
-			Map.entry("Leg1", List.of("InnerLeg")),
-			Map.entry("InnerLeg", List.of("Feet")),
-			Map.entry("Leg2", List.of("InnerLeg2")),
-			Map.entry("InnerLeg2", List.of("Feet2")),
-			Map.entry("Leg3", List.of("InnerLeg3")),
-			Map.entry("InnerLeg3", List.of("Feet3")),
-			Map.entry("Leg4", List.of("InnerLeg4")),
-			Map.entry("InnerLeg4", List.of("Feet4")),
-			Map.entry("head", List.of("Fin1", "Fin2", "Fin3", "Fin4", "Atena")),
-			Map.entry("Fin1", List.of("bone", "bone2", "bone3")),
-			Map.entry("Fin2", List.of("bone4", "bone5", "bone6")),
-			Map.entry("Fin3", List.of("bone7", "bone8", "bone9")),
-			Map.entry("Fin4", List.of("bone10", "bone11", "bone12")),
-			Map.entry("Atena", List.of("Atena2"))
-	);
+//	public static final Map<String, List<String>> BONE_HIERARCHY = Map.ofEntries(
+//			Map.entry("root", List.of("Body")),
+//			Map.entry("Body", List.of("Leg1", "Leg2", "Leg3", "Leg4", "head")),
+//			Map.entry("Leg1", List.of("InnerLeg")),
+//			Map.entry("InnerLeg", List.of("Feet")),
+//			Map.entry("Leg2", List.of("InnerLeg2")),
+//			Map.entry("InnerLeg2", List.of("Feet2")),
+//			Map.entry("Leg3", List.of("InnerLeg3")),
+//			Map.entry("InnerLeg3", List.of("Feet3")),
+//			Map.entry("Leg4", List.of("InnerLeg4")),
+//			Map.entry("InnerLeg4", List.of("Feet4")),
+//			Map.entry("head", List.of("Fin1", "Fin2", "Fin3", "Fin4", "Atena")),
+//			Map.entry("Fin1", List.of("bone", "bone2", "bone3")),
+//			Map.entry("Fin2", List.of("bone4", "bone5", "bone6")),
+//			Map.entry("Fin3", List.of("bone7", "bone8", "bone9")),
+//			Map.entry("Fin4", List.of("bone10", "bone11", "bone12")),
+//			Map.entry("Atena", List.of("Atena2"))
+//	);
 
 	public BeaconModel(ModelPart root) {
 		super(RenderType::entityCutoutNoCull, root.getChild("Body"));
@@ -157,6 +157,6 @@ public class BeaconModel extends AbstractAniModel {
 
 		return LayerDefinition.create(meshdefinition, 64, 64);
 	}
-	public String getRootBoneName() {return "Body";}
-	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
+//	public String getRootBoneName() {return "Body";}
+//	public List<String> getBoneChild(String boneName) {return BONE_HIERARCHY.get(boneName);}
 }
