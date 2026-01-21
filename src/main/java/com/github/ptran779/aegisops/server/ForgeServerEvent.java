@@ -4,7 +4,7 @@ import com.github.ptran779.aegisops.Config.MlModelManager;
 import com.github.ptran779.aegisops.Config.ServerConfig;
 import com.github.ptran779.aegisops.Config.SkinManager;
 import com.github.ptran779.aegisops.Utils;
-import com.github.ptran779.aegisops.brain.api.BrainInfer;
+import com.github.ptran779.aegisops.brain.api.BrainServer;
 import com.github.ptran779.aegisops.entity.extra.FallingHellPod;
 import com.github.ptran779.aegisops.network.CameraModePacket;
 import net.minecraft.nbt.CompoundTag;
@@ -31,13 +31,13 @@ import static com.github.ptran779.aegisops.server.EntityInit.FALLING_HELL_POD;
 
 @Mod.EventBusSubscriber(modid = AegisOps.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeServerEvent {
-  public static BrainInfer BRAIN_INFER = null;
+  public static BrainServer BRAIN_INFER = null;
   public Thread workerThread;
 
   @SubscribeEvent
   public static void onServerStarting(ServerStartingEvent event) {
     AgentConfigManager.serverGenerateDefault();
-    BRAIN_INFER = new BrainInfer();
+    BRAIN_INFER = new BrainServer();
     BRAIN_INFER.start();
 //    System.out.println("[AegisOps] BrainInfer started");
     SkinManager.reload();
@@ -48,7 +48,6 @@ public class ForgeServerEvent {
     if (BRAIN_INFER != null) {
       BRAIN_INFER.stop();   // stops loop + interrupts thread
       BRAIN_INFER = null;
-//      System.out.println("[AegisOps] BrainInfer stopped");
     }
 
     MlModelManager.cleanAll();
@@ -60,11 +59,16 @@ public class ForgeServerEvent {
     ServerLevel level = event.getServer().getLevel(Level.OVERWORLD);  // this level should always run
     if (level == null) return;
     if (level.getGameTime() % 20 != 0) return;
-    while (BRAIN_INFER.resultQueue.peek() != null) {
-      BrainInfer.resultPayload payload = BRAIN_INFER.resultQueue.poll();
-//      if (payload.agent != null && payload.agent.isAlive()) {
+    //infer
+    while (BRAIN_INFER.resultQueueInf.peek() != null) {
+      BrainServer.InfDatOut payload = BRAIN_INFER.resultQueueInf.poll();
       System.out.println("Agent " + payload.agentUUID + " got a behavior update");
       System.out.println(Arrays.toString(payload.decision));
+    }
+    //train
+    while (BRAIN_INFER.resultQueueTrain.peek() != null) {
+      BrainServer.TrainDatOut payload = BRAIN_INFER.resultQueueTrain.poll();
+      System.out.println("Agent " + payload.agentUUID + " got a a new brain");
     }
   }
 

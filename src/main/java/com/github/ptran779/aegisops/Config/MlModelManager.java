@@ -1,5 +1,6 @@
 package com.github.ptran779.aegisops.Config;
 
+import com.github.ptran779.aegisops.brain.ml.DataManager;
 import com.github.ptran779.aegisops.brain.ml.DenseLayer;
 import com.github.ptran779.aegisops.brain.ml.ML;
 import com.github.ptran779.aegisops.brain.ml.RNNLayer;
@@ -18,6 +19,7 @@ public class MlModelManager {
   public static class Item{
     public int lastAccess;
     public ML model;
+    DataManager dataManager;
 
     public Item(ML model, int lastAccess) {
       this.lastAccess = lastAccess;
@@ -99,16 +101,13 @@ public class MlModelManager {
       System.out.println("A new ChipBrain object created");
       ML model = new ML();
       // let's add in a bunch of layer dummy model
-      DenseLayer l1 = new DenseLayer(20, 15);
-      RNNLayer l2 = new RNNLayer(15, 10);
+//      DenseLayer l1 = new DenseLayer(20, 10);
+      RNNLayer l1 = new RNNLayer(20, 10);
 
       // initialized random for now. fixme add load serialized
       l1.randomInit(-1, 1);
-      l2.randomInit(-1, 1);
-      l2.zeroHidden();
 
       model.addLayer(l1);
-      model.addLayer(l2);
 
       return new Item(model, gameTick);
     }

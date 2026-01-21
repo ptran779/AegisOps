@@ -1,14 +1,11 @@
 package com.github.ptran779.aegisops.brain.agent;
 
 import com.github.ptran779.aegisops.Utils;
-import com.github.ptran779.aegisops.brain.api.BrainInfer;
 import com.github.ptran779.aegisops.brain.api.Sensor;
 import com.github.ptran779.aegisops.brain.api.ThrottleSensor;
 import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-
-import static com.github.ptran779.aegisops.server.ForgeServerEvent.BRAIN_INFER;
 
 public class TestBrain extends com.github.ptran779.aegisops.brain.api.Brain {
   protected AbstractAgentEntity agent;

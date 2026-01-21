@@ -2,7 +2,7 @@ package com.github.ptran779.aegisops.server;
 
 import com.github.ptran779.aegisops.AegisOps;
 import com.github.ptran779.aegisops.item.*;
-import com.github.ptran779.aegisops.item.brain.BrainChipItem;
+import com.github.ptran779.aegisops.item.BrainChipItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.registries.DeferredRegister;
