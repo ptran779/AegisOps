@@ -4,6 +4,7 @@ import com.github.ptran779.aegisops.AegisOps;
 import com.github.ptran779.aegisops.network.Agent.*;
 import com.github.ptran779.aegisops.network.player.CameraModePacket;
 import com.github.ptran779.aegisops.network.player.KeyBindPacket;
+import com.github.ptran779.aegisops.network.player.serverConfigPacket;
 import com.github.ptran779.aegisops.network.render.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.render.StructureRenderPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -26,5 +27,6 @@ public class PacketHandler {
     CHANNELS.registerMessage(id++, EntityRenderPacket.class, EntityRenderPacket::encode, EntityRenderPacket::decode, EntityRenderPacket::handle);
     CHANNELS.registerMessage(id++, StructureRenderPacket.class, StructureRenderPacket::encode, StructureRenderPacket::decode, StructureRenderPacket::handle);
     CHANNELS.registerMessage(id++, KeyBindPacket.class, KeyBindPacket::encode, KeyBindPacket::decode, KeyBindPacket::handle);
+    CHANNELS.registerMessage(id++, serverConfigPacket.class, serverConfigPacket::encode, serverConfigPacket::decode, serverConfigPacket::handle);
   }
 }

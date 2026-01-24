@@ -2,7 +2,6 @@ package com.github.ptran779.aegisops.goal.common;
 
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.attribute.AgentAttribute;
-import com.github.ptran779.aegisops.client.animation.AgentLivingAnimation;
 import com.github.ptran779.aegisops.entity.agent.AbstractAgentEntity;
 import com.github.ptran779.aegisops.network.render.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
@@ -134,11 +133,11 @@ public class AgentAttackGoal extends Goal {
         } else if (targetDistSq > gunLowRangeSq) { // snipe that
           agent.stopNav();
           if (agent.shootGun(true)) {
-            attackCoolDown =  computeAttackCooldown() + ((int) AgentLivingAnimation.RELOAD.lengthInSeconds())*20;  // reload should take time
+            attackCoolDown =  computeAttackCooldown() + 50;  // reload should take time
           } else {attackCoolDown = computeAttackCooldown();};
         } else if (targetDistSq > meleeRangeSq || !meleeYes) { // too close , move further, or someone has no melee :(
           if (agent.shootGun(false)) {
-            attackCoolDown =  computeAttackCooldown() + ((int) AgentLivingAnimation.RELOAD.lengthInSeconds())*20;  // reload should take time
+            attackCoolDown =  computeAttackCooldown() + 50;  // reload should take time
           } else {attackCoolDown = computeAttackCooldown();};
         }
       }

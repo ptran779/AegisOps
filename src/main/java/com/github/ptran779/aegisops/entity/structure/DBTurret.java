@@ -11,6 +11,7 @@ import com.github.ptran779.aegisops.network.render.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import com.github.ptran779.aegisops.server.EntityInit;
 import com.github.ptran779.aegisops.server.ItemInit;
+import com.mojang.logging.LogUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -33,12 +34,15 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
+import org.slf4j.Logger;
+
 
 import static com.github.ptran779.aegisops.config.ServerConfig.BD_TURRET_DPS;
 
 public class DBTurret extends AbstractAgentStruct implements IEntityTarget {
   public static final int T_OFFSET = -40;
   private Utils.TargetMode targetMode = Utils.TargetMode.OFF;
+ private static final Logger LOGGER = LogUtils.getLogger();
 
   // sync dat
   public static final EntityDataAccessor<Boolean> DEPLOYED = SynchedEntityData.defineId(DBTurret.class, EntityDataSerializers.BOOLEAN);
@@ -122,7 +126,7 @@ public class DBTurret extends AbstractAgentStruct implements IEntityTarget {
         } else if (off_tick == 180 || off_tick == 190){
           level.playSound(null, this, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 1.2f, 1.0f);
           level.sendParticles(ParticleTypes.COMPOSTER, getX(), getY(), getZ(), 20, 0, 2, 0, 0.02);
-        } else if (off_tick == 200) {
+        } else if (off_tick >= 200) {
           entityData.set(DEPLOYED, true);
         }
       }

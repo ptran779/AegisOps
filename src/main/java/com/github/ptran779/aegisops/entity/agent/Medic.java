@@ -25,11 +25,6 @@ public class Medic extends AbstractAgentEntity {
         this.agentType = "Medic";
     }
 
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-    }
-
     protected void registerGoals() {
         super.registerGoals();
         this.goalSelector.addGoal(2, new HealFriendlyGoal(this, 60));
@@ -38,27 +33,6 @@ public class Medic extends AbstractAgentEntity {
         this.goalSelector.addGoal(3, new AgentAttackGoal(this, 4, 12, 24));
     }
 
-    public void tick() {
-        super.tick();
-    }
-
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor worldIn, DifficultyInstance difficultyIn, MobSpawnType reason, @Nullable SpawnGroupData spawnDataIn, @Nullable CompoundTag dataTag) {
-        return super.finalizeSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
-    }
-
-    public static void updateClassConfig(@Nonnull AgentConfig config) {
-      Medic.config = config;}
-
-    @Override
-    public boolean isEquipableGun(ItemStack stack) {
-        CompoundTag nbt = stack.getOrCreateTag();
-        String gunId = nbt.getString(GUN_ID_TAG);
-        if (gunId.isEmpty()) return false;
-        return config.allowGuns.contains(gunId);
-    }
-    public boolean isEquipableMelee(ItemStack stack) {
-        return config.allowMelees.contains(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
-    }
-    public int getMaxVirtualAmmo(){return config.maxVirtualAmmo;}
-    public int getAmmoPerCharge(){return config.chargePerAmmo;}
+    public static void updateClassConfig(@Nonnull AgentConfig config) {Medic.config = config;}
+    public AgentConfig getAgentConfig() {return config;}
 }

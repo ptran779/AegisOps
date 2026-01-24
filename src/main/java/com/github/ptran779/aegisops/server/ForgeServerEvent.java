@@ -5,6 +5,7 @@ import com.github.ptran779.aegisops.config.SkinManager;
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.extra.FallingHellPod;
 import com.github.ptran779.aegisops.network.player.CameraModePacket;
+import com.github.ptran779.aegisops.network.player.serverConfigPacket;
 import com.github.ptran779.aegisops.player.TaticalCommandProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -37,7 +38,6 @@ public class ForgeServerEvent {
   @SubscribeEvent
   public static void onConfigLoad(ServerStartingEvent event) {
     AgentConfigManager.serverGenerateDefault();
-    SkinManager.reload();
   }
 
   @SubscribeEvent
@@ -75,9 +75,21 @@ public class ForgeServerEvent {
   @SubscribeEvent
   public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
     Player player = event.getEntity();
+    // sync server config so everyone has the same copy of agent config
+    if (player instanceof ServerPlayer serverPlayer) {
+      // Get the "Long String" from your manager
+      String json = AgentConfigManager.getSyncPayload();
+
+      // Send the packet (using your channel instance name 'CHANNELS')
+      CHANNELS.send(
+          PacketDistributor.PLAYER.with(() -> serverPlayer),
+          new serverConfigPacket(json) // Or S2CAgentConfigSyncPacket, whatever you named it
+      );
+    }
+
+    // 1st time joining get to be delivered in a hell pod :)
     CompoundTag persistentData = player.getPersistentData();
     CompoundTag data;
-
     if (!persistentData.contains(Player.PERSISTED_NBT_TAG)) {
       data = new CompoundTag();
       persistentData.put(Player.PERSISTED_NBT_TAG, data);

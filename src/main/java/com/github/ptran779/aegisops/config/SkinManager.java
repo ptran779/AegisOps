@@ -5,8 +5,9 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-import java.text.Normalizer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -15,11 +16,15 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
+import static com.github.ptran779.aegisops.Utils.makeSafeSkinName;
+
+@OnlyIn(Dist.CLIENT)
 public class SkinManager {
   private static final Minecraft MC = Minecraft.getInstance();
   private static final Path SKIN_DIR = Path.of("config/aegisops/skins");
   private static final String NAMESPACE = AegisOps.MOD_ID+"_dynamic";
-  private static final ResourceLocation MISSING_TEXTURE = new ResourceLocation(AegisOps.MOD_ID, "textures/entities/defaultslim.png");
+  private static final ResourceLocation MALE_MISSING = new ResourceLocation(AegisOps.MOD_ID, "textures/entities/defaultwide.png");
+  private static final ResourceLocation FEMALE_MISSING = new ResourceLocation(AegisOps.MOD_ID, "textures/entities/defaultslim.png");
 
   // Indexed by gender: 0 = male, 1 = female
   private static final Map<String, ResourceLocation> MALE_SKINS = new HashMap<>();
@@ -35,11 +40,15 @@ public class SkinManager {
       Files.createDirectories(femaleDir);
 
       // Copy default skins only if the folders were just created (i.e., empty)
-      if (Files.list(maleDir).findAny().isEmpty()) {
-        copyDefault("/assets/aegisops/textures/entities/defaultwide.png", maleDir.resolve("defaultwide.png"));
+      try (Stream<Path> entries = Files.list(maleDir)) {
+        if (entries.findAny().isEmpty()) {
+          copyDefault("/assets/aegisops/textures/entities/defaultwide.png", maleDir.resolve("defaultwide.png"));
+        }
       }
-      if (Files.list(femaleDir).findAny().isEmpty()) {
-        copyDefault("/assets/aegisops/textures/entities/defaultslim.png", femaleDir.resolve("defaultslim.png"));
+      try (Stream<Path> entries = Files.list(femaleDir)) {
+        if (entries.findAny().isEmpty()) {
+          copyDefault("/assets/aegisops/textures/entities/defaultslim.png", femaleDir.resolve("defaultslim.png"));
+        }
       }
 
       //load the dynamic resource
@@ -59,35 +68,6 @@ public class SkinManager {
       System.err.println("[AegisOps] Failed to copy default skin: " + internalPath);
       e.printStackTrace();
     }
-  }
-
-  private static String makeSafeSkinName(String rawFileName) {
-    if (rawFileName == null || rawFileName.isEmpty()) return "skin_default";
-
-    // 1. Strip extension if present
-    int dotIndex = rawFileName.lastIndexOf('.');
-    String base = (dotIndex > 0 ? rawFileName.substring(0, dotIndex) : rawFileName);
-
-    // 2. Lowercase
-    base = base.toLowerCase(Locale.ROOT);
-
-    // 3. Normalize Unicode → ASCII
-    base = Normalizer.normalize(base, Normalizer.Form.NFKD)
-        .replaceAll("\\p{M}", ""); // removes diacritics
-
-    // 4. Replace illegal ResourceLocation characters with _
-    base = base.replaceAll("[^a-z0-9._-]", "_");
-
-    // 5. Collapse multiple underscores and trim edges
-    base = base.replaceAll("_+", "_")
-        .replaceAll("^_|_$", "");
-
-    // 6. Fallback if empty after cleaning
-    if (base.isEmpty()) base = "skin";
-
-    // 7. Append short hash to avoid collisions
-    String hash = Integer.toHexString(rawFileName.hashCode());
-    return base + "_" + hash;
   }
 
   private static void loadSkinsFromFolder(String genderKey, Path folder, Map<String, ResourceLocation> skinMap) {
@@ -124,9 +104,9 @@ public class SkinManager {
     Map<String, ResourceLocation> map = slim ? FEMALE_SKINS : MALE_SKINS;
     ResourceLocation rl = map.get(key.toLowerCase());
     if (rl == null) {
-      System.err.println("[AegisOps] No skin found for key: " + key + "wtf?");
+      System.err.println("[AegisOps] No skin found for key: " + key);
     }
-    return map.getOrDefault(key.toLowerCase(), MISSING_TEXTURE);
+    return map.getOrDefault(key.toLowerCase(), slim ? FEMALE_MISSING : MALE_MISSING);
   }
 
   public static void reload() {
@@ -139,10 +119,5 @@ public class SkinManager {
     MALE_SKINS.clear();
     FEMALE_SKINS.clear();
     init();
-  }
-
-  public static String renerateRandom(boolean slim) {
-    List<String> keys = new ArrayList<>((slim ? FEMALE_SKINS : MALE_SKINS).keySet());
-    return keys.get(ThreadLocalRandom.current().nextInt(keys.size()));
   }
 }

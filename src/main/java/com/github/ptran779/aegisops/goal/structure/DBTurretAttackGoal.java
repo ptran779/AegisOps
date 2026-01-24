@@ -6,6 +6,8 @@ import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
 
+import static com.github.ptran779.aegisops.entity.structure.DBTurret.DEPLOYED;
+
 public class DBTurretAttackGoal extends Goal {
   private final DBTurret turret;
   private final double maxRangeSq;
@@ -25,7 +27,7 @@ public class DBTurretAttackGoal extends Goal {
   }
 
   public boolean canUse() {
-    return turret.getTarget() != null && turret.getTarget().isAlive() && WandECheck();
+    return turret.getEntityData().get(DEPLOYED) && turret.getTarget() != null && turret.getTarget().isAlive() && WandECheck();
   }
 
   public boolean canContinueToUse() {

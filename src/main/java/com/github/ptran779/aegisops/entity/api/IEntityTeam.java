@@ -13,18 +13,36 @@ public interface IEntityTeam {
   }
 
   default boolean isFriendlyPlayer(Player player, Level level) {
-    // Boss
-    if (getBossUUID() == null) {return false;}
+    // 1. No Boss? Not friendly.
+    if (getBossUUID() == null) return false;
+    // 2. Is the player the Boss? Friendly.
     if (getBossUUID().equals(player.getUUID())) return true;
-    // Team
-    return player.getTeam().getName().equals(level.getPlayerByUUID(getBossUUID()).getTeam().getName());  // same team
-  };
-  default boolean isFriendlyMod(IEntityTeam teamer, Level level){
-    // boss
-    if (getBossUUID() == null || teamer.getBossUUID() == null) {return false;}
-    if (getBossUUID().equals(teamer.getBossUUID())) {return true;}
-    //team with boss
-    return level.getPlayerByUUID(teamer.getBossUUID()).getTeam().getName().equals(level.getPlayerByUUID(getBossUUID()).getTeam().getName());
-  };
+    // 3. Does the TARGET player have a team? If no, cannot be teammates.
+    if (player.getTeam() == null) return false;
+    // 4. Is the BOSS online? If not, we can't check their team.
+    Player boss = level.getPlayerByUUID(getBossUUID());
+    if (boss == null) return false;
+    // 5. Does the BOSS have a team?
+    if (boss.getTeam() == null) return false;
+    // 6. Compare teams
+    return player.getTeam().getName().equals(boss.getTeam().getName());
+  }
+
+  default boolean isFriendlyMod(IEntityTeam teamer, Level level) {
+    // 1. Missing UUIDs?
+    if (getBossUUID() == null || teamer.getBossUUID() == null) return false;
+    // 2. Same Boss? Friendly.
+    if (getBossUUID().equals(teamer.getBossUUID())) return true;
+    // 3. Get both Boss entities
+    Player myBoss = level.getPlayerByUUID(getBossUUID());
+    Player otherBoss = level.getPlayerByUUID(teamer.getBossUUID());
+
+    // 4. Are both bosses online?
+    if (myBoss == null || otherBoss == null) return false;
+    // 5. Do both bosses have teams?
+    if (myBoss.getTeam() == null || otherBoss.getTeam() == null) return false;
+    // 6. Compare teams
+    return myBoss.getTeam().getName().equals(otherBoss.getTeam().getName());
+  }
   UUID getBossUUID();
 }

@@ -1,5 +1,6 @@
 package com.github.ptran779.aegisops.entity.agent;
 
+import com.github.ptran779.aegisops.config.AgentConfig;
 import com.github.ptran779.aegisops.config.SkinManager;
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.inventory.AgentInventory;
@@ -18,6 +19,7 @@ import com.tacz.guns.api.item.IAmmoBox;
 import com.tacz.guns.api.item.gun.AbstractGunItem;
 import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.util.AttachmentDataUtils;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -58,6 +60,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.github.ptran779.aegisops.attribute.AgentAttribute.*;
+import static com.tacz.guns.api.item.nbt.GunItemDataAccessor.GUN_ID_TAG;
 
 public abstract class AbstractAgentEntity extends PathfinderMob implements InventoryCarrier, MenuProvider, IEntityTeam, IEntityTarget, IEntityRender {
   public String agentType = "Template";
@@ -187,6 +190,8 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
     setAniMove(Utils.AniMove.SPECIAL);
     this.entityData.set(SPECIAL_MOVE, move);
   }
+
+  public abstract AgentConfig getAgentConfig();
 
   /// Combat
   public boolean shootGun(boolean precision){   ///  true = long reload, false = just compute cooldown,
@@ -465,13 +470,14 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
 //    this.setAttackPlayer(nbt.getBoolean("attack_player"));
     this.setFollowMode(Utils.FollowMode.values()[nbt.getInt("movement")], this.getBossUUID());
     this.setVirtualAmmo(nbt.getInt("virtual_ammo"));
+    this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
   }
 
   public void initCosmetic(){
     boolean isFemale = ThreadLocalRandom.current().nextBoolean();
     this.setCustomName(Component.literal(Utils.randomName(isFemale)));
     setFemale(isFemale);
-    setSkin(SkinManager.renerateRandom(isFemale));
+    setSkin(isFemale ? Utils.makeSafeSkinName(getAgentConfig().defaultFemaleSkin) : Utils.makeSafeSkinName(getAgentConfig().defaultMaleSkin));
   }
   public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag) {
     SpawnGroupData data = super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
@@ -480,7 +486,7 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
       boolean isFemale = ThreadLocalRandom.current().nextBoolean();
       this.setCustomName(Component.literal(Utils.randomName(isFemale)));
       setFemale(isFemale);
-      setSkin(SkinManager.renerateRandom(isFemale));
+      setSkin(isFemale ? Utils.makeSafeSkinName(getAgentConfig().defaultFemaleSkin) : Utils.makeSafeSkinName(getAgentConfig().defaultMaleSkin));
     }
     return data;
   }
@@ -551,8 +557,19 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
   public ItemStack getGunSlot(){return inventory.getItem(gunSlot);}
 
   // for overwrite later in final class
-  public boolean isEquipableGun(ItemStack stack) {return false;}
-  public boolean isEquipableMelee(ItemStack stack) {return false;}
-  public int getMaxVirtualAmmo(){return 0;}
-  public int getAmmoPerCharge(){return 1;}
+  public boolean isEquipableGun(ItemStack stack) {
+    CompoundTag nbt = stack.getOrCreateTag();
+    String gunId = nbt.getString(GUN_ID_TAG);
+    if (gunId.isEmpty()) return false;
+    return getAgentConfig().allowGuns.contains(gunId);
+  }
+  public boolean isEquipableMelee(ItemStack stack) {
+    if (stack.isEmpty()) return false;
+    return (getAgentConfig().allowMelees.contains(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString()) ||
+        stack.getTags().anyMatch(tagKey -> getAgentConfig().allowMelees.contains("#" + tagKey.location())));
+  }
+  public int getMaxVirtualAmmo(){return getAgentConfig().maxVirtualAmmo;}
+  public int getAmmoPerCharge(){return getAgentConfig().chargePerAmmo;}
+
+
 }
