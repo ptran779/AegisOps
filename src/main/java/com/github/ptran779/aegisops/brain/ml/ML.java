@@ -1,9 +1,7 @@
 package com.github.ptran779.aegisops.brain.ml;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import javax.annotation.Nullable;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,17 +9,24 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-/// fixme optimized new usage in all layer during back prog
 public class ML {
+  public static final int VERSION = 1;   // used in serialized/deserialized for safety check later
   protected List<AbstractLayer> layers;
   protected Supplier<Float> scoreFunc;
-  protected Function<float[], Integer> actionFunc;
+  protected Function<float[], Integer> actionFunc;  // fixme what is it for?
 
-  protected MathUtil.arr2D dErrs;   // for chain event derivative back pass  fixme
   public float posLearnRate = 0.1f;
   public float negLearnRate = 1f;
-  public float lr = 0.001f, beta1 = 0.9f, beta2 = 0.99f, eps = 0.001f;
-  public int batchSize = 1;
+  public float lr = 0.001f, beta1 = 0.9f, beta2 = 0.99f, eps = 1e-8f;
+  public int batchSize = 8;
+  public int maxEpochs = 1, patience = 3;
+  public float minDelta = 5;
+  // used to prepare dataset. For convenience of UI management, I just leave it here
+  public float valFrac = 0.2f;
+  public float testFrac = 0.2f;
+  public boolean dataCollector = false;
+
+  protected MathUtil.arr2D dErrs;   // for chain event derivative back pass
 
   public ML() {
     layers = new ArrayList<>();
@@ -33,10 +38,33 @@ public class ML {
       AbstractLayer copyLayer = layer.clone();
       copy.layers.add(copyLayer);
     }
+    copy.scoreFunc = scoreFunc;
+    copy.actionFunc = actionFunc;
+    copy.posLearnRate = posLearnRate;
+    copy.negLearnRate = negLearnRate;
+    copy.lr = lr;
+    copy.beta1 = beta1;
+    copy.beta2 = beta2;
+    copy.eps = eps;
+    copy.batchSize = batchSize;
+    copy.maxEpochs = maxEpochs;
+    copy.patience = patience;
+    copy.minDelta = minDelta;
+    copy.valFrac = valFrac;
+    copy.testFrac = testFrac;
+
     return copy;
   }
 
-  public List<AbstractLayer> getLayers(){return layers;}
+  public int getInsize(){
+    if (layers.isEmpty()) {return 0;}
+    return layers.get(0).getInputSize();
+  }
+
+  public int getOutsize(){
+    if (layers.isEmpty()) {return 0;}
+    return layers.get(layers.size()-1).getOutputSize();
+  }
 
   // return false if layer violate size coupling
   public boolean addLayer(AbstractLayer layer) {
@@ -89,7 +117,7 @@ public class ML {
         // eval score & convert to error
         float score = batchY[i][j];
         int action = batchA[i][j];
-        dErrBack.set(nchain-j-1, action, score>0 ? -score*posLearnRate : score*negLearnRate);
+        dErrBack.set(nchain-j-1, action, score>0 ? score*posLearnRate : -score*negLearnRate);
       }
 
       // backward
@@ -108,44 +136,46 @@ public class ML {
 
     // 1. Validation & Setup
     if (batchSize < 1) { System.out.println("Batch size < 1"); return 0; }
-    if (trainX.length == 0 || evalX.length == 0) return 0;
+    if (evalX == null || evalX.length == 0) {return 0;}
+//    if (trainX.length == 0 || evalX.length == 0) return 0;
 
-    // 2. Shuffle Training Indices
-    // We can't shuffle the big arrays directly easily, so we shuffle an index list
-    Integer[] indices = new Integer[trainX.length];  //fixme optimiza
-    for (int i = 0; i < indices.length; i++) indices[i] = i;
-    // Fisher-Yates shuffle
-    java.util.Collections.shuffle(Arrays.asList(indices));
+    if (trainX != null && trainX.length > 0) {
+      // 2. Shuffle Training Indices
+      // We can't shuffle the big arrays directly easily, so we shuffle an index list
+      Integer[] indices = new Integer[trainX.length];  //fixme optimize me with preallocation
+      for (int i = 0; i < indices.length; i++) indices[i] = i;
+      // Fisher-Yates shuffle
+      java.util.Collections.shuffle(Arrays.asList(indices));
 
-    // 3. Training Loop
-    pauseTraining(false); // Enable Dropout/Noise if any
+      // 3. Training Loop
+      pauseTraining(false); // Enable Dropout/Noise if any
 
-    for (int i = 0; i < trainX.length; i += batchSize) {
-      // A. Slice the Batch
-      int end = Math.min(i + batchSize, trainX.length);
-      int actualBatchSize = end - i;
-      //fixme need optimization
-      float[][][] batchX = new float[actualBatchSize][][];
-      int[][] batchA = new int[actualBatchSize][];
-      float[][] batchY = new float[actualBatchSize][];
+      for (int i = 0; i < trainX.length; i += batchSize) {
+        // A. Slice the Batch
+        int end = Math.min(i + batchSize, trainX.length);
+        int actualBatchSize = end - i;
+        //fixme need optimization with batch slicing and pre allocated block
+        float[][][] batchX = new float[actualBatchSize][][];
+        int[][] batchA = new int[actualBatchSize][];
+        float[][] batchY = new float[actualBatchSize][];
 
-      // Fill the batch using the shuffled indices
-      for (int b = 0; b < actualBatchSize; b++) {
-        int idx = indices[i + b];
-        batchX[b] = trainX[idx];
-        batchA[b] = trainA[idx];
-        batchY[b] = trainY[idx];
+        // Fill the batch using the shuffled indices
+        for (int b = 0; b < actualBatchSize; b++) {
+          int idx = indices[i + b];
+          batchX[b] = trainX[idx];
+          batchA[b] = trainA[idx];
+          batchY[b] = trainY[idx];
+        }
+
+        // B. Train Step
+        batchStep(batchX, batchA, batchY);
       }
-
-      // B. Train Step
-      batchStep(batchX, batchA, batchY);
     }
-
     // 4. Evaluation Loop
     pauseTraining(true);
 
     float totalAlignment = 0;
-    float totalPossibleScore = 0; // To normalize the result later
+    float totalPossibleScore = 0; // To normalize the result later fixme
 
     for (int i = 0; i < evalX.length; i++) {
       float[][] chainInputs = evalX[i];
@@ -181,41 +211,63 @@ public class ML {
     // 0.0 = Random guessing / Neutral
     // -1.0 = Perfect failure (AI loves death and hates life)
     float weightedAccuracy = (totalPossibleScore == 0) ? 0 : totalAlignment / totalPossibleScore;
-    System.out.println("Epoch Eval -> Weighted Alignment: " + String.format("%.2f", weightedAccuracy * 100) + "%");
+//    System.out.println("Epoch Eval -> Weighted Alignment: " + String.format("%.2f", weightedAccuracy * 100) + "%");
 
     return weightedAccuracy;
   }
 
+  public record TrainStat(
+      long trainTimeNs,
+      float startScore,
+      float endScore,
+      float epochRun
+  ) {}
 
-  public void startTraining(DataManager dataMan, int maxEpochs, int stopIfNotImproved) {
+  //MASTER START TRAING... config this
+  public TrainStat startTraining(DataManager dataMan) {
+    long topStartTime = System.nanoTime();
     turnOnTrainMode(true);
     // prepare data should be done ahead of time and only call fetch since you might want to extend training
     DataManager.ItemPack[] epocSet = dataMan.fetchTrainEpoc();
+    DataManager.ItemPack testSet = dataMan.fetchTest();
     int epocCount = 0;
-    float lastScore = -1000;
     float bestScore = -1000;
+    float lastBestScore = -1000;
     int failC = 0;
 
-    while (epocCount < maxEpochs && failC < stopIfNotImproved) {
+    // get some data pre train
+    float preScore = epoch(new float[0][][], new int[0][], new float[0][],
+        testSet.input, testSet.action, testSet.output);
+    System.out.printf("PreTrain Evaluation Score: %.5f (%s%%)%n", preScore, String.format("%.2f", preScore * 100));
+
+    // epoc loop
+    while (epocCount < maxEpochs && failC < patience) {
       //timer
       long startTime = System.nanoTime();
       float score = epoch(epocSet[0].input, epocSet[0].action, epocSet[0].output, epocSet[1].input, epocSet[1].action, epocSet[1].output);
       //stop time
       long endTime = System.nanoTime();
       epocCount++;
-      failC = lastScore > score ? failC + 1 : 0;
-      lastScore = score;
+      if (score > lastBestScore + minDelta) {
+        failC = 0; // We improved significantly! Reset counter.
+        lastBestScore = score;
+      } else {
+        failC++;   // We didn't improve enough. Count a failure.
+      }
       float durationMs = (endTime - startTime) / 1_000_000f;
       bestScore = Math.max(score, bestScore);
       System.out.printf("Epoch [%3d] | Time: %6.1fms | Score: %.5f | Best: %.5f | Fail: %d/%d%n",
-          epocCount, durationMs, score, bestScore, failC, stopIfNotImproved);
+          epocCount, durationMs, score, bestScore, failC, patience);
     }
 
-    System.out.println("train done I think"); // place holder don change this
-    turnOnTrainMode(false);
-  }
+    // run final test
+    float postScore = epoch(new float[0][][], new int[0][], new float[0][],
+        testSet.input, testSet.action, testSet.output);
+    System.out.printf("Final Evaluation Score: %.5f (%s%%)%n", postScore, String.format("%.2f", postScore * 100));
 
-//  private void
+    turnOnTrainMode(false);
+    return new TrainStat(System.nanoTime()-topStartTime, preScore, postScore, epocCount);
+  }
 
   public void setScoreFunc(Supplier<Float> scoreFunc) {this.scoreFunc = scoreFunc;}
   public void setActionFunc(Function<float[],Integer> actionFunc) {this.actionFunc = actionFunc;}
@@ -248,15 +300,28 @@ public class ML {
     return exp;
   }
 
-  public byte[] serialize() {
+  // for disk IO
+  public byte[] diskSerialize() {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       DataOutputStream dos = new DataOutputStream(baos);
 
-      // 1. number of layers
+      // version for safety check
+      dos.writeInt(VERSION);
+
+      // train config param
+      dos.writeFloat(lr);dos.writeFloat(beta1);dos.writeFloat(beta2);dos.writeFloat(eps);
+      dos.writeFloat(posLearnRate);dos.writeFloat(negLearnRate);
+      dos.writeInt(batchSize);
+      dos.writeInt(maxEpochs);dos.writeInt(patience);dos.writeFloat(minDelta);
+      dos.writeFloat(valFrac);dos.writeFloat(testFrac);
+
+      dos.writeBoolean(dataCollector);
+
+      // number of layers
       dos.writeInt(layers.size());
 
-      // 2. for each layer
+      // for each layer dynamic
       for (AbstractLayer layer : layers) {
         // write a simple type ID
         dos.writeInt(layer.getLayerID());
@@ -273,12 +338,19 @@ public class ML {
       return new byte[0];
     }
   }
-
-  public static ML deserialize(byte[] data) {
+  public static ML diskDeserialize(byte[] data) {
     try {
       ML model = new ML();
       DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
-
+      // read first for version check
+      int modelVersion = dis.readInt();
+      if (modelVersion != VERSION) {
+        System.out.println("[Aegisops Critical] model has incorrect version. Got " + modelVersion + ", expected " + VERSION);
+        return null;
+      }
+      // config load
+      modelConfigByteLoad(model, dis);
+      // layer load
       int numLayers = dis.readInt();
       for (int i = 0; i < numLayers; i++) {
         int typeId = dis.readInt();
@@ -290,7 +362,8 @@ public class ML {
         if (typeId == DenseLayer.LAYER_ID) layer = new DenseLayer(0, 0);
         else if(typeId == ReluLayer.LAYER_ID) layer = new ReluLayer(0);
         else if (typeId == RNNLayer.LAYER_ID) layer = new RNNLayer(0, 0);
-        else throw new RuntimeException("Unknown layer type in deserialization");
+        else if (typeId == LeakyReluLayer.LAYER_ID) { layer = new LeakyReluLayer(0);
+        } else throw new RuntimeException("[Aegisops crash] Unknown layer type in deserialization");  // maybe return null
 
         layer.deserialize(ByteBuffer.wrap(layerBytes));
         model.addLayer(layer);
@@ -299,6 +372,7 @@ public class ML {
       return model;
     } catch (Exception e) {
       e.printStackTrace();
+      System.out.println("[Aegisops Critical] Failed to deserialize ML]");
       return null;
     }
   }
@@ -312,4 +386,111 @@ public class ML {
     }
     return sb.toString();
   }
+
+  // for network composition
+  //input size, numberOfLayer, layer1O, layer2O... last layer output has the output of the model
+  public byte[] modelSimpleSerialize() {
+    // 1. Calculate exact size needed: 11 int/float + 2 per layer
+    int totalBytes = 8 + (layers.size() * 8);
+    ByteBuffer buffer = ByteBuffer.allocate(totalBytes);
+
+    // 2. Write Header (Matches screen.deserializeModel reading order)
+    buffer.putInt(getInsize());      // Reads into 'modelInputSize'
+    buffer.putInt(layers.size());    // Reads into 'numLayers'
+
+    // 3. Write Body
+    for (AbstractLayer layer : layers) {
+      buffer.putInt(layer.getLayerID());   // Reads into addLayer(type...)
+      buffer.putInt(layer.getOutputSize());// Reads into addLayer(...node)
+    }
+
+    return buffer.array();
+  }
+  public static ML createModelFromSerialization(byte[] data, boolean ranInit) {
+    try {
+      if (data == null || data.length == 0) return null;  // for clearing model
+      ML model = new ML();
+      DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
+      int inputSize = dis.readInt();
+      int numLayers = dis.readInt();
+
+      for (int i = 0; i < numLayers; i++) {
+        int typeId = dis.readInt();
+        int outputSize = dis.readInt();
+
+        AbstractLayer layer;
+        if (typeId == DenseLayer.LAYER_ID) layer = new DenseLayer(inputSize, outputSize);
+        else if(typeId == ReluLayer.LAYER_ID) layer = new ReluLayer(outputSize);
+        else if (typeId == RNNLayer.LAYER_ID) layer = new RNNLayer(inputSize, outputSize);
+        else if (typeId == LeakyReluLayer.LAYER_ID) { layer = new LeakyReluLayer(outputSize);}
+        else throw new RuntimeException("Unknown layer type in deserialization");
+
+        model.addLayer(layer);
+        inputSize = outputSize;
+      }
+
+      if (ranInit) model.initRandom(-1,1);
+      return model;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+  // for config network
+  public static byte[] trainConfigSerialize(@Nullable ML model) {
+    ByteBuffer buffer = ByteBuffer.allocate(48);
+    if (model != null) {  // if model exist
+      buffer.putFloat(model.lr);
+      buffer.putFloat(model.beta1);
+      buffer.putFloat(model.beta2);
+      buffer.putFloat(model.eps);
+      buffer.putFloat(model.posLearnRate);
+      buffer.putFloat(model.negLearnRate);
+      buffer.putInt(model.batchSize);
+      buffer.putInt(model.maxEpochs);
+      buffer.putInt(model.patience);
+      buffer.putFloat(model.minDelta);
+      buffer.putFloat(model.valFrac);
+      buffer.putFloat(model.testFrac);
+    } else {  // just based config
+      buffer.putFloat(0.001f);
+      buffer.putFloat(0.9f);
+      buffer.putFloat(0.99f);
+      buffer.putFloat(0.00000001f);
+      buffer.putFloat(0.1f);
+      buffer.putFloat(1f);
+      buffer.putInt(32);
+      buffer.putInt(1);
+      buffer.putInt(3);
+      buffer.putFloat(5);
+      buffer.putFloat(0.2f);
+      buffer.putFloat(0.2f);
+    }
+    return buffer.array();
+  }
+
+  public void trainConfigDeserialize(byte[] data) {
+      try {
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
+        modelConfigByteLoad(this, dis);
+      } catch (IOException ignored) {}
+  }
+
+  private static void modelConfigByteLoad(ML model, DataInputStream dis) throws IOException {
+    model.lr = dis.readFloat();
+    model.beta1 = dis.readFloat();
+    model.beta2 = dis.readFloat();
+    model.eps = dis.readFloat();
+    model.posLearnRate = dis.readFloat();
+    model.negLearnRate = dis.readFloat();
+    model.batchSize = dis.readInt();
+    model.maxEpochs = dis.readInt();
+    model.patience = dis.readInt();
+    model.minDelta = dis.readFloat();
+    model.valFrac = dis.readFloat();
+    model.testFrac = dis.readFloat();
+    model.dataCollector = dis.readBoolean();
+  }
+
+  private void initRandom(float min, float max) {for (AbstractLayer layer : layers) {layer.randomInit(min, max);}}
 }

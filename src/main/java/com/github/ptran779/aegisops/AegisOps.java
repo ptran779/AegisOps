@@ -1,6 +1,6 @@
 package com.github.ptran779.aegisops;
 
-import com.github.ptran779.aegisops.Config.ServerConfig;
+import com.github.ptran779.aegisops.config.ServerConfig;
 import com.github.ptran779.aegisops.server.*;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;

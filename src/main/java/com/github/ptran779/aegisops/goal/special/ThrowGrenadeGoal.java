@@ -18,7 +18,7 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.EnumSet;
 
-import static com.github.ptran779.aegisops.Config.ServerConfig.GRENADE_CLUSTER;
+import static com.github.ptran779.aegisops.config.ServerConfig.GRENADE_CLUSTER;
 
 public class ThrowGrenadeGoal extends AbstractThrottleGoal {
   AbstractAgentEntity agent;

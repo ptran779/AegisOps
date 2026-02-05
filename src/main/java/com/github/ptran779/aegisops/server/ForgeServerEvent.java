@@ -1,12 +1,16 @@
 package com.github.ptran779.aegisops.server;
 
-import com.github.ptran779.aegisops.Config.MlModelManager;
-import com.github.ptran779.aegisops.Config.ServerConfig;
-import com.github.ptran779.aegisops.Config.SkinManager;
+import com.github.ptran779.aegisops.brain.ml.ML;
+import com.github.ptran779.aegisops.config.MlModelManager;
+import com.github.ptran779.aegisops.config.ServerConfig;
+import com.github.ptran779.aegisops.config.SkinManager;
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.brain.api.BrainServer;
 import com.github.ptran779.aegisops.entity.extra.FallingHellPod;
 import com.github.ptran779.aegisops.network.CameraModePacket;
+import com.github.ptran779.aegisops.network.PacketHandler;
+import com.github.ptran779.aegisops.network.ml_packet.PushDatLog;
+import com.github.ptran779.aegisops.network.ml_packet.TrainDone;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -21,7 +25,7 @@ import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import com.github.ptran779.aegisops.AegisOps;
-import com.github.ptran779.aegisops.Config.AgentConfigManager;
+import com.github.ptran779.aegisops.config.AgentConfigManager;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.Arrays;
@@ -31,23 +35,23 @@ import static com.github.ptran779.aegisops.server.EntityInit.FALLING_HELL_POD;
 
 @Mod.EventBusSubscriber(modid = AegisOps.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeServerEvent {
-  public static BrainServer BRAIN_INFER = null;
+  public static BrainServer BRAIN_SERVER = null;
   public Thread workerThread;
 
   @SubscribeEvent
   public static void onServerStarting(ServerStartingEvent event) {
     AgentConfigManager.serverGenerateDefault();
-    BRAIN_INFER = new BrainServer();
-    BRAIN_INFER.start();
+    BRAIN_SERVER = new BrainServer();
+    BRAIN_SERVER.start();
 //    System.out.println("[AegisOps] BrainInfer started");
     SkinManager.reload();
   }
 
   @SubscribeEvent
   public static void onServerStopping(ServerStoppingEvent event) {
-    if (BRAIN_INFER != null) {
-      BRAIN_INFER.stop();   // stops loop + interrupts thread
-      BRAIN_INFER = null;
+    if (BRAIN_SERVER != null) {
+      BRAIN_SERVER.stop();   // stops loop + interrupts thread
+      BRAIN_SERVER = null;
     }
 
     MlModelManager.cleanAll();
@@ -58,20 +62,33 @@ public class ForgeServerEvent {
     if (event.phase == TickEvent.Phase.END) return;
     ServerLevel level = event.getServer().getLevel(Level.OVERWORLD);  // this level should always run
     if (level == null) return;
-    if (level.getGameTime() % 20 != 0) return;
+    if (level.getGameTime() % 20 != 0) return;  // fixme remove later? it's pretty cheap to run the queue check
     //infer
-    while (BRAIN_INFER.resultQueueInf.peek() != null) {
-      BrainServer.InfDatOut payload = BRAIN_INFER.resultQueueInf.poll();
-      System.out.println("Agent " + payload.agentUUID + " got a behavior update");
-      System.out.println(Arrays.toString(payload.decision));
+    while (BRAIN_SERVER.RESULT_QUEUE_INF.peek() != null) {
+      BrainServer.InfDatOut payload = BRAIN_SERVER.RESULT_QUEUE_INF.poll();
+      System.out.println("Agent " + payload.agentUUID() + " got a behavior update");
+      System.out.println(Arrays.toString(payload.decision()));
     }
     //train
-    while (BRAIN_INFER.resultQueueTrain.peek() != null) {
-      BrainServer.TrainDatOut payload = BRAIN_INFER.resultQueueTrain.poll();
-      System.out.println("Agent " + payload.agentUUID + " got a a new brain");
+    while (BRAIN_SERVER.RESULT_QUEUE_TRAIN.peek() != null) {
+      BrainServer.TrainDatOut payload = BRAIN_SERVER.RESULT_QUEUE_TRAIN.poll();
+      // push into tmp model storage
+      MlModelManager.MLUnit target = MlModelManager.getMUnit(payload.modelUUID(), level.getGameTime());
+      target.model2 = payload.model();  // push to tmp storage
+//      System.out.println("Agent " + payload.targetUUID() + " got a a new brain data");
+      if (payload.receiver() == BrainServer.TARGET_RECEIVER.PLAYER){
+        ServerPlayer player = level.getServer().getPlayerList().getPlayer(payload.targetUUID());
+        if (player != null) {
+          ML.TrainStat stat = payload.stats();
+          PacketHandler.CHANNELS.send(PacketDistributor.PLAYER.with(() -> player),
+          new PushDatLog(String.format("Training Finished [%.0f Epochs] | Time: %.2fms | Score: %.4f -> %.4f",
+              stat.epochRun(),stat.trainTimeNs() / 1_000_000f,stat.startScore(),stat.endScore())));
+          PacketHandler.CHANNELS.send(PacketDistributor.PLAYER.with(() -> player), new TrainDone());
+        }
+      }
+      //new case?
     }
   }
-
 
   @SubscribeEvent
   public static void deployHellPod(TickEvent.ServerTickEvent event) {  // maybe swap to day/night time trigger fixme
@@ -102,7 +119,6 @@ public class ForgeServerEvent {
       }
     }
   }
-
 
   //Player deployment on world join first time
   @SubscribeEvent

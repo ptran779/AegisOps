@@ -1,6 +1,6 @@
 package com.github.ptran779.aegisops.goal.special;
 
-import com.github.ptran779.aegisops.Config.ServerConfig;
+import com.github.ptran779.aegisops.config.ServerConfig;
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.client.animation.AnimationLibrary;
 import com.github.ptran779.aegisops.entity.structure.AbstractAgentStruct;

@@ -1,0 +1,19 @@
+* f95e654 (origin/master, master, dev) Create README.md
+* 5f68892 Major architecture refactor for Multiplayer compatibility
+* 4a3d14d add all special items' tooltip
+*   ec11360 Merge branch 'master' into dev
+|\  
+| * 4cb48fd fix #2.
+| * 97c27ef add key binding for large group operation add new menu screen for advance config -- will allow local custom selection of avaliable skins, set config mode
+* | 7b9556e add key binding for large group operation add new menu screen for advance config -- will allow local custom selection of avaliable skins, set config mode
+|/  
+| * 20ad6ab (HEAD -> ai_rework) complete RL DNN infastructure
+| * 95a0190 (origin/ai_rework) complete rewrite of the AI infastructure
+|/  
+* 3712f60 Minor Fixes Fixed occasional null targeting causing goal glitches.
+* 60b2e73 New drop pod variance: Hell Pod   - one land, penetrate the ground, then lift the entity up  - Replace the default dropped. The default drop pod will be repurposed for something else later
+* 595bb56 add medic goal redo attack goal: stop will not drop target. This allow special goal to trigger without loosing target add sniper goal
+* 569e5fa - update default texture to fix a few spot here and there - rework animation. Now Agent will have their own living animation - implement timeframe handler for pose animation
+* ab9b980 Create LICENSE
+* 27a906e First version complete
+* c2555f4 initial push

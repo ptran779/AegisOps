@@ -6,7 +6,7 @@ import java.util.Stack;
 
 public class ReluLayer extends AbstractLayer {
   public static final int LAYER_ID = 2;
-  public float[] outPred;
+  protected float[] outPred;
 
   private Stack<float[]> history;
 
@@ -24,8 +24,10 @@ public class ReluLayer extends AbstractLayer {
   @Override
   public void turnOnTrainMode(boolean train) {
     if (train) {
+      stopCollection = true;
       history = new Stack<>();
     } else {
+      stopCollection = false;
       history = null;
     }
   }
@@ -35,7 +37,8 @@ public class ReluLayer extends AbstractLayer {
     for (int i = 0; i < outputSize; i++) {
       outPred[i] = (input[i] > 0) ? input[i] : 0;
     }
-    if (history != null) {
+    if (stopCollection){
+//    if (history != null) {
       history.push(Arrays.copyOf(input, inputSize));}
     return outPred;
   }
@@ -64,19 +67,17 @@ public class ReluLayer extends AbstractLayer {
 
   @Override
   public byte[] serialize() {
-    ByteBuffer buf = ByteBuffer.allocate(8);
+    ByteBuffer buf = ByteBuffer.allocate(4);
     buf.putInt(inputSize);
-    buf.putInt(outputSize);
     return buf.array();
   }
 
   @Override
   public void deserialize(ByteBuffer buffer) {
-    int inSize = buffer.getInt();
-    int outSize = buffer.getInt();
+    int size = buffer.getInt();
 
-    this.inputSize = inSize;
-    this.outputSize = outSize;
+    this.inputSize = size;
+    this.outputSize = size;
     this.outPred = new float[outputSize];
   }
 }

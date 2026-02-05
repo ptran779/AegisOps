@@ -7,12 +7,12 @@ import java.lang.Math;
 
 public class RNNLayer extends AbstractLayer {
   public static final int LAYER_ID = 3;
-  public MathUtil.arr2D weightIn; // input -> hidden
-  public MathUtil.arr2D weightHid;
-  public float[] biases;    // bias
+  protected MathUtil.arr2D weightIn; // input -> hidden
+  protected MathUtil.arr2D weightHid;
+  protected float[] biases;    // bias
 
-  public float[] hidden;    // hidden state
-  private float[] hiddenBuffer;  // for output buffering to prevent gc overkill
+  protected float[] hidden;    // hidden state
+  protected float[] hiddenBuffer;  // for output buffering to prevent gc overkill
 
   // --- TRAINING STATE (Allocated only when turnOnTrainMode(true)) ---
   // Gradients
@@ -38,7 +38,7 @@ public class RNNLayer extends AbstractLayer {
   public RNNLayer(int inputSize, int outputSize) {
     super(inputSize, outputSize);
     weightIn = new MathUtil.arr2D(inputSize, outputSize);
-    weightHid = new MathUtil.arr2D(inputSize, outputSize);
+    weightHid = new MathUtil.arr2D(outputSize, outputSize);
     biases = new float[outputSize];
     hidden = new float[outputSize]; // initially zero
     hiddenBuffer = new float[outputSize];
@@ -76,7 +76,7 @@ public class RNNLayer extends AbstractLayer {
 
   public void turnOnTrainMode(boolean train) {
     if (train) {
-      infAcc = true;
+      stopCollection = true;
       initAdam();
       dWin = new MathUtil.arr2D(inputSize,outputSize);
       dWhid = new MathUtil.arr2D(outputSize,outputSize);
@@ -88,7 +88,7 @@ public class RNNLayer extends AbstractLayer {
       history = new Stack<>();
       dInputToReturn = new MathUtil.arr2D(0, 0);
     } else {
-      infAcc = false;
+      stopCollection = false;
       clearAdam();
       dWin = null; dWhid = null; dBias = null; prevHiddenStateZERO=null; futureError=null; deltaVec = null;
       dNextHidden = null; history = null; dInputToReturn = null;
@@ -144,7 +144,7 @@ public class RNNLayer extends AbstractLayer {
       newH[j] = (float) Math.tanh(newH[j]);
     }
 
-    if (infAcc) {
+    if (stopCollection) {
       history.push(new RnnState(input, newH));
     }
 

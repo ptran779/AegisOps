@@ -17,7 +17,7 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.EnumSet;
 
-import static com.github.ptran779.aegisops.Config.ServerConfig.VP_MIN_TARGET_HEALTH;
+import static com.github.ptran779.aegisops.config.ServerConfig.VP_MIN_TARGET_HEALTH;
 
 public class DeployVPGoal extends AbstractThrottleGoal {
   AbstractAgentEntity agent;

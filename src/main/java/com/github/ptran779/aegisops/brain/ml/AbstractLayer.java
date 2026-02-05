@@ -3,7 +3,7 @@ package com.github.ptran779.aegisops.brain.ml;
 import java.nio.ByteBuffer;
 
 public abstract class AbstractLayer {
-  protected boolean infAcc = false;  // use to signal training data collection for eval
+  protected boolean stopCollection = false;  // use to signal training data collection for eval
   protected int inputSize;
   protected int outputSize;
 
@@ -15,13 +15,15 @@ public abstract class AbstractLayer {
   public int getInputSize() {return inputSize;}
   public int getOutputSize() {return outputSize;}
   public abstract int getLayerID();
+  public void randomInit(float min, float max){}
   public void zeroHidden(){};
 
   /**
    * Forward pass: takes input of type I, returns output of type O
    */
   public void turnOnTrainMode(boolean train){}
-  public void pauseTraining(boolean pause){infAcc = !pause;}
+  public void pauseTraining(boolean pause){
+    stopCollection = !pause;}
   public abstract float[] forward(float[] input);
   public abstract MathUtil.arr2D backward(MathUtil.arr2D dOut);
   public abstract void updateWeight(float lr, float beta1, float beta2, float eps);

@@ -1,0 +1,724 @@
+commit 20ad6abb3c37fbab2d9ba330963e4006130dccf7
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Wed Jan 21 10:16:21 2026 -0600
+
+    complete RL DNN infastructure
+    
+    some junk code everywhere. pls clean it up
+    
+    need to make new screen and handle integration
+
+ build.gradle                                       |   3 +-
+ .../ptran779/aegisops/Config/MlModelManager.java   |   9 +-
+ .../ptran779/aegisops/brain/agent/TestBrain.java   |   3 -
+ .../ptran779/aegisops/brain/api/BrainInfer.java    |  76 ------
+ .../ptran779/aegisops/brain/api/BrainServer.java   | 140 +++++++++++
+ .../ptran779/aegisops/brain/ml/AbstractLayer.java  |  10 +-
+ .../github/ptran779/aegisops/brain/ml/DataIO.java  | 102 ++++++++
+ .../ptran779/aegisops/brain/ml/DataManager.java    | 173 +++++++++++++
+ .../ptran779/aegisops/brain/ml/DenseLayer.java     | 186 ++++++++++++--
+ .../com/github/ptran779/aegisops/brain/ml/ML.java  | 207 ++++++++++++++--
+ .../ptran779/aegisops/brain/ml/MathUtil.java       |  42 ++++
+ .../ptran779/aegisops/brain/ml/RNNLayer.java       | 275 ++++++++++++++++++---
+ .../ptran779/aegisops/brain/ml/ReluLayer.java      |  82 ++++++
+ .../ptran779/aegisops/item/BrainChipItem.java      |  91 +++++++
+ .../aegisops/item/brain/BrainChipItem.java         |  58 -----
+ .../ptran779/aegisops/item/brain/ChipBrain.java    |  68 -----
+ .../ptran779/aegisops/item/brain/IChipBrain.java   |   8 -
+ .../ptran779/aegisops/server/CapabilitiesInit.java |  19 --
+ .../ptran779/aegisops/server/ForgeServerEvent.java |  18 +-
+ .../github/ptran779/aegisops/server/ItemInit.java  |   2 +-
+ 20 files changed, 1265 insertions(+), 307 deletions(-)
+
+commit 95a01904ba5deddc61976ca270463c143adcb5b3
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Sat Jan 17 13:36:32 2026 -0600
+
+    complete rewrite of the AI infastructure
+    
+    now operate based on sensor->decision->atomic behavior
+    migrate complete for base atomic behavior + sensor
+    complete new API build from scratch for deep RRN model
+    
+    AI model:
+    inference is now complete and CPU friendly (sorta as long as it stay on a seperate thread)
+    
+    need to work on error & back propagation
+    
+    need a training model
+    
+    Agent AI
+    not ready: only being use to test for simple stuff rn, has not been hook up with the rnn yet.
+    
+    need a training way: 1 with synthesis data and live training config
+    
+    Render
+    redesign rendering system, now support mid animation transmutation between 2 speperate animation obj (as long as they have same bone)
+
+ build.gradle                                       |  11 +-
+ .../ptran779/aegisops/Config/MlModelManager.java   | 115 +++++++++
+ .../java/com/github/ptran779/aegisops/Utils.java   |   3 +-
+ .../aegisops/attribute/AgentAttribute.java         |   2 +-
+ .../github/ptran779/aegisops/block/DropPodBE.java  |   2 +-
+ .../ptran779/aegisops/brain/agent/EatBehavior.java |  74 ++++++
+ .../aegisops/brain/agent/FollowBehavior.java       |  49 ++++
+ .../ptran779/aegisops/brain/agent/GunBehavior.java |  68 ++++++
+ .../aegisops/brain/agent/MeleeBehavior.java        | 106 +++++++++
+ .../aegisops/brain/agent/SaluteBehavior.java       |  59 +++++
+ .../ptran779/aegisops/brain/agent/TestBrain.java   |  80 +++++++
+ .../aegisops/brain/agent/WanderBehavior.java       |  31 +++
+ .../ptran779/aegisops/brain/api/Behavior.java      |  15 ++
+ .../github/ptran779/aegisops/brain/api/Brain.java  |  77 ++++++
+ .../ptran779/aegisops/brain/api/BrainInfer.java    |  76 ++++++
+ .../aegisops/brain/api/CombatBehavior.java         |  43 ++++
+ .../github/ptran779/aegisops/brain/api/Sensor.java |  35 +++
+ .../aegisops/brain/api/ThrottleBehavior.java       |  40 ++++
+ .../aegisops/brain/api/ThrottleSensor.java         |  19 ++
+ .../ptran779/aegisops/brain/ml/AbstractLayer.java  |  25 ++
+ .../ptran779/aegisops/brain/ml/DenseLayer.java     | 100 ++++++++
+ .../com/github/ptran779/aegisops/brain/ml/ML.java  | 140 +++++++++++
+ .../ptran779/aegisops/brain/ml/RNNLayer.java       | 180 ++++++++++++++
+ .../ptran779/aegisops/client/AgentAnimationID.java |  23 ++
+ .../ptran779/aegisops/client/AnimationHelper.java  | 102 +++++++-
+ .../ptran779/aegisops/client/IBoneHierachy.java    |   1 -
+ .../client/animation/AgentLivingAnimation.java     | 265 ++++++++++++++++++---
+ .../client/animation/AnimationLibrary.java         |  33 +++
+ .../aegisops/client/model/AbstractAniModel.java    |   4 +-
+ .../aegisops/client/model/BeaconModel.java         |  40 ++--
+ .../aegisops/client/model/DBTurretModel.java       |  26 --
+ .../aegisops/client/model/DBTurretReadyModel.java  |   1 -
+ .../aegisops/client/model/GrenadeModel.java        |  14 +-
+ .../aegisops/client/model/HellpodModel.java        |  14 +-
+ .../aegisops/client/model/ModularShieldModel.java  |  14 +-
+ .../aegisops/client/model/PortDispModel.java       |  12 +-
+ .../aegisops/client/model/VectorPursuerModel.java  |  18 +-
+ .../aegisops/client/render/AgentEntityRender.java  | 255 +++++++++++---------
+ .../aegisops/entity/agent/AbstractAgentEntity.java |  78 ++++--
+ .../ptran779/aegisops/entity/agent/Swordman.java   |  53 ++++-
+ .../aegisops/entity/extra/FallingDropPod.java      |   2 -
+ .../aegisops/entity/inventory/AgentInventory.java  |  45 ++--
+ .../aegisops/entity/structure/DBTurret.java        |   4 -
+ .../aegisops/goal/special/DeployVPGoal.java        |   1 -
+ .../aegisops/goal/special/HealFriendlyGoal.java    |   1 -
+ .../ptran779/aegisops/goal/special/HypeUpGoal.java |   1 -
+ .../aegisops/goal/special/PrecisionShotGoal.java   |   1 -
+ .../aegisops/goal/special/ShieldBashGoal.java      |   7 -
+ .../aegisops/goal/special/ThrowGrenadeGoal.java    |   1 -
+ .../aegisops/goal/special/WorkOnStructureGoal.java |   7 +-
+ .../github/ptran779/aegisops/item/BandageItem.java |   1 -
+ .../github/ptran779/aegisops/item/IHealItem.java   |   1 -
+ .../ptran779/aegisops/item/MorphineItem.java       |   1 -
+ .../aegisops/item/brain/BrainChipItem.java         |  58 +++++
+ .../ptran779/aegisops/item/brain/ChipBrain.java    |  68 ++++++
+ .../ptran779/aegisops/item/brain/IChipBrain.java   |   8 +
+ .../aegisops/network/EntityRenderPacket.java       |   2 +-
+ .../ptran779/aegisops/server/CapabilitiesInit.java |  19 ++
+ .../ptran779/aegisops/server/CreativeTabInit.java  |   1 +
+ .../ptran779/aegisops/server/ForgeServerEvent.java |  40 +++-
+ .../github/ptran779/aegisops/server/ItemInit.java  |   4 +
+ 61 files changed, 2271 insertions(+), 305 deletions(-)
+
+commit 3712f601808b67f3cfc297c3feed39aa9ac127a4
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Sat Jul 26 01:29:34 2025 -0500
+
+    Minor Fixes
+    Fixed occasional null targeting causing goal glitches.
+    
+    Core re-organization
+    Reorganized goal system: Targeting goal now manages target dropping to avoid premature target loss caused by attack goal stopping early (thanks, Minecraft modding quirks).
+    
+    New Skills
+    Soldier – Hype: Added battle flow effect with a slight attack speed boost (balancing tweaks coming later).
+    
+    New Demolition Skills & Items
+    Grenade: New throwable item with TNT-level explosion power that does no block damage.
+    Triggers only when demolition detects a configurable cluster of enemies (default: 3 enemies within 3 blocks of the main target).
+    
+    Vector Pursuer: Kamikaze drone with pathfinding that targets high-value enemies (default: targets with at least 30 health). Upon detecting a valid target within range, it deploys the drone entity.
+    
+    Vector Drone Entity Behavior
+    If target alive and beyond 12 blocks: pathfind to target.
+    
+    Within 12 blocks: enter killer mode — speed up and charge the enemy for kamikaze detonation.
+    
+    If target dies or becomes null mid-flight: drone returns to deployer and drops as an item (no wasted drones).
+    
+    New Feature
+    Agents now auto-pickup nearby items.
+    (May cause lag if many items cluster near an agent — will monitor and optimize as needed.
+
+ build.gradle                                       |   2 +-
+ .../com/github/ptran779/aegisops/AegisOps.java     |   2 +
+ .../aegisops/Config/AgentConfigManager.java        |   2 +-
+ .../ptran779/aegisops/Config/ServerConfig.java     |  12 ++
+ .../java/com/github/ptran779/aegisops/Utils.java   |   9 +-
+ .../aegisops/attribute/AgentAttribute.java         |   6 +-
+ .../aegisops/client/AgentInventoryScreen.java      |   4 +-
+ .../ptran779/aegisops/client/AnimationHelper.java  |   6 +-
+ .../ptran779/aegisops/client/IBoneHierachy.java    |   2 +-
+ .../ptran779/aegisops/client/ModClientEvents.java  |  15 +-
+ .../ptran779/aegisops/client/ShareModel.java       |  21 ++
+ .../client/animation/AgentSpecialAnimation.java    | 233 +++++++++++++++++++++
+ .../client/animation/GrenadeAnimation.java         |  24 +++
+ .../client/animation/VectorPursuerAnimation.java   | 131 ++++++++++++
+ .../aegisops/client/model/AbstractAniModel.java    |  30 +++
+ .../ptran779/aegisops/client/model/AgentModel.java |   2 +-
+ .../aegisops/client/model/BeaconModel.java         |  32 +--
+ .../aegisops/client/model/DBTurretModel.java       |  29 +--
+ .../aegisops/client/model/DBTurretReadyModel.java  |   2 +-
+ .../aegisops/client/model/GrenadeModel.java        |  51 +++++
+ .../aegisops/client/model/HellpodModel.java        |  23 +-
+ .../aegisops/client/model/ModularShieldModel.java  |  23 +-
+ .../aegisops/client/model/PortDispModel.java       |  29 +--
+ .../aegisops/client/model/VectorPursuerModel.java  |  98 +++++++++
+ .../aegisops/client/render/AgentEntityRender.java  |  63 +++---
+ .../aegisops/client/render/BeaconBERender.java     |   2 +-
+ .../aegisops/client/render/DBTurretRender.java     |   4 +-
+ .../client/render/FallingDropPodRender.java        |   2 +-
+ .../client/render/FallingHellPodRender.java        |  10 +-
+ .../client/render/GrenadeEntityRender.java         |  45 ++++
+ .../aegisops/client/render/GrenadeItemRender.java  |  54 +++++
+ .../aegisops/client/render/HellPodBERender.java    |   5 +-
+ .../client/render/ModularShieldRender.java         |   4 +-
+ .../aegisops/client/render/PortDispRender.java     |   6 +-
+ .../aegisops/client/render/TurretBulletRender.java |   2 +-
+ .../client/render/VectorPursuerRender.java         |  50 +++++
+ .../ptran779/aegisops/effect/BattleFlow.java       |  22 ++
+ .../{util => agent}/AbstractAgentEntity.java       | 137 ++++++++----
+ .../aegisops/entity/{ => agent}/Demolition.java    |  19 +-
+ .../aegisops/entity/{ => agent}/Engineer.java      |  15 +-
+ .../aegisops/entity/{ => agent}/Heavy.java         |  17 +-
+ .../aegisops/entity/{ => agent}/Medic.java         |  17 +-
+ .../aegisops/entity/{ => agent}/Sniper.java        |  15 +-
+ .../aegisops/entity/{ => agent}/Soldier.java       |  15 +-
+ .../aegisops/entity/{ => agent}/Swordman.java      |  14 +-
+ .../entity/{util => api}/IEntityRender.java        |   2 +-
+ .../aegisops/entity/api/IEntityTarget.java         |  33 +++
+ .../ptran779/aegisops/entity/api/IEntityTeam.java  |  25 +++
+ .../entity/{ => extra}/FallingDropPod.java         |  10 +-
+ .../entity/{ => extra}/FallingHellPod.java         |  47 +----
+ .../ptran779/aegisops/entity/extra/Grenade.java    |  40 ++++
+ .../aegisops/entity/{ => extra}/TurretBullet.java  |   2 +-
+ .../aegisops/entity/extra/VectorPursuer.java       |  95 +++++++++
+ .../entity/{util => inventory}/AgentInventory.java |  23 +-
+ .../{util => inventory}/AgentInventoryMenu.java    |  16 +-
+ .../entity/{util => inventory}/ArmorSlot.java      |   3 +-
+ .../entity/{util => inventory}/GunSlot.java        |   3 +-
+ .../entity/{util => inventory}/MeleeSlot.java      |   3 +-
+ .../{util => structure}/AbstractAgentStruct.java   |  35 ++--
+ .../aegisops/entity/{ => structure}/DBTurret.java  |  40 +---
+ .../aegisops/entity/{ => structure}/PortDisp.java  |  12 +-
+ .../aegisops/entity/util/IEntityTarget.java        |  17 --
+ .../ptran779/aegisops/entity/util/IEntityTeam.java |  12 --
+ .../aegisops/goal/AbstractThrottleGoal.java        |   2 +-
+ .../goal/{ => common}/AgentAttackGoal.java         | 129 ++----------
+ .../goal/{ => common}/CustomRandomStrollGoal.java  |   4 +-
+ .../goal/{ => common}/CustomRangeTargetGoal.java   |  45 ++--
+ .../{ => common}/CustomRetaliationTargetGoal.java  |   6 +-
+ .../aegisops/goal/{ => common}/EatFoodGoal.java    |   4 +-
+ .../aegisops/goal/{ => common}/FollowGoal.java     |   4 +-
+ .../aegisops/goal/{ => common}/SaluteGoal.java     |   5 +-
+ .../aegisops/goal/special/DeployVPGoal.java        |  96 +++++++++
+ .../aegisops/goal/special/DronePursudeGoal.java    |  65 ++++++
+ .../goal/{ => special}/HealFriendlyGoal.java       |   7 +-
+ .../ptran779/aegisops/goal/special/HypeUpGoal.java |  46 ++++
+ .../goal/{ => special}/PrecisionShotGoal.java      |   8 +-
+ .../goal/{ => special}/RechargeVirtualAmmo.java    |   9 +-
+ .../goal/{ => special}/ShieldBashGoal.java         |  27 ++-
+ .../aegisops/goal/special/ThrowGrenadeGoal.java    | 149 +++++++++++++
+ .../goal/{ => special}/WorkOnStructureGoal.java    |   9 +-
+ .../goal/{ => structure}/DBTurretAttackGoal.java   |   7 +-
+ .../ptran779/aegisops/item/DBTurretItem.java       |   2 +-
+ .../github/ptran779/aegisops/item/GrenadeItem.java |  78 +++++++
+ .../ptran779/aegisops/item/ModularShieldItem.java  |   7 +-
+ .../ptran779/aegisops/item/PortDispItem.java       |   3 +-
+ .../ptran779/aegisops/item/VPTerminalItem.java     |  46 ++++
+ .../aegisops/network/AgentDismissPacket.java       |   2 +-
+ .../aegisops/network/AgentFollowPacket.java        |   2 +-
+ .../aegisops/network/AgentHostilePacket.java       |   2 +-
+ .../aegisops/network/AgentSpecialPacket.java       |   2 +-
+ .../aegisops/network/EntityRenderPacket.java       |   2 +-
+ .../aegisops/network/StructureRenderPacket.java    |   4 +-
+ .../ptran779/aegisops/server/AttributeInit.java    |   2 +-
+ .../ptran779/aegisops/server/CreativeTabInit.java  |   2 +
+ .../ptran779/aegisops/server/EffectInit.java       |  14 ++
+ .../ptran779/aegisops/server/EntityInit.java       |  20 +-
+ .../ptran779/aegisops/server/ForgeServerEvent.java |   2 +-
+ .../github/ptran779/aegisops/server/ItemInit.java  |   4 +
+ .../github/ptran779/aegisops/server/MenuInit.java  |   2 +-
+ .../ptran779/aegisops/server/ModServerEvent.java   |  37 ++--
+ src/main/resources/META-INF/mods.toml              |   2 +-
+ src/main/resources/assets/aegisops/lang/en_us.json |   2 +
+ .../assets/aegisops/models/item/grenade.json       |   4 +
+ .../assets/aegisops/models/item/vp_terminal.json   | 123 +++++++++++
+ .../aegisops/textures/entities/vector_pursuer.png  | Bin 0 -> 1408 bytes
+ .../assets/aegisops/textures/item/dudad.png~       | Bin 0 -> 371 bytes
+ .../aegisops/textures/item/engineer_badge.png      | Bin 324 -> 371 bytes
+ .../aegisops/textures/item/engineer_badge.png~     | Bin 0 -> 324 bytes
+ .../assets/aegisops/textures/item/grenade.png      | Bin 0 -> 1065 bytes
+ .../assets/aegisops/textures/item/vp_terminal.png  | Bin 0 -> 507 bytes
+ .../aegisops/textures/mob_effect/battle_flow.png   | Bin 0 -> 419 bytes
+ .../recipes/{angi_hammer.json => engi_hammer.json} |   0
+ .../resources/data/aegisops/recipes/grenade.json   |  19 ++
+ .../data/aegisops/recipes/vp_terminal.json         |  20 ++
+ 114 files changed, 2091 insertions(+), 658 deletions(-)
+
+commit 60b2e7348a67badf8ccf1aadfcc8957755145ba9
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Tue Jul 15 13:42:00 2025 -0500
+
+    New drop pod variance: Hell Pod 
+     - one land, penetrate the ground, then lift the entity up
+     - Replace the default dropped. The default drop pod will be repurposed for something else later
+    
+    New Item: Modular Shield
+    
+     - 600 durability
+    
+     - use for Heavy special
+    
+    New special Skill: Heavy Shield Bash.
+     - When equipped with a modular shield, Heavy performs shield bash:
+    phase 1: equip
+    
+    phase 2: Charge toward the enemy until 3 3-block radius
+    
+    phase 3: taunt: Target entity will target heavy, and all enemies within 8 8-block radius WITH a target redirect agro toward Heavy 
+    
+    phase 4: Shield Bash: all enemy within 3 block radius in front get a knockback + 4 dmg
+    
+    -- if heavy has no gun, recover and end
+    
+    -- if heavy has a gun, try to shot target 3 time and end
+    
+    Minor bug fix:
+    demolition config fix 
+
+ build.gradle                                       |   2 +-
+ .../ptran779/aegisops/Config/ServerConfig.java     |   6 +-
+ .../java/com/github/ptran779/aegisops/Utils.java   |  16 +-
+ .../github/ptran779/aegisops/block/DropPodBE.java  |   2 +-
+ .../github/ptran779/aegisops/block/HellPodBE.java  |  73 ++
+ .../ptran779/aegisops/block/HellPodBlock.java      |  56 ++
+ .../aegisops/block/HellPodBlockUsedBot.java        |  41 ++
+ .../aegisops/block/HellPodBlockUsedTop.java        |  31 +
+ .../ptran779/aegisops/client/ModClientEvents.java  |  27 +-
+ ...entAnimation.java => AgentLivingAnimation.java} |  43 +-
+ .../client/animation/AgentSpecialAnimation.java    | 420 +++++++++++
+ .../client/animation/HellPodAnimation.java         |  55 ++
+ .../client/animation/ModularShieldAnimation.java   |  42 ++
+ .../aegisops/client/model/HellpodModel.java        | 143 ++++
+ .../aegisops/client/model/ModularShieldModel.java  |  70 ++
+ .../aegisops/client/render/AgentEntityRender.java  | 208 +++---
+ ...allingRender.java => FallingDropPodRender.java} |   4 +-
+ .../client/render/FallingHellPodRender.java        |  50 ++
+ .../aegisops/client/render/HellPodBERender.java    |  43 ++
+ .../client/render/ModularShieldRender.java         |  73 ++
+ .../github/ptran779/aegisops/entity/DBTurret.java  |   7 +-
+ .../ptran779/aegisops/entity/Demolition.java       |   2 +
+ .../github/ptran779/aegisops/entity/Engineer.java  |   4 +-
+ .../ptran779/aegisops/entity/FallingHellPod.java   | 202 +++++
+ .../com/github/ptran779/aegisops/entity/Heavy.java |   2 +
+ .../com/github/ptran779/aegisops/entity/Medic.java |   4 +-
+ .../github/ptran779/aegisops/entity/PortDisp.java  |   6 +-
+ .../github/ptran779/aegisops/entity/Sniper.java    |   4 +-
+ .../aegisops/entity/util/AbstractAgentEntity.java  | 143 +++-
+ .../aegisops/entity/util/AbstractAgentStruct.java  |   2 +-
+ .../aegisops/entity/util/IEntityRender.java        |   5 +
+ .../aegisops/goal/AbstractThrottleGoal.java        |   8 +-
+ .../ptran779/aegisops/goal/AgentAttackGoal.java    | 143 ++--
+ .../aegisops/goal/CustomRetaliationTargetGoal.java |   8 +-
+ .../{HealFriendly.java => HealFriendlyGoal.java}   |  19 +-
+ .../{PrecisionShot.java => PrecisionShotGoal.java} |  50 +-
+ .../aegisops/goal/RechargeVirtualAmmo.java         |   5 +-
+ .../aegisops/goal/{Salute.java => SaluteGoal.java} |   9 +-
+ .../ptran779/aegisops/goal/ShieldBashGoal.java     | 179 +++++
+ ...rkOnStructure.java => WorkOnStructureGoal.java} |  13 +-
+ .../item/{Bandage.java => BandageItem.java}        |   6 +-
+ .../github/ptran779/aegisops/item/HellPodItem.java |  42 ++
+ .../item/{HealItemI.java => IHealItem.java}        |   4 +-
+ .../ptran779/aegisops/item/ModularShieldItem.java  |  50 ++
+ .../item/{Morphine.java => MorphineItem.java}      |   6 +-
+ ...ntRenderPacket.java => EntityRenderPacket.java} |  15 +-
+ .../ptran779/aegisops/network/PacketHandler.java   |   2 +-
+ .../ptran779/aegisops/server/BlockEntityInit.java  |   8 +
+ .../github/ptran779/aegisops/server/BlockInit.java |   9 +-
+ .../ptran779/aegisops/server/CreativeTabInit.java  |   2 +
+ .../ptran779/aegisops/server/EntityInit.java       |   6 +
+ .../ptran779/aegisops/server/ForgeServerEvent.java |  10 +-
+ .../github/ptran779/aegisops/server/ItemInit.java  |   9 +-
+ .../ptran779/aegisops/server/ModServerEvent.java   |   1 +
+ src/main/resources/META-INF/mods.toml              |   2 +-
+ .../aegisops/blockstates/drop_pod_block_used.json  |   7 -
+ .../aegisops/blockstates/hell_pod_block.json       |   7 +
+ .../aegisops/blockstates/hell_pod_block_bot.json   |   7 +
+ .../aegisops/blockstates/hell_pod_block_top.json   |   7 +
+ src/main/resources/assets/aegisops/lang/en_us.json |   4 +
+ .../assets/aegisops/models/block/hell_pod_bot.json | 129 ++++
+ .../assets/aegisops/models/block/hell_pod_top.json | 672 +++++++++++++++++
+ .../assets/aegisops/models/item/hell_pod.json      | 814 +++++++++++++++++++++
+ .../aegisops/models/item/modular_shield.json       |   4 +
+ .../assets/aegisops/textures/block/hell_pod.png    | Bin 0 -> 4847 bytes
+ .../aegisops/textures/item/modular_shield.png      | Bin 0 -> 740 bytes
+ .../data/aegisops/recipes/modular_shield.json      |  18 +
+ .../data/minecraft/tags/items/shields.json         |   6 +
+ 68 files changed, 3756 insertions(+), 311 deletions(-)
+
+commit 595bb564d8c1d4315120d5779efb67eded8cba8c
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Fri Jul 11 09:37:46 2025 -0500
+
+    add medic goal
+    redo attack goal: stop will not drop target. This allow special goal to trigger without loosing target
+    add sniper goal
+    
+    add 2 medic items
+    
+    fix #1 cause by incorrect config value. Additional check added to trigger regenerate default config.
+    minor bug fix on attack goal. As I forgot to calcute the distance between target and user.
+
+ build.gradle                                       |   2 +-
+ .../ptran779/aegisops/Config/AgentConfig.java      |   4 +
+ .../aegisops/Config/AgentConfigManager.java        |  67 ++++--
+ .../ptran779/aegisops/Config/ServerConfig.java     |   6 +
+ .../java/com/github/ptran779/aegisops/Utils.java   |  25 +-
+ .../aegisops/client/AgentInventoryScreen.java      |  39 ++-
+ .../aegisops/client/animation/AgentAnimation.java  | 267 +++++++++++++++++++++
+ .../aegisops/client/render/AgentEntityRender.java  |  44 ++--
+ .../github/ptran779/aegisops/entity/DBTurret.java  |   9 +
+ .../github/ptran779/aegisops/entity/Engineer.java  |   4 +-
+ .../com/github/ptran779/aegisops/entity/Medic.java |   4 +-
+ .../github/ptran779/aegisops/entity/PortDisp.java  |  19 +-
+ .../github/ptran779/aegisops/entity/Sniper.java    |   4 +
+ .../github/ptran779/aegisops/entity/Soldier.java   |   2 +
+ .../github/ptran779/aegisops/entity/Swordman.java  |   2 +
+ .../aegisops/entity/util/AbstractAgentEntity.java  |  33 ++-
+ .../aegisops/entity/util/AbstractAgentStruct.java  |   6 +
+ .../aegisops/entity/util/AgentInventory.java       |  14 +-
+ .../aegisops/goal/AbstractThrottleGoal.java        |  21 ++
+ .../ptran779/aegisops/goal/AgentAttackGoal.java    |  56 +++--
+ .../aegisops/goal/CustomRangeTargetGoal.java       |   2 +-
+ .../ptran779/aegisops/goal/HealFriendly.java       |  68 ++++++
+ .../ptran779/aegisops/goal/PrecisionShot.java      |  81 +++++++
+ .../aegisops/goal/RechargeVirtualAmmo.java         |  34 ++-
+ .../com/github/ptran779/aegisops/goal/Salute.java  |  55 +++++
+ .../ptran779/aegisops/goal/WorkOnStructure.java    |  26 +-
+ .../com/github/ptran779/aegisops/item/Bandage.java |  35 +++
+ .../github/ptran779/aegisops/item/HealItemI.java   |  12 +
+ .../github/ptran779/aegisops/item/Morphine.java    |  35 +++
+ .../aegisops/network/AgentCommandType.java         |   9 -
+ ...gentBoolPacket.java => AgentDismissPacket.java} |  23 +-
+ .../aegisops/network/AgentSpecialPacket.java       |  43 ++++
+ .../aegisops/network/CameraModePacket.java         |   4 +-
+ .../ptran779/aegisops/network/PacketHandler.java   |   3 +-
+ .../ptran779/aegisops/server/CreativeTabInit.java  |   2 +
+ .../github/ptran779/aegisops/server/ItemInit.java  |   5 +
+ src/main/resources/META-INF/mods.toml              |   2 +-
+ src/main/resources/assets/aegisops/lang/en_us.json |   2 +
+ .../assets/aegisops/models/item/bandage.json       |  69 ++++++
+ .../assets/aegisops/models/item/engi_hammer.json   |  10 -
+ .../assets/aegisops/models/item/morphine.json      | 128 ++++++++++
+ .../assets/aegisops/textures/inventory.png         | Bin 3309 -> 3463 bytes
+ .../aegisops/textures/inventory.png-autosave.kra   | Bin 88469 -> 50581 bytes
+ .../assets/aegisops/textures/inventory.png~        | Bin 3308 -> 3463 bytes
+ .../assets/aegisops/textures/item/bandage.png      | Bin 0 -> 469 bytes
+ .../assets/aegisops/textures/item/morphine.png     | Bin 0 -> 578 bytes
+ .../resources/data/aegisops/recipes/bandage.json   |  24 ++
+ .../resources/data/aegisops/recipes/morphine.json  |  19 ++
+ 48 files changed, 1131 insertions(+), 188 deletions(-)
+
+commit 569e5fa580805c435ecd8db6f1302f1c3b72677c
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Thu Jul 3 15:07:14 2025 -0500
+
+    - update default texture to fix a few spot here and there
+    - rework animation. Now Agent will have their own living animation
+    - implement timeframe handler for pose animation
+    
+    - update path finding: now throttle at 10 tick before calling pathfind (may not help much in term of tps? but why not)
+    
+    Finish structure: double barrel turret and portable dispenser. Work on by engieer
+    Apply structure animation
+
+ .gitignore                                         |   2 +
+ build.gradle                                       |  20 +-
+ .../ptran779/aegisops/Config/AgentConfig.java      |   4 +-
+ .../aegisops/Config/AgentConfigManager.java        |  18 +-
+ .../ptran779/aegisops/Config/ServerConfig.java     |  31 +
+ .../java/com/github/ptran779/aegisops/Utils.java   |  43 ++
+ .../aegisops/client/AgentInventoryScreen.java      |  44 +-
+ .../ptran779/aegisops/client/AnimationHelper.java  |  69 +++
+ .../{BoneHierachy.java => IBoneHierachy.java}      |   2 +-
+ .../ptran779/aegisops/client/ModClientEvents.java  |  19 +-
+ .../aegisops/client/RecursiveAnimationHelper.java  |  46 --
+ .../aegisops/client/animation/AgentAnimation.java  | 634 +++++++++++++++++++++
+ .../client/animation/DBTurretAnimation.java        | 151 +++++
+ .../client/animation/PortDispAnimation.java        |  62 ++
+ .../ptran779/aegisops/client/model/AgentModel.java |  35 +-
+ .../aegisops/client/model/BeaconModel.java         |  26 +-
+ .../aegisops/client/model/DBTurretModel.java       | 159 ++++++
+ .../aegisops/client/model/DBTurretReadyModel.java  | 134 +++++
+ .../aegisops/client/model/DropPodModel.java        |   5 -
+ .../aegisops/client/model/PortDispModel.java       | 120 ++++
+ .../aegisops/client/model/TurretBulletModel.java   |  37 ++
+ .../aegisops/client/render/AgentEntityRender.java  |  83 ++-
+ .../aegisops/client/render/BeaconBERender.java     |   5 +-
+ .../aegisops/client/render/DBTurretRender.java     |  72 +++
+ .../aegisops/client/render/DropPodBERender.java    |   1 -
+ .../client/render/DropPodFallingRender.java        |   3 +-
+ .../aegisops/client/render/PortDispRender.java     |  51 ++
+ .../aegisops/client/render/TurretBulletRender.java |  50 ++
+ .../github/ptran779/aegisops/entity/DBTurret.java  | 184 ++++++
+ .../github/ptran779/aegisops/entity/Engineer.java  |  10 +-
+ .../ptran779/aegisops/entity/FallingDropPod.java   |   3 +-
+ .../com/github/ptran779/aegisops/entity/Heavy.java |   6 +-
+ .../com/github/ptran779/aegisops/entity/Medic.java |   6 +-
+ .../github/ptran779/aegisops/entity/PortDisp.java  |  89 +++
+ .../github/ptran779/aegisops/entity/Sniper.java    |   4 +-
+ .../github/ptran779/aegisops/entity/Soldier.java   |   4 +-
+ .../github/ptran779/aegisops/entity/Swordman.java  |   4 +-
+ .../ptran779/aegisops/entity/TurretBullet.java     |  73 +++
+ .../aegisops/entity/util/AbstractAgentEntity.java  | 187 +++---
+ .../aegisops/entity/util/AbstractAgentStruct.java  |  88 +++
+ .../aegisops/entity/util/AgentInventory.java       |  11 +-
+ .../aegisops/entity/util/IAgentEntity.java         |  10 -
+ .../aegisops/entity/util/IEntityTarget.java        |  17 +
+ .../ptran779/aegisops/entity/util/IEntityTeam.java |  12 +
+ .../ptran779/aegisops/goal/AgentAttackGoal.java    | 128 +++--
+ .../aegisops/goal/CustomRangeTargetGoal.java       |  19 +-
+ .../aegisops/goal/CustomRetaliationTargetGoal.java |   2 +-
+ .../ptran779/aegisops/goal/DBTurretAttackGoal.java |  72 +++
+ .../github/ptran779/aegisops/goal/FollowGoal.java  |   6 +-
+ .../aegisops/goal/RechargeVirtualAmmo.java         |  84 +++
+ .../github/ptran779/aegisops/goal/RetreatGoal.java |   4 -
+ .../ptran779/aegisops/goal/WorkOnStructure.java    |  91 +++
+ .../ptran779/aegisops/item/DBTurretItem.java       |  33 ++
+ .../ptran779/aegisops/item/EngiHammerItem.java     |   9 +
+ .../ptran779/aegisops/item/PortDispItem.java       |  34 ++
+ .../ptran779/aegisops/network/AgentBoolPacket.java |   3 +-
+ .../aegisops/network/AgentHostilePacket.java       |   4 +-
+ .../aegisops/network/AgentRenderPacket.java        |  44 ++
+ .../ptran779/aegisops/network/PacketHandler.java   |   2 +
+ .../aegisops/network/StructureRenderPacket.java    |  45 ++
+ .../ptran779/aegisops/server/CreativeTabInit.java  |   3 +
+ .../ptran779/aegisops/server/EntityInit.java       |  24 +-
+ .../github/ptran779/aegisops/server/ItemInit.java  |  12 +-
+ .../ptran779/aegisops/server/ModServerEvent.java   |  13 +-
+ src/main/resources/META-INF/mods.toml              |   2 +-
+ src/main/resources/assets/aegisops/lang/en_us.json |   8 +-
+ .../assets/aegisops/models/item/db_turret.json     | 197 +++++++
+ .../assets/aegisops/models/item/engi_hammer.json   | 133 +++++
+ .../assets/aegisops/models/item/port_disp.json     | 267 +++++++++
+ .../assets/aegisops/textures/entities/bullet.png   | Bin 0 -> 123 bytes
+ .../assets/aegisops/textures/entities/dbturret.png | Bin 0 -> 1301 bytes
+ .../aegisops/textures/entities/defaultslim.png     | Bin 944 -> 919 bytes
+ .../aegisops/textures/entities/defaultwide.png     | Bin 879 -> 876 bytes
+ .../assets/aegisops/textures/entities/portdisp.png | Bin 0 -> 2528 bytes
+ .../assets/aegisops/textures/item/db_turret.png    | Bin 0 -> 589 bytes
+ .../assets/aegisops/textures/item/engi_hammer.png  | Bin 0 -> 802 bytes
+ .../assets/aegisops/textures/item/port_disp.png    | Bin 0 -> 2696 bytes
+ .../data/aegisops/recipes/angi_hammer.json         |  19 +
+ .../resources/data/aegisops/recipes/db_turret.json |  22 +
+ .../resources/data/aegisops/recipes/port_disp.json |  21 +
+ 80 files changed, 3584 insertions(+), 351 deletions(-)
+
+commit ab9b9808f150bbeebf43e53a08923a59bc6acdaa
+Author: P.T <47065265+ptran779@users.noreply.github.com>
+Date:   Sun Jun 29 14:31:13 2025 -0500
+
+    Create LICENSE
+
+ LICENSE | 47 +++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 47 insertions(+)
+
+commit 27a906e221df9a5c6a84bd4397158baba8064063
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Sun Jun 29 14:19:49 2025 -0500
+
+    First version complete
+    
+    complete basic AI system
+    redo HUD
+    add beacon to call down reinforcement
+
+ .gitignore                                         |   3 +
+ build.gradle                                       |  10 +-
+ .../com/github/ptran779/aegisops/AegisOps.java     |  18 +-
+ .../aegisops/Config/AgentConfigManager.java        |  61 ++-
+ .../ptran779/aegisops/Config/ServerConfig.java     |  56 ++
+ .../ptran779/aegisops/Config/ShareResource.java    |  10 -
+ .../ptran779/aegisops/Config/SkinManager.java      | 114 ++++
+ .../java/com/github/ptran779/aegisops/Utils.java   |  67 +++
+ .../aegisops/attribute/AgentAttribute.java         |   5 +-
+ .../github/ptran779/aegisops/block/BeaconBE.java   | 102 ++++
+ .../ptran779/aegisops/block/BeaconBlock.java       |  88 +++
+ .../ptran779/aegisops/block/BeaconBlockUnused.java |  41 ++
+ .../github/ptran779/aegisops/block/DropPodBE.java  |  37 +-
+ .../ptran779/aegisops/block/DropPodBlock.java      |   8 +-
+ .../ptran779/aegisops/block/DropPodBlockUsed.java  |  60 +++
+ .../aegisops/client/AgentInventoryScreen.java      | 102 +++-
+ .../ptran779/aegisops/client/BoneHierachy.java     |  14 +
+ .../ptran779/aegisops/client/ModClientEvents.java  |  14 +-
+ .../aegisops/client/RecursiveAnimationHelper.java  |  46 ++
+ .../aegisops/client/animation/BeaconAnimation.java | 269 ++++++++++
+ .../aegisops/client/model/BeaconModel.java         | 194 +++++++
+ .../aegisops/client/render/AgentEntityRender.java  |  26 +-
+ .../aegisops/client/render/BeaconBERender.java     |  53 ++
+ .../aegisops/client/render/DropPodBERender.java    |   2 +-
+ .../client/render/DropPodFallingRender.java        |   5 +-
+ .../ptran779/aegisops/command/SquadCommand.java    |  77 ---
+ .../ptran779/aegisops/entity/Demolition.java       |  61 +++
+ .../github/ptran779/aegisops/entity/Engineer.java  |  62 +++
+ .../ptran779/aegisops/entity/FallingDropPod.java   | 126 +++--
+ .../com/github/ptran779/aegisops/entity/Heavy.java |  19 +-
+ .../com/github/ptran779/aegisops/entity/Medic.java |  61 +++
+ .../github/ptran779/aegisops/entity/Sniper.java    |  19 +-
+ .../github/ptran779/aegisops/entity/Soldier.java   |  14 +
+ .../github/ptran779/aegisops/entity/Swordman.java  |  60 +++
+ .../aegisops/entity/util/AbstractAgentEntity.java  | 593 ++++++++++++---------
+ .../aegisops/entity/util/AgentInventory.java       |  42 +-
+ .../aegisops/entity/util/AgentInventoryMenu.java   |  22 +-
+ .../aegisops/entity/util/IAgentEntity.java         |   4 +-
+ .../ptran779/aegisops/entity/util/MeleeSlot.java   |  15 +
+ .../ptran779/aegisops/entity/util/Utils.java       |  36 --
+ .../ptran779/aegisops/goal/AgentAttackGoal.java    |  44 +-
+ .../aegisops/goal/CustomRandomStrollGoal.java      |  23 +
+ .../aegisops/goal/CustomRangeTargetGoal.java       |  10 +-
+ .../aegisops/goal/CustomRetaliationTargetGoal.java |  47 ++
+ .../github/ptran779/aegisops/goal/FollowGoal.java  |  10 +-
+ .../github/ptran779/aegisops/item/BeaconItem.java  |  42 ++
+ ...AgentActionPacket.java => AgentBoolPacket.java} |  25 +-
+ .../aegisops/network/AgentCommandType.java         |   3 +-
+ .../aegisops/network/AgentFollowPacket.java        |  50 ++
+ .../aegisops/network/AgentHostilePacket.java       |  41 ++
+ .../aegisops/network/CameraModePacket.java         |  25 +
+ .../ptran779/aegisops/network/PacketHandler.java   |   5 +-
+ .../ptran779/aegisops/server/BlockEntityInit.java  |  17 +-
+ .../github/ptran779/aegisops/server/BlockInit.java |   8 +-
+ .../github/ptran779/aegisops/server/Config.java    |  19 -
+ .../ptran779/aegisops/server/CreativeTabInit.java  |   6 +
+ .../ptran779/aegisops/server/EntityInit.java       |  28 +-
+ .../ptran779/aegisops/server/ForgeServerEvent.java |  80 +++
+ .../github/ptran779/aegisops/server/ItemInit.java  |  28 +-
+ .../github/ptran779/aegisops/server/MenuInit.java  |   2 +-
+ .../ptran779/aegisops/server/ModServerEvent.java   |  12 +
+ src/main/resources/META-INF/mods.toml              |  23 +-
+ .../assets/aegisops/blockstates/beacon_block.json  |   5 +
+ .../aegisops/blockstates/beacon_block_unused.json  |   5 +
+ .../aegisops/blockstates/drop_pod_block.json       |   7 +
+ .../aegisops/blockstates/drop_pod_block_used.json  |   7 +
+ src/main/resources/assets/aegisops/lang/en_us.json |  13 +
+ .../aegisops/models/block/beacon_block_unused.json | 169 ++++++
+ .../aegisops/models/block/drop_pod_block.json      |   6 +
+ .../assets/aegisops/models/item/beacon.json        |  29 +
+ .../aegisops/models/item/demolition_spawn_egg.json |   6 +
+ .../assets/aegisops/models/item/drop_pod.json      |   6 +
+ .../aegisops/models/item/engineer_spawn_egg.json   |   6 +
+ .../aegisops/models/item/heavy_spawn_egg.json      |   6 +
+ .../aegisops/models/item/medic_spawn_egg.json      |   6 +
+ .../aegisops/models/item/sniper_spawn_egg.json     |   6 +
+ .../aegisops/models/item/soldier_spawn_egg.json    |   6 +
+ .../aegisops/models/item/swordman_spawn_egg.json   |   6 +
+ .../assets/aegisops/textures/block/beacon.png      | Bin 0 -> 1903 bytes
+ .../aegisops/textures/block/beacon_unused.png      | Bin 0 -> 949 bytes
+ .../textures/{blocks => block}/drop_pod.png        | Bin
+ .../aegisops/textures/block/drop_pod_block.png     | Bin 0 -> 111 bytes
+ .../aegisops/textures/entities/defaultslim.png     | Bin 0 -> 944 bytes
+ .../aegisops/textures/entities/defaultwide.png     | Bin 0 -> 879 bytes
+ .../textures/entities/female/defaultslim.png       | Bin 527 -> 0 bytes
+ .../textures/entities/male/defaultwide.png         | Bin 555 -> 0 bytes
+ .../assets/aegisops/textures/inventory.png         | Bin 1495 -> 3309 bytes
+ .../aegisops/textures/inventory.png-autosave.kra   | Bin 0 -> 88469 bytes
+ .../aegisops/textures/inventory.png-autosave.kra~  | Bin 0 -> 88310 bytes
+ .../assets/aegisops/textures/inventory.png~        | Bin 2866 -> 3308 bytes
+ .../aegisops/textures/item/demolition_badge.png    | Bin 0 -> 368 bytes
+ .../assets/aegisops/textures/item/drop_pod.png     | Bin 0 -> 274 bytes
+ .../aegisops/textures/item/engineer_badge.png      | Bin 0 -> 324 bytes
+ .../assets/aegisops/textures/item/heavy_badge.png  | Bin 0 -> 324 bytes
+ .../assets/aegisops/textures/item/medic_badge.png  | Bin 0 -> 298 bytes
+ .../assets/aegisops/textures/item/sniper_badge.png | Bin 0 -> 377 bytes
+ .../aegisops/textures/item/soldier_badge.png       | Bin 0 -> 360 bytes
+ .../aegisops/textures/item/swordman_badge.png      | Bin 0 -> 355 bytes
+ .../loot_tables/blocks/beacon_block_unused.json    |  14 +
+ .../loot_tables/blocks/drop_pod_block.json         |  20 +
+ .../loot_tables/blocks/drop_pod_block_used.json    |  20 +
+ .../resources/data/aegisops/recipes/beacon.json    |  19 +
+ .../minecraft/tags/blocks/mineable/pickaxe.json    |   9 +
+ src/main/resources/logo.png                        | Bin 0 -> 161791 bytes
+ 104 files changed, 2923 insertions(+), 612 deletions(-)
+
+commit c2555f42cc8a6d90bca84b8d0392ca11f35589f6
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Sat Jun 21 18:50:34 2025 -0500
+
+    initial push
+
+ .gitattributes                                     |   5 +
+ .gitignore                                         |  25 +
+ bb/drop_pod.bbmodel                                |   1 +
+ build.gradle                                       | 159 +++++
+ changelog.txt                                      | 729 +++++++++++++++++++++
+ gradle.properties                                  |   4 +
+ gradle/wrapper/gradle-wrapper.jar                  | Bin 0 -> 43583 bytes
+ gradle/wrapper/gradle-wrapper.properties           |   7 +
+ gradlew                                            | 252 +++++++
+ gradlew.bat                                        |  94 +++
+ .../com/github/ptran779/aegisops/AegisOps.java     |  42 ++
+ .../ptran779/aegisops/Config/AgentConfig.java      |   9 +
+ .../aegisops/Config/AgentConfigManager.java        | 131 ++++
+ .../ptran779/aegisops/Config/ShareResource.java    |  10 +
+ .../aegisops/attribute/AgentAttribute.java         |  17 +
+ .../github/ptran779/aegisops/block/DropPodBE.java  |  68 ++
+ .../ptran779/aegisops/block/DropPodBlock.java      |  91 +++
+ .../aegisops/client/AgentInventoryScreen.java      | 103 +++
+ .../ptran779/aegisops/client/ModClientEvents.java  |  40 ++
+ .../ptran779/aegisops/client/ToggleButton.java     |  20 +
+ .../ptran779/aegisops/client/model/AgentModel.java |  32 +
+ .../aegisops/client/model/DropPodModel.java        | 110 ++++
+ .../aegisops/client/render/AgentEntityRender.java  |  25 +
+ .../aegisops/client/render/DropPodBERender.java    |  43 ++
+ .../client/render/DropPodFallingRender.java        |  42 ++
+ .../ptran779/aegisops/command/SquadCommand.java    |  77 +++
+ .../ptran779/aegisops/entity/FallingDropPod.java   |  86 +++
+ .../com/github/ptran779/aegisops/entity/Heavy.java |  50 ++
+ .../github/ptran779/aegisops/entity/Sniper.java    |  50 ++
+ .../github/ptran779/aegisops/entity/Soldier.java   |  46 ++
+ .../aegisops/entity/util/AbstractAgentEntity.java  | 307 +++++++++
+ .../aegisops/entity/util/AgentInventory.java       | 157 +++++
+ .../aegisops/entity/util/AgentInventoryMenu.java   |  91 +++
+ .../ptran779/aegisops/entity/util/ArmorSlot.java   |  18 +
+ .../ptran779/aegisops/entity/util/GunSlot.java     |  15 +
+ .../aegisops/entity/util/IAgentEntity.java         |   8 +
+ .../ptran779/aegisops/entity/util/Utils.java       |  36 +
+ .../ptran779/aegisops/goal/AgentAttackGoal.java    | 156 +++++
+ .../aegisops/goal/CustomRangeTargetGoal.java       |  51 ++
+ .../github/ptran779/aegisops/goal/EatFoodGoal.java |  40 ++
+ .../github/ptran779/aegisops/goal/FollowGoal.java  |  44 ++
+ .../github/ptran779/aegisops/goal/RetreatGoal.java |   4 +
+ .../github/ptran779/aegisops/item/DropPodItem.java |  42 ++
+ .../aegisops/network/AgentActionPacket.java        |  60 ++
+ .../aegisops/network/AgentCommandType.java         |   8 +
+ .../ptran779/aegisops/network/PacketHandler.java   |  16 +
+ .../ptran779/aegisops/server/AttributeInit.java    |  15 +
+ .../ptran779/aegisops/server/BlockEntityInit.java  |  14 +
+ .../github/ptran779/aegisops/server/BlockInit.java |  17 +
+ .../github/ptran779/aegisops/server/Config.java    |  19 +
+ .../ptran779/aegisops/server/CreativeTabInit.java  |  25 +
+ .../ptran779/aegisops/server/EntityInit.java       |  23 +
+ .../ptran779/aegisops/server/ForgeServerEvent.java |  16 +
+ .../github/ptran779/aegisops/server/ItemInit.java  |  25 +
+ .../github/ptran779/aegisops/server/MenuInit.java  |  16 +
+ .../ptran779/aegisops/server/ModServerEvent.java   |  26 +
+ src/main/resources/META-INF/accesstransformer.cfg  |   1 +
+ src/main/resources/META-INF/mods.toml              |  60 ++
+ src/main/resources/assets/aegisops/lang/en_us.json |   3 +
+ .../assets/aegisops/textures/blocks/drop_pod.png   | Bin 0 -> 3147 bytes
+ .../resources/assets/aegisops/textures/button.png  | Bin 0 -> 338 bytes
+ .../textures/entities/female/defaultslim.png       | Bin 0 -> 527 bytes
+ .../textures/entities/male/defaultwide.png         | Bin 0 -> 555 bytes
+ .../resources/assets/aegisops/textures/false.png~  | Bin 0 -> 221 bytes
+ .../assets/aegisops/textures/inventory.png         | Bin 0 -> 1495 bytes
+ .../assets/aegisops/textures/inventory.png~        | Bin 0 -> 2866 bytes
+ src/main/resources/pack.mcmeta                     |   6 +
+ 67 files changed, 3687 insertions(+)

@@ -1,6 +1,6 @@
 package com.github.ptran779.aegisops.entity.agent;
 
-import com.github.ptran779.aegisops.Config.AgentConfig;
+import com.github.ptran779.aegisops.config.AgentConfig;
 import com.github.ptran779.aegisops.goal.common.AgentAttackGoal;
 import com.github.ptran779.aegisops.goal.common.CustomRangeTargetGoal;
 import com.github.ptran779.aegisops.goal.common.CustomRetaliationTargetGoal;
@@ -63,4 +63,8 @@ public class Demolition extends AbstractAgentEntity {
     }
     public int getMaxVirtualAmmo(){return config.maxVirtualAmmo;}
     public int getAmmoPerCharge(){return config.chargePerAmmo;}
+
+    //dummy test
+    public int getSensorSize(){return 10;}
+    public int getBehaviorSize(){return 10;}
 }

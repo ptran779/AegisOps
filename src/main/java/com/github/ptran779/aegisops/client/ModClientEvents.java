@@ -1,7 +1,7 @@
 package com.github.ptran779.aegisops.client;
 
 import com.github.ptran779.aegisops.AegisOps;
-import com.github.ptran779.aegisops.Config.SkinManager;
+import com.github.ptran779.aegisops.config.SkinManager;
 import com.github.ptran779.aegisops.client.model.*;
 import com.github.ptran779.aegisops.client.render.*;
 import com.github.ptran779.aegisops.server.BlockEntityInit;

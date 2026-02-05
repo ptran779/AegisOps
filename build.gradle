@@ -31,6 +31,7 @@ minecraft {
     runs {
         client {
             workingDirectory project.file('run')
+            jvmArgs '-Xmx4G'
 
             property 'forge.logging.markers', 'REGISTRIES'
 

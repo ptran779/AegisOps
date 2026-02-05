@@ -70,6 +70,6 @@ public final class ItemInit {
     public static final RegistryObject<Item> VP_ITEM = ITEMS.register("vp_terminal",
         () -> new VPTerminalItem(new Item.Properties()));
 
-    public static final RegistryObject<Item> BRAIN_CHIP_ITEM = ITEMS.register("chip_brain",
+    public static final RegistryObject<Item> BRAIN_CHIP_ITEM = ITEMS.register("brain_chip",
         () -> new BrainChipItem(new Item.Properties().stacksTo(1)));
 }

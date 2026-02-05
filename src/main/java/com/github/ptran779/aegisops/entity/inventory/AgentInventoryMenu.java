@@ -37,26 +37,26 @@ public class AgentInventoryMenu extends AbstractContainerMenu {
 
     private void loadInventoryMenu() {
         for (int i = 7; i < this.agentInv.getContainerSize(); i++) {
-            this.addSlot(new Slot(this.agentInv, i, 61 + (i-7) * 18, 57));
+            this.addSlot(new Slot(this.agentInv, i, 61 + (i-7) * 18, 61));
         }
         // agent load out
-        this.addSlot(new GunSlot(this.agentInv, agent.gunSlot, 14, 120));    // gun
-        this.addSlot(new MeleeSlot(this.agentInv, agent.meleeSlot, 34, 120));    // sword
-        this.addSlot(new Slot(this.agentInv, agent.specialSlot, 24, 139));    // special
-        this.addSlot(new ArmorSlot(this.agentInv, agent.gearSlots[0], 14, 82, EquipmentSlot.HEAD));
-        this.addSlot(new ArmorSlot(this.agentInv, agent.gearSlots[1], 34, 82, EquipmentSlot.CHEST));
-        this.addSlot(new ArmorSlot(this.agentInv, agent.gearSlots[2], 14, 101, EquipmentSlot.LEGS));
-        this.addSlot(new ArmorSlot(this.agentInv, agent.gearSlots[3], 34, 101, EquipmentSlot.FEET));
+        this.addSlot(new GunSlot(this.agentInv, agent.gunSlot, 14, 127));    // gun
+        this.addSlot(new MeleeSlot(this.agentInv, agent.meleeSlot, 34, 127));    // sword
+        this.addSlot(new Slot(this.agentInv, agent.specialSlot, 24, 147));    // special
+        this.addSlot(new ArmorSlot(this.agentInv, agent.gearSlots[0], 14, 87, EquipmentSlot.HEAD));
+        this.addSlot(new ArmorSlot(this.agentInv, agent.gearSlots[1], 34, 87, EquipmentSlot.CHEST));
+        this.addSlot(new ArmorSlot(this.agentInv, agent.gearSlots[2], 14, 107, EquipmentSlot.LEGS));
+        this.addSlot(new ArmorSlot(this.agentInv, agent.gearSlots[3], 34, 107, EquipmentSlot.FEET));
 
         //player hotbar
         for (int c = 0; c < 9; c++) {
-            this.addSlot(new Slot(this.playerInv, c, 61 + c * 18, 141));
+            this.addSlot(new Slot(this.playerInv, c, 61 + c * 18, 149));
         }
 
         // player slot
         for (int r = 0; r < 3; r++) {
             for (int c = 0; c < 9; c++) {
-                this.addSlot(new Slot(this.playerInv, c + r * 9+9, 61 + c * 18, 85 + r * 17));
+                this.addSlot(new Slot(this.playerInv, c + r * 9+9, 61 + c * 18, 90 + r * 18));
             }
         }
     }

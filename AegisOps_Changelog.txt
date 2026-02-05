@@ -1,0 +1,143 @@
+commit 20ad6abb3c37fbab2d9ba330963e4006130dccf7
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Wed Jan 21 10:16:21 2026 -0600
+
+    complete RL DNN infastructure
+    
+    some junk code everywhere. pls clean it up
+    
+    need to make new screen and handle integration
+
+commit 95a01904ba5deddc61976ca270463c143adcb5b3
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Sat Jan 17 13:36:32 2026 -0600
+
+    complete rewrite of the AI infastructure
+    
+    now operate based on sensor->decision->atomic behavior
+    migrate complete for base atomic behavior + sensor
+    complete new API build from scratch for deep RRN model
+    
+    AI model:
+    inference is now complete and CPU friendly (sorta as long as it stay on a seperate thread)
+    
+    need to work on error & back propagation
+    
+    need a training model
+    
+    Agent AI
+    not ready: only being use to test for simple stuff rn, has not been hook up with the rnn yet.
+    
+    need a training way: 1 with synthesis data and live training config
+    
+    Render
+    redesign rendering system, now support mid animation transmutation between 2 speperate animation obj (as long as they have same bone)
+
+commit 3712f601808b67f3cfc297c3feed39aa9ac127a4
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Sat Jul 26 01:29:34 2025 -0500
+
+    Minor Fixes
+    Fixed occasional null targeting causing goal glitches.
+    
+    Core re-organization
+    Reorganized goal system: Targeting goal now manages target dropping to avoid premature target loss caused by attack goal stopping early (thanks, Minecraft modding quirks).
+    
+    New Skills
+    Soldier – Hype: Added battle flow effect with a slight attack speed boost (balancing tweaks coming later).
+    
+    New Demolition Skills & Items
+    Grenade: New throwable item with TNT-level explosion power that does no block damage.
+    Triggers only when demolition detects a configurable cluster of enemies (default: 3 enemies within 3 blocks of the main target).
+    
+    Vector Pursuer: Kamikaze drone with pathfinding that targets high-value enemies (default: targets with at least 30 health). Upon detecting a valid target within range, it deploys the drone entity.
+    
+    Vector Drone Entity Behavior
+    If target alive and beyond 12 blocks: pathfind to target.
+    
+    Within 12 blocks: enter killer mode — speed up and charge the enemy for kamikaze detonation.
+    
+    If target dies or becomes null mid-flight: drone returns to deployer and drops as an item (no wasted drones).
+    
+    New Feature
+    Agents now auto-pickup nearby items.
+    (May cause lag if many items cluster near an agent — will monitor and optimize as needed.
+
+commit 60b2e7348a67badf8ccf1aadfcc8957755145ba9
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Tue Jul 15 13:42:00 2025 -0500
+
+    New drop pod variance: Hell Pod 
+     - one land, penetrate the ground, then lift the entity up
+     - Replace the default dropped. The default drop pod will be repurposed for something else later
+    
+    New Item: Modular Shield
+    
+     - 600 durability
+    
+     - use for Heavy special
+    
+    New special Skill: Heavy Shield Bash.
+     - When equipped with a modular shield, Heavy performs shield bash:
+    phase 1: equip
+    
+    phase 2: Charge toward the enemy until 3 3-block radius
+    
+    phase 3: taunt: Target entity will target heavy, and all enemies within 8 8-block radius WITH a target redirect agro toward Heavy 
+    
+    phase 4: Shield Bash: all enemy within 3 block radius in front get a knockback + 4 dmg
+    
+    -- if heavy has no gun, recover and end
+    
+    -- if heavy has a gun, try to shot target 3 time and end
+    
+    Minor bug fix:
+    demolition config fix 
+
+commit 595bb564d8c1d4315120d5779efb67eded8cba8c
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Fri Jul 11 09:37:46 2025 -0500
+
+    add medic goal
+    redo attack goal: stop will not drop target. This allow special goal to trigger without loosing target
+    add sniper goal
+    
+    add 2 medic items
+    
+    fix #1 cause by incorrect config value. Additional check added to trigger regenerate default config.
+    minor bug fix on attack goal. As I forgot to calcute the distance between target and user.
+
+commit 569e5fa580805c435ecd8db6f1302f1c3b72677c
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Thu Jul 3 15:07:14 2025 -0500
+
+    - update default texture to fix a few spot here and there
+    - rework animation. Now Agent will have their own living animation
+    - implement timeframe handler for pose animation
+    
+    - update path finding: now throttle at 10 tick before calling pathfind (may not help much in term of tps? but why not)
+    
+    Finish structure: double barrel turret and portable dispenser. Work on by engieer
+    Apply structure animation
+
+commit ab9b9808f150bbeebf43e53a08923a59bc6acdaa
+Author: P.T <47065265+ptran779@users.noreply.github.com>
+Date:   Sun Jun 29 14:31:13 2025 -0500
+
+    Create LICENSE
+
+commit 27a906e221df9a5c6a84bd4397158baba8064063
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Sun Jun 29 14:19:49 2025 -0500
+
+    First version complete
+    
+    complete basic AI system
+    redo HUD
+    add beacon to call down reinforcement
+
+commit c2555f42cc8a6d90bca84b8d0392ca11f35589f6
+Author: ptran779 <phong6900user@gmail.com>
+Date:   Sat Jun 21 18:50:34 2025 -0500
+
+    initial push

@@ -1,6 +1,6 @@
 package com.github.ptran779.aegisops.entity.structure;
 
-import com.github.ptran779.aegisops.Config.ServerConfig;
+import com.github.ptran779.aegisops.config.ServerConfig;
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.entity.extra.TurretBullet;
 import com.github.ptran779.aegisops.entity.api.IEntityTarget;
@@ -34,7 +34,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
 
-import static com.github.ptran779.aegisops.Config.ServerConfig.BD_TURRET_DPS;
+import static com.github.ptran779.aegisops.config.ServerConfig.BD_TURRET_DPS;
 
 public class DBTurret extends AbstractAgentStruct implements IEntityTarget {
   public static final int T_OFFSET = -40;

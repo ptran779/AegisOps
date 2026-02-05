@@ -1,6 +1,6 @@
 package com.github.ptran779.aegisops.entity.agent;
 
-import com.github.ptran779.aegisops.Config.AgentConfig;
+import com.github.ptran779.aegisops.config.AgentConfig;
 import com.github.ptran779.aegisops.brain.agent.TestBrain;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -40,13 +40,13 @@ public class Swordman extends AbstractAgentEntity {
 //        this.goalSelector.addGoal(4, new CustomRangeTargetGoal<>(this, LivingEntity.class, 20, 20, 24, true, entity -> this.shouldTargetEntity(this, (LivingEntity) entity)));
 //        this.goalSelector.addGoal(3, new AgentAttackGoal(this, 12, 12, 20));
     }
-    protected TestBrain agentBrain = new TestBrain(this);
+//    protected TestBrain agentBrain = new TestBrain(this);
 
     public void tick() {
         super.tick();
-        if (!level().isClientSide()) {
-            agentBrain.tick();
-        }
+//        if (!level().isClientSide()) {
+//            agentBrain.tick();
+//        }
     }
 
     public InteractionResult mobInteract(Player player, InteractionHand hand) {

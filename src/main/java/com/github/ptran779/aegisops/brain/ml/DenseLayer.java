@@ -6,8 +6,8 @@ import java.util.Stack;
 
 public class DenseLayer extends AbstractLayer {
   public static final int LAYER_ID = 1;
-  public MathUtil.arr2D weights; // [inputSize][outputSize]
-  public float[] biases;    // [outputSize]
+  protected MathUtil.arr2D weights; // [inputSize][outputSize]
+  protected float[] biases;    // [outputSize]
   public float[] outPred;       // [outputSize]
 
   //for training
@@ -46,7 +46,7 @@ public class DenseLayer extends AbstractLayer {
   @Override
   public void turnOnTrainMode(boolean train) {
     if (train){
-      infAcc = true;
+      stopCollection = true;
       initAdam();
       dW = new MathUtil.arr2D(inputSize, outputSize);
       dB = new float[outputSize];
@@ -58,7 +58,7 @@ public class DenseLayer extends AbstractLayer {
       Arrays.fill(dB, 0f);
 
     } else {
-      infAcc = false;
+      stopCollection = false;
       clearAdam();
       dW = null;
       dB = null;
@@ -89,7 +89,7 @@ public class DenseLayer extends AbstractLayer {
     }
 
     // 2. Store History (Train only)
-    if (infAcc) {
+    if (stopCollection) {
       history.push(Arrays.copyOf(input, inputSize));
     }
 

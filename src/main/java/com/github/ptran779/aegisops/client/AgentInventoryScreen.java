@@ -24,8 +24,6 @@ import org.joml.Quaternionf;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
-
-
 @OnlyIn(Dist.CLIENT)
 public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventoryMenu>{
     private static final Font font = Minecraft.getInstance().font;
@@ -79,7 +77,7 @@ public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventory
 
     public AgentInventoryScreen(AgentInventoryMenu container, Inventory pPlayerInventory, Component pTitle) {
         super(container, pPlayerInventory, pTitle);
-        this.imageHeight = 166;
+        this.imageHeight = 175;
         this.imageWidth = 300;
         this.agent = container.agent;
         this.inventoryLabelY = this.imageHeight - 94;
@@ -109,7 +107,7 @@ public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventory
     @Override
     protected void renderBg(GuiGraphics pGuiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
         renderBackground(pGuiGraphics);
-        pGuiGraphics.blit(CONTAINER_BACKGROUND,(this.width - this.imageWidth) / 2, (this.height - this.imageHeight) / 2,0,0,this.imageWidth,this.imageHeight, 300, 166);
+        pGuiGraphics.blit(CONTAINER_BACKGROUND,(this.width - this.imageWidth) / 2, (this.height - this.imageHeight) / 2,0,0,this.imageWidth,this.imageHeight, 300, 175);
     }
 
     @Override
@@ -130,12 +128,12 @@ public class AgentInventoryScreen extends AbstractContainerScreen<AgentInventory
             case ENEMY_AGENTS -> "Humanoid";
             case ALL -> "All";
         };
-        pGuiGraphics.drawString(font, hostileDisp, 242, 44, 0x00CFFF, false);
+        pGuiGraphics.drawString(font, hostileDisp, 242, 45, 0x00CFFF, false);
 
-        pGuiGraphics.drawString(font, agent.getAllowSpecial() ? "Spec On":"Spec Off", 242, 72, 0x00CFFF, false);
+        pGuiGraphics.drawString(font, agent.getAllowSpecial() ? "Spec On":"Spec Off", 242, 74, 0x00CFFF, false);
 
-        pGuiGraphics.drawString(font, agent.getVirtualAmmo() + "/" +agent.getMaxVirtualAmmo(), 242, 100, 0x00CFFF, false);
-        pGuiGraphics.drawString(font, agent.getFood() + "/" +agent.maxfood, 242, 128, 0x00CFFF, false);
+        pGuiGraphics.drawString(font, agent.getVirtualAmmo() + "/" +agent.getMaxVirtualAmmo(), 242, 103, 0x00CFFF, false);
+        pGuiGraphics.drawString(font, agent.getFood() + "/" +agent.maxfood, 242, 132, 0x00CFFF, false);
     }
 
     @Override

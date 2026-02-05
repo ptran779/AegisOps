@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-//todo: add gameID just in case
+//todo: add gameID just in case  fixme what is this for? del it?
 public class DataIO {
 
   // Save all training data to a CSV readable by Excel

@@ -1,6 +1,6 @@
 package com.github.ptran779.aegisops.entity.agent;
 
-import com.github.ptran779.aegisops.Config.SkinManager;
+import com.github.ptran779.aegisops.config.SkinManager;
 import com.github.ptran779.aegisops.Utils;
 import com.github.ptran779.aegisops.client.animation.AnimationLibrary;
 import com.github.ptran779.aegisops.entity.inventory.AgentInventory;
@@ -10,6 +10,7 @@ import com.github.ptran779.aegisops.entity.api.IEntityTarget;
 import com.github.ptran779.aegisops.entity.api.IEntityTeam;
 import com.github.ptran779.aegisops.goal.common.*;
 import com.github.ptran779.aegisops.goal.special.RechargeVirtualAmmo;
+import com.github.ptran779.aegisops.item.BrainChipItem;
 import com.github.ptran779.aegisops.network.EntityRenderPacket;
 import com.github.ptran779.aegisops.network.PacketHandler;
 import com.tacz.guns.api.TimelessAPI;
@@ -61,7 +62,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.github.ptran779.aegisops.attribute.AgentAttribute.*;
 
 public abstract class AbstractAgentEntity extends PathfinderMob implements InventoryCarrier, MenuProvider, IEntityTeam, IEntityTarget, IEntityRender {
-  public String agentType = "Template";
+  public String agentType = "Template";  // fixme use a method to get this. do static
   private boolean persistedFromNBT = false;
   public boolean invincible = false;
   public IGunOperator op;
@@ -208,10 +209,6 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
   public boolean getFemale() {return this.entityData.get(FEMALE);}
   public void setFemale(boolean flag) {this.entityData.set(FEMALE, flag);}
 
-  // fixme get rid of everything down here
-//  public int getAniMove() {return this.entityData.get(ANI_MOVE);}
-//  public Utils.AniMove getAniMove() {return Utils.AniMove.fromId(this.entityData.get(ANI_MOVE));}
-//  public void setAniMove(int move) {this.entityData.set(ANI_MOVE, move);}
   public void setAniMove(Utils.AniMove move) {this.entityData.set(ANI_MOVE, move.ordinal());}
 
   /// Combat -- why is it here again?
@@ -294,6 +291,10 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
   }
   public InteractionResult mobInteract(Player player, InteractionHand hand) {
     if(!this.level().isClientSide()) {
+      if (player.getMainHandItem().getItem() instanceof BrainChipItem){
+        return InteractionResult.PASS;
+      }
+
       if (getBossUUID() == null) {
         setBossUUID(player.getUUID());}
       if (sameTeam(player)) {
@@ -593,4 +594,7 @@ public abstract class AbstractAgentEntity extends PathfinderMob implements Inven
   public boolean isEquipableMelee(ItemStack stack) {return false;}
   public int getMaxVirtualAmmo(){return 0;}
   public int getAmmoPerCharge(){return 1;}
+
+  public int getSensorSize(){return 1;}
+  public int getBehaviorSize(){return 1;}
 }

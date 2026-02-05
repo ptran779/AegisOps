@@ -17,7 +17,7 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.EnumSet;
 
-import static com.github.ptran779.aegisops.Config.ServerConfig.VIRT_AMMO_REFILL;
+import static com.github.ptran779.aegisops.config.ServerConfig.VIRT_AMMO_REFILL;
 
 public class RechargeVirtualAmmo extends AbstractThrottleGoal {
   AbstractAgentEntity agent;
